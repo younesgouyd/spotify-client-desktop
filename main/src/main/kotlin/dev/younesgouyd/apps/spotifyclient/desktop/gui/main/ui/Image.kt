@@ -1,0 +1,91 @@
+package dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BrokenImage
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.res.loadImageBitmap
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.URL
+
+typealias ImageUrl = String
+
+private val cache = mutableMapOf<ImageUrl, ImageBitmap>()
+
+@Composable
+fun Image(
+    modifier: Modifier = Modifier,
+    url: ImageUrl?,
+) {
+    var loading by remember { mutableStateOf(true) }
+    var img by remember { mutableStateOf<ImageBitmap?>(null) }
+    val scope = rememberCoroutineScope()
+
+    if (url == null) {
+        BrokenImage(modifier)
+    } else {
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                loading = true
+                val fromCache = cache[url]
+                if (fromCache == null) {
+                    try {
+                        val stream = URL(url).openStream()
+                        val imageBitmap = loadImageBitmap(stream)
+                        img = imageBitmap
+                        cache += url to imageBitmap
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                } else {
+                    img = fromCache
+                }
+                loading = false
+            }
+        }
+
+        when (loading) {
+            true -> LoadingImage(modifier)
+            false -> {
+                img?.let {
+                    androidx.compose.foundation.Image(
+                        modifier = modifier,
+                        bitmap = it,
+                        contentDescription = null
+                    )
+                } ?: BrokenImage(modifier)
+            }
+        }
+    }
+}
+
+@Composable
+fun BrokenImage(
+    modifier: Modifier = Modifier
+) {
+    androidx.compose.foundation.Image(
+        modifier = modifier.size(150.dp),
+        imageVector = Icons.Default.BrokenImage,
+        contentDescription = null
+    )
+}
+
+@Composable
+private fun LoadingImage(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
+    }
+}
