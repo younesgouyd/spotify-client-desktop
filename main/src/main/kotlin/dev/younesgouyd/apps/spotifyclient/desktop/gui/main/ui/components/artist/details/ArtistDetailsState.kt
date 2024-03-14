@@ -6,7 +6,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.Album
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.Artist
 
 sealed class ArtistDetailsState {
-    object Loading : ArtistDetailsState()
+    data object Loading : ArtistDetailsState()
 
     data class State(
         val artist: Artist,

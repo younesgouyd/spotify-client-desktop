@@ -4,7 +4,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.TrackId
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.Playlist
 
 sealed class PlaylistDetailsState {
-    object Loading : PlaylistDetailsState()
+    data object Loading : PlaylistDetailsState()
 
     data class State(
         val playlist: Playlist,
