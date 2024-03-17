@@ -58,7 +58,7 @@ object Application {
                                     modifier = Modifier.fillMaxWidth().weight(.75f),
                                     drawerContent = {
                                         PermanentDrawerSheet {
-                                            NavigationDrawerItems.values().forEach {
+                                            NavigationDrawerItems.entries.forEach {
                                                 NavigationDrawerItem(
                                                     label = { Text(it.toString()) },
                                                     selected = it == selectedNavigationDrawerItem,
