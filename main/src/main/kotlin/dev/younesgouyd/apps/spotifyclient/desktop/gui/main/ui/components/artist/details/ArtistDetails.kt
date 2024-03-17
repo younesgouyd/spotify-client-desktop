@@ -185,7 +185,7 @@ private fun TopTracks(
                                 onClick = { onPlayTrackClick(track.id) }
                             )
                         }
-                        Divider()
+                        HorizontalDivider()
                     }
                 }
             }
