@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.net.URL
+import java.net.URI
 
 typealias ImageUrl = String
 
@@ -38,10 +38,11 @@ fun Image(
                 val fromCache = cache[url]
                 if (fromCache == null) {
                     try {
-                        val stream = URL(url).openStream()
-                        val imageBitmap = loadImageBitmap(stream)
-                        img = imageBitmap
-                        cache += url to imageBitmap
+                        URI(url).toURL().openStream().use {
+                            val imageBitmap = loadImageBitmap(it)
+                            img = imageBitmap
+                            cache += url to imageBitmap
+                        }
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
