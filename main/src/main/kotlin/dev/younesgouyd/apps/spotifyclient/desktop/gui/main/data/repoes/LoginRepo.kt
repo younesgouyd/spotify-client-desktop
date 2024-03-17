@@ -15,6 +15,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.awt.Desktop
+import java.math.BigInteger
 import java.net.URI
 import java.net.URLEncoder
 import java.security.MessageDigest
@@ -60,11 +61,12 @@ class LoginRepo internal constructor(
                 val challenge = createChallenge(verifier)
 
                 val encodedScope = URLEncoder.encode(SCOPE, Charsets.UTF_8)
+                val state = BigInteger(130, SecureRandom()).toString(32)
                 val url = "https://$DOMAIN/authorize?" +
                         "client_id=$clientId" +
                         "&response_type=code" +
                         "&redirect_uri=$encodedRedirectUri" +
-                        "&state=${UUID.randomUUID()}" +
+                        "&state=$state" +
                         "&scope=$encodedScope" +
                         "&show_dialog=false" +
                         "&code_challenge_method=S256" +
@@ -72,13 +74,13 @@ class LoginRepo internal constructor(
 
                 Desktop.getDesktop().browse(URI(url))
 
-                val code = waitForCallback()
+                val code = waitForCallback(state)
 
                 return@withContext getToken(client, code, verifier)
             }
         }
 
-        private suspend fun waitForCallback(): String {
+        private suspend fun waitForCallback(state: String): String {
             var server: NettyApplicationEngine? = null
 
             val code = suspendCancellableCoroutine { continuation ->
@@ -86,8 +88,11 @@ class LoginRepo internal constructor(
                     routing {
                         get ("/callback") {
                             val code = call.parameters["code"] ?: throw RuntimeException("Received a response with no code")
-                            if (call.parameters["state"] == null) {
+                            val receivedState = call.parameters["state"]
+                            if (receivedState == null) {
                                 throw RuntimeException("Received a response with no state")
+                            } else if (receivedState != state) {
+                                throw RuntimeException("Received state doesn't match sent state")
                             }
                             call.respondText("OK")
 
