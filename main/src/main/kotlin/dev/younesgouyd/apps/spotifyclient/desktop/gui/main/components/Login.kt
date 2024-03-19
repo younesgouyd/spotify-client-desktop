@@ -1,38 +1,43 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.gui.main.components
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.Component
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.LoginResult
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.RepoStore
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.components.Login
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class Login(
     private val repoStore: RepoStore,
-    private val toCurrentUserProfile: () -> Unit
+    private val onDone: () -> Unit
 ) : Component() {
-    private val state: MutableStateFlow<LoginResult?> = MutableStateFlow(null)
-
-    init {
-        coroutineScope.launch {
-            val result = repoStore.loginRepo.login()
-            state.update { result }
-            if (result == LoginResult.Success) {
-                toCurrentUserProfile()
-            }
-        }
-    }
+    private val errorMessage = MutableStateFlow("")
+    private val enabled = MutableStateFlow(true)
 
     @Composable
     override fun show() {
-        val state by state.collectAsState()
+        val errorMessage by errorMessage.collectAsState()
+        val enabled by enabled.collectAsState()
 
-        if (state == null) {
-            Text("Login in...")
-        } else Text(state.toString())
+        Login(
+            errorMessage = errorMessage,
+            enabled = enabled,
+            onLoginClick = ::onLoginClick
+        )
+    }
+
+    private fun onLoginClick(clientId: String) {
+        coroutineScope.launch {
+            enabled.value = false
+            val result = repoStore.authRepo.login(clientId)
+            when (result) {
+                LoginResult.Success -> onDone()
+                LoginResult.Failure -> errorMessage.value = "Something went wrong"
+            }
+            enabled.value = true
+        }
     }
 }

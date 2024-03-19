@@ -10,8 +10,9 @@ import io.ktor.client.request.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class ArtistRepo internal constructor(
+class ArtistRepo(
     private val client: HttpClient,
+    private val authRepo: AuthRepo
 ) {
     companion object {
         const val ID_TYPE = "artist"
@@ -26,6 +27,7 @@ class ArtistRepo internal constructor(
     suspend fun getCurrentUserFollowedArtists(after: ArtistId?, limit: Int?): List<dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.Artist> {
         return withContext(Dispatchers.IO) {
             client.get("me/following") {
+                header("Authorization", "Bearer ${authRepo.getToken()}")
                 parameter("type", ID_TYPE)
                 parameter("after", after)
                 parameter("limit", limit)
@@ -39,7 +41,9 @@ class ArtistRepo internal constructor(
      */
     suspend fun get(id: ArtistId): dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.Artist {
         return withContext(Dispatchers.IO) {
-            client.get("artists/$id").body<Artist>().toModel()
+            client.get("artists/$id") {
+                header("Authorization", "Bearer ${authRepo.getToken()}")
+            }.body<Artist>().toModel()
         }
     }
 }

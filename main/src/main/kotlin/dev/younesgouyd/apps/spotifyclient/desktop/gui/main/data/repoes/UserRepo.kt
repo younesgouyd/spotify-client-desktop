@@ -10,8 +10,9 @@ import io.ktor.client.request.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class UserRepo internal constructor(
-    private val client: HttpClient
+class UserRepo(
+    private val client: HttpClient,
+    private val authRepo: AuthRepo
 ) {
     /**
      * GET /me
@@ -20,6 +21,7 @@ class UserRepo internal constructor(
     suspend fun getCurrentUser(): dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.User {
         return withContext(Dispatchers.IO) {
             client.get("me") {
+                header("Authorization", "Bearer ${authRepo.getToken()}")
             }.body<CurrentUser>().toModel()
         }
     }
@@ -29,6 +31,8 @@ class UserRepo internal constructor(
      * @param userId The user's Spotify user ID
      */
     suspend fun get(userId: UserId): User {
-        return client.get("/users/$userId").body<User>()
+        return client.get("/users/$userId") {
+            header("Authorization", "Bearer ${authRepo.getToken()}")
+        }.body<User>()
     }
 }

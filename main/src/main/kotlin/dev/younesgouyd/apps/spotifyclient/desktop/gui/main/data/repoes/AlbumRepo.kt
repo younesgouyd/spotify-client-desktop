@@ -12,8 +12,9 @@ import io.ktor.client.request.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class AlbumRepo internal constructor(
+class AlbumRepo(
     private val client: HttpClient,
+    private val authRepo: AuthRepo
 ) {
     /**
      * GET /me/albums
@@ -23,6 +24,7 @@ class AlbumRepo internal constructor(
     suspend fun getSavedAlbums(limit: Int, offset: Int): List<Album> {
         return withContext(Dispatchers.IO) {
             client.get("me/albums") {
+                header("Authorization", "Bearer ${authRepo.getToken()}")
                 parameter("limit", limit)
                 parameter("offset", offset)
             }.body<SavedAlbums>().toModel()
@@ -38,6 +40,7 @@ class AlbumRepo internal constructor(
     suspend fun getArtistAlbums(id: ArtistId, limit: Int, offset: Int): List<Album> {
         return withContext(Dispatchers.IO) {
             client.get("artists/$id/albums") {
+                header("Authorization", "Bearer ${authRepo.getToken()}")
                 parameter("limit", limit)
                 parameter("offset", offset)
             }.body<ArtistAlbums>().toModel()
@@ -50,7 +53,9 @@ class AlbumRepo internal constructor(
      */
     suspend fun getAlbum(id: AlbumId): Album {
         return withContext(Dispatchers.IO) {
-            client.get("albums/$id").body<dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.album.Album>().toModel()
+            client.get("albums/$id") {
+                header("Authorization", "Bearer ${authRepo.getToken()}")
+            }.body<dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.album.Album>().toModel()
         }
     }
 }

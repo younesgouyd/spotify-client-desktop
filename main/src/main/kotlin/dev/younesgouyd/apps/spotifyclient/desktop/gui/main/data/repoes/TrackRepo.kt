@@ -16,8 +16,9 @@ import io.ktor.client.request.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class TrackRepo internal constructor(
-    private val client: HttpClient
+class TrackRepo(
+    private val client: HttpClient,
+    private val authRepo: AuthRepo
 ) {
     /**
      * GET /playlists/{id}/tracks
@@ -27,6 +28,7 @@ class TrackRepo internal constructor(
     suspend fun getPlaylistTracks(playlistId: PlaylistId, limit: Int?, offset: Int?): List<Playlist.Track> {
         return withContext(Dispatchers.IO) {
             client.get("playlists/$playlistId/tracks") {
+                header("Authorization", "Bearer ${authRepo.getToken()}")
                 parameter("limit", limit)
                 parameter("offset", offset)
             }.body<PlaylistTracks>().toModel()
@@ -41,6 +43,7 @@ class TrackRepo internal constructor(
     suspend fun getAlbumTracks(id: AlbumId, limit: Int?, offset: Int?): List<Album.Track> {
         return withContext(Dispatchers.IO) {
             client.get("albums/$id/tracks") {
+                header("Authorization", "Bearer ${authRepo.getToken()}")
                 parameter("limit", limit)
                 parameter("offset", offset)
             }.body<AlbumTracks>().toModel()
@@ -49,7 +52,9 @@ class TrackRepo internal constructor(
 
     suspend fun getArtistTopTracks(id: ArtistId): List<Artist.Track> {
         return withContext(Dispatchers.IO) {
-            client.get("artists/$id/top-tracks").body<ArtistTopTracks>().toModel()
+            client.get("artists/$id/top-tracks") {
+                header("Authorization", "Bearer ${authRepo.getToken()}")
+            }.body<ArtistTopTracks>().toModel()
         }
     }
 }

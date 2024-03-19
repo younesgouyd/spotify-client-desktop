@@ -6,7 +6,6 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
-import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
@@ -24,7 +23,6 @@ class RepoStore {
                 host = "api.spotify.com"
                 path("v1/")
             }
-            header("Authorization", "Bearer ${LoginRepo.token}")
         }
     }
 
@@ -35,10 +33,11 @@ class RepoStore {
         }
     }
 
-    val albumRepo by lazy { AlbumRepo(client) }
-    val artistRepo by lazy { ArtistRepo(client) }
-    val loginRepo by lazy { LoginRepo(authClient) }
-    val playlistRepo by lazy { PlaylistRepo(client) }
-    val trackRepo by lazy { TrackRepo(client) }
-    val userRepo by lazy { UserRepo(client) }
+    val appDataRepo by lazy { AppDataRepo() }
+    val authRepo by lazy { AuthRepo(authClient, appDataRepo) }
+    val albumRepo by lazy { AlbumRepo(client, authRepo) }
+    val artistRepo by lazy { ArtistRepo(client, authRepo) }
+    val playlistRepo by lazy { PlaylistRepo(client, authRepo) }
+    val trackRepo by lazy { TrackRepo(client, authRepo) }
+    val userRepo by lazy { UserRepo(client, authRepo) }
 }

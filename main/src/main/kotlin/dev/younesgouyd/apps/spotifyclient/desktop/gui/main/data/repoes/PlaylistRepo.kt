@@ -11,8 +11,9 @@ import io.ktor.client.request.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class PlaylistRepo internal constructor(
+class PlaylistRepo(
     private val client: HttpClient,
+    private val authRepo: AuthRepo
 ) {
     /**
      * GET /me/playlists
@@ -22,6 +23,7 @@ class PlaylistRepo internal constructor(
     suspend fun getCurrentUserPlaylists(limit: Int, offset: Int): List<SimplifiedPlaylist> {
         return withContext(Dispatchers.IO) {
             client.get("me/playlists") {
+                header("Authorization", "Bearer ${authRepo.getToken()}")
                 parameter("limit", limit)
                 parameter("offset", offset)
             }.body<Playlists>().toModel()
@@ -35,6 +37,7 @@ class PlaylistRepo internal constructor(
     suspend fun get(playlistId: PlaylistId): Playlist {
         return withContext(Dispatchers.IO) {
             client.get("playlists/$playlistId") {
+                header("Authorization", "Bearer ${authRepo.getToken()}")
             }.body<dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.playlist.Playlist>().toModel()
         }
     }
