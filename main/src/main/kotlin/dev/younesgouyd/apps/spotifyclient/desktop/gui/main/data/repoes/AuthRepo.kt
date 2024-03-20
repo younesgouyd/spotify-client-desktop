@@ -76,6 +76,11 @@ class AuthRepo(
         } else LoginResult.Failure
     }
 
+    suspend fun logout() {
+        token = null
+        appDataRepo.clear()
+    }
+
     private suspend fun refreshToken() {
         val data = appDataRepo.getData()
         val newTokenJson = LoginDataSource.getNewToken(

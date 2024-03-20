@@ -25,6 +25,14 @@ class AppDataRepo {
         }
     }
 
+    suspend fun clear() {
+        withContext(Dispatchers.IO) {
+            FileWriter(DATA_FILE_NAME, charset).use {
+                it.write("{}")
+            }
+        }
+    }
+
     suspend fun save(data: JSONObject) {
         withContext(Dispatchers.IO) {
             FileWriter(DATA_FILE_NAME, charset).use {

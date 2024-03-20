@@ -12,7 +12,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class Profile(
-    private val repoStore: RepoStore
+    private val repoStore: RepoStore,
+    private val onLogout: () -> Unit
 ) : Component() {
     private val state: MutableStateFlow<ProfileState> = MutableStateFlow(ProfileState.Loading)
 
@@ -20,7 +21,12 @@ class Profile(
         coroutineScope.launch {
             state.update {
                 ProfileState.State(
-                    user = repoStore.userRepo.getCurrentUser()
+                    user = repoStore.userRepo.getCurrentUser(),
+                    onLogoutClick = {
+                        coroutineScope.launch {
+                            onLogout()
+                        }
+                    }
                 )
             }
         }

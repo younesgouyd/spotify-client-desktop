@@ -13,9 +13,13 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.components.SplashScre
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.RepoStore
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.DARK_MODE_SETTING
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.Theme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 object Application {
+    private val coroutineScope = CoroutineScope(SupervisorJob())
     private val repoStore = RepoStore()
     private val currentComponent: MutableStateFlow<Component>
 
@@ -57,11 +61,18 @@ object Application {
     private fun showLogin() {
         currentComponent.value = Login(
             repoStore = repoStore,
-            onDone = { currentComponent.value = Content(repoStore) }
+            onDone = { currentComponent.value = Content(repoStore, ::logout) }
         )
     }
 
     private fun showContent() {
-        currentComponent.value = Content(repoStore)
+        currentComponent.value = Content(repoStore, ::logout)
+    }
+
+    private fun logout() {
+        coroutineScope.launch {
+            repoStore.authRepo.logout()
+            showLogin()
+        }
     }
 }

@@ -26,7 +26,8 @@ import kotlinx.coroutines.flow.update
 
 // todo: find a better name
 class Content(
-    val repoStore: RepoStore
+    private val repoStore: RepoStore,
+    private val onLogout: () -> Unit
 ) : Component() {
     private val mainComponentController = MainComponentController()
     private val componentsFactory = ComponentsFactory()
@@ -102,7 +103,8 @@ class Content(
     private inner class ComponentsFactory {
         fun getProfile(): Profile {
             return Profile(
-                repoStore = repoStore
+                repoStore = repoStore,
+                onLogout = onLogout
             )
         }
 

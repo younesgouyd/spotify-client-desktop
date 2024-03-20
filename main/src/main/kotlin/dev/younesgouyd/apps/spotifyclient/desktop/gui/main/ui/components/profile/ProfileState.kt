@@ -6,6 +6,7 @@ sealed class ProfileState {
     data object Loading : ProfileState()
 
     data class State(
-        val user: User
+        val user: User,
+        val onLogoutClick: () -> Unit
     ) : ProfileState()
 }
