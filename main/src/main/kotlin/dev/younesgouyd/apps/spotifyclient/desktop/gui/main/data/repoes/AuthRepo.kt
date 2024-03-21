@@ -32,7 +32,7 @@ class AuthRepo(
 ) {
     private var token: Token? = null
 
-    suspend fun loggedIn(): Boolean {
+    suspend fun isAuthorized(): Boolean {
         try {
             loadTokenFromCache()
             return true
@@ -79,6 +79,14 @@ class AuthRepo(
     suspend fun logout() {
         token = null
         appDataRepo.clear()
+    }
+
+    suspend fun refreshTokenIfNeeded() {
+        token.let {
+            if (it == null || it.expired()) {
+                refreshToken()
+            }
+        }
     }
 
     private suspend fun refreshToken() {
