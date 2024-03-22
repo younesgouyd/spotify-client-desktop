@@ -17,7 +17,7 @@ data class Playlists(
     @Serializable
     data class SimplifiedPlaylist(
         val id: PlaylistId,
-        val images: List<Image>,
+        val images: List<Image>?,
         val name: String
     )
 }

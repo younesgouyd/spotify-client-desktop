@@ -132,8 +132,8 @@ fun dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.artist.Artis
     )
 }
 
-fun Images.Companion.fromStandardImages(list: List<Image>): Images {
-    return Images(
+fun Images.Companion.fromStandardImages(list: List<Image>?): Images {
+    return if (list == null) empty() else Images(
         large = try { list[0].url } catch (ignored: Exception) { null },
         medium = try { list[1].url } catch (ignored: Exception) { null },
         small = try { list[2].url } catch (ignored: Exception) { null }
