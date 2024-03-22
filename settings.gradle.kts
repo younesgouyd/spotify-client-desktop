@@ -25,7 +25,7 @@ dependencyResolutionManagement {
                 val kotlin = version("kotlin", "1.9.22")
                 val ktor = version("ktor", "2.3.2")
                 val okhttp = version("okhttp", "4.10.0")
-                val coroutines = version("coroutines", "1.7.2")
+                val coroutines = version("coroutines", "1.8.0")
                 val logback = version("logback", "1.4.14")
                 val compose = version("compose", "1.6.1")
             }
