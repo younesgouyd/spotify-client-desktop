@@ -41,7 +41,7 @@ private fun ArtistList(
         contentPadding = PaddingValues(18.dp),
         horizontalArrangement = Arrangement.spacedBy(18.dp),
         verticalItemSpacing = 18.dp,
-        columns = StaggeredGridCells.Adaptive(200.dp)
+        columns = StaggeredGridCells.FixedSize(200.dp)
     ) {
         items(
             items = artists
@@ -66,10 +66,14 @@ private fun ArtistItem(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Image(
-                modifier = Modifier.width(300.dp),
-                url = artist.images.preferablyMedium()
-            )
+            Box(
+                modifier = Modifier.size(200.dp),
+                contentAlignment = Alignment.TopCenter // todo
+            ) {
+                Image(
+                    url = artist.images.preferablyMedium()
+                )
+            }
             Text(
                 modifier = Modifier.padding(8.dp),
                 text = artist.name,
