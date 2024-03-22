@@ -45,17 +45,21 @@ private fun PlaylistDetails(
 ) {
     LazyColumn (
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
-            PlaylistInfo(playlist, onPlayClick)
+            PlaylistInfo(
+                modifier = Modifier.fillMaxWidth(),
+                playlist = playlist,
+                onPlayClick = onPlayClick
+            )
         }
         items(
             items = tracks
         ) { item ->
             TrackItem(
+                modifier = Modifier.fillMaxWidth(),
                 track = item,
                 onTrackClick = onTrackClick
             )
@@ -65,36 +69,32 @@ private fun PlaylistDetails(
 
 @Composable
 private fun PlaylistInfo(
+    modifier: Modifier,
     playlist: Playlist,
     onPlayClick: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth()
-            .padding(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier,
+        horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
             modifier = Modifier.size(300.dp),
-            url = playlist.imageUrl
+            url = playlist.images.preferablyMedium()
         )
         Column(
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier.fillMaxWidth().padding(18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Column(
-                horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = playlist.name,
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Text(
-                    text = playlist.description,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
+            Text(
+                text = playlist.name,
+                style = MaterialTheme.typography.displayMedium
+            )
+            Text(
+                text = playlist.description,
+                style = MaterialTheme.typography.bodyMedium
+            )
             IconButton(
                 content = { Icon(Icons.Default.PlayCircle, null) },
                 onClick = onPlayClick
@@ -105,28 +105,29 @@ private fun PlaylistInfo(
 
 @Composable
 private fun TrackItem(
+    modifier: Modifier = Modifier,
     track: Playlist.Track,
     onTrackClick: (TrackId) -> Unit
 ) {
     Item(
-        modifier = Modifier.fillMaxWidth().padding(8.dp),
+        modifier = modifier,
         onClick = { onTrackClick(track.id) },
         contentAlignment = Alignment.CenterStart
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(
-                space = 8.dp,
-                Alignment.Start
+                space = 12.dp,
+                alignment = Alignment.Start
             ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                modifier = Modifier.size(150.dp),
-                url = track.images.medium
+                modifier = Modifier.size(64.dp),
+                url = track.images.preferablySmall()
             )
             Text(
                 text = track.name,
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleMedium
             )
         }
     }

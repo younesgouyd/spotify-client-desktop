@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -37,9 +38,9 @@ private fun AlbumList(
 ) {
     LazyVerticalStaggeredGrid (
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalItemSpacing = 8.dp,
+        contentPadding = PaddingValues(18.dp),
+        horizontalArrangement = Arrangement.spacedBy(18.dp),
+        verticalItemSpacing = 18.dp,
         columns = StaggeredGridCells.Adaptive(200.dp)
     ) {
         items(
@@ -55,25 +56,27 @@ private fun AlbumList(
 
 @Composable
 private fun AlbumItem(
+    modifier: Modifier = Modifier,
     album: Album,
     onAlbumClick: (AlbumId) -> Unit
 ) {
     Item (
-        modifier = Modifier.padding(8.dp),
+        modifier = modifier,
         onClick = { onAlbumClick(album.id) },
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(
-                space = 8.dp,
-                alignment = Alignment.CenterVertically
-            ),
+            verticalArrangement = Arrangement.Center
         ) {
             Image(
-                modifier = Modifier.size(150.dp),
-                url = album.images.medium
+                modifier = Modifier.width(300.dp),
+                url = album.images.preferablyMedium()
             )
-            Text(album.name)
+            Text(
+                modifier = Modifier.padding(12.dp),
+                text = album.name,
+                style = MaterialTheme.typography.titleMedium
+            )
         }
     }
 }

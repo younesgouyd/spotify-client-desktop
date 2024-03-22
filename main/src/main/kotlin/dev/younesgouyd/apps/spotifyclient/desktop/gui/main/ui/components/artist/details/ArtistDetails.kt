@@ -1,17 +1,15 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.components.artist.details
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -53,8 +51,8 @@ private fun ArtistDetails(
 ) {
     LazyVerticalStaggeredGrid (
         modifier = Modifier.fillMaxSize(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalItemSpacing = 8.dp,
+        horizontalArrangement = Arrangement.spacedBy(18.dp),
+        verticalItemSpacing = 18.dp,
         columns = StaggeredGridCells.Adaptive(200.dp)
     ) {
         item(span = StaggeredGridItemSpan.FullLine) {
@@ -67,7 +65,7 @@ private fun ArtistDetails(
                 )
             ) {
                 ArtistInfo(
-                    modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant),
+                    modifier = Modifier.fillMaxWidth(),
                     artist = artist,
                     onPlayClick = onPlayClick
                 )
@@ -79,7 +77,7 @@ private fun ArtistDetails(
                 Text(
                     modifier = Modifier.fillMaxWidth().padding(8.dp),
                     text = "Discography",
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.headlineMedium
                 )
             }
         }
@@ -87,7 +85,6 @@ private fun ArtistDetails(
             items = albums
         ) { item ->
             AlbumItem(
-                modifier = Modifier.padding(8.dp),
                 album = item,
                 onAlbumClick = onAlbumClick
             )
@@ -103,20 +100,21 @@ private fun ArtistInfo(
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(
-            space = 8.dp,
-            alignment = Alignment.Start
-        ),
+        horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(url = artist.images.medium)
+        Image(
+            modifier = Modifier.size(300.dp),
+            url = artist.images.preferablyMedium()
+        )
         Column(
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier.fillMaxWidth().padding(18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
                 text = artist.name,
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.displayMedium
             )
             IconButton(
                 content = { Icon(Icons.Default.PlayCircle, null) },
@@ -132,61 +130,39 @@ private fun TopTracks(
     tracks: List<Artist.Track>,
     onPlayTrackClick: (TrackId) -> Unit
 ) {
-    var topTracksExpanded by remember { mutableStateOf(true) }
-
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        Text(
+            modifier = Modifier.fillMaxWidth().padding(8.dp),
+            text = "Top Tracks",
+            style = MaterialTheme.typography.headlineMedium
+        )
         Column(
-            modifier = modifier,
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.Top
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    modifier = Modifier.padding(8.dp),
-                    text = "Top Tracks",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                IconButton(
-                    content = {
-                        when (topTracksExpanded) {
-                            true -> Icon(Icons.Default.ExpandLess, null)
-                            false -> Icon(Icons.Default.ExpandMore, null)
-                        }
-                    },
-                    onClick = { topTracksExpanded = !topTracksExpanded }
-                )
-            }
-            if (topTracksExpanded) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Top
+            for (track in tracks) {
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                        .clickable { onPlayTrackClick(track.id) },
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    for (track in tracks) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Image(url = track.images.small)
-                            Text(
-                                modifier = Modifier.weight(1f),
-                                text = track.name,
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                            IconButton(
-                                content = { Icon(Icons.Default.PlayCircle, null) },
-                                onClick = { onPlayTrackClick(track.id) }
-                            )
-                        }
-                        HorizontalDivider()
-                    }
+                    Image(
+                        modifier = Modifier.size(64.dp),
+                        url = track.images.small
+                    )
+                    Text(
+                        text = track.name,
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+                if (track != tracks.last()) {
+                    HorizontalDivider()
                 }
             }
         }
@@ -205,16 +181,17 @@ private fun AlbumItem(
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(
-                space = 8.dp,
-                alignment = Alignment.CenterVertically
-            ),
+            verticalArrangement = Arrangement.Center
         ) {
             Image(
-                modifier = Modifier.size(150.dp),
-                url = album.images.medium
+                modifier = Modifier.width(300.dp),
+                url = album.images.preferablyMedium()
             )
-            Text(album.name)
+            Text(
+                modifier = Modifier.padding(12.dp),
+                text = album.name,
+                style = MaterialTheme.typography.titleMedium
+            )
         }
     }
 }

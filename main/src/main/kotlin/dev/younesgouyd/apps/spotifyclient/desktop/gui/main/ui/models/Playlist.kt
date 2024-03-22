@@ -9,7 +9,7 @@ data class Playlist(
     val id: PlaylistId,
     val name: String,
     val description: String,
-    val imageUrl: String?
+    val images: Images
 ) {
     data class Track(
         val id: TrackId,

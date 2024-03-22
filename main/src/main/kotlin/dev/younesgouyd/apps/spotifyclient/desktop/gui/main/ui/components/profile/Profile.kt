@@ -1,6 +1,5 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.components.profile
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
@@ -13,7 +12,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.Image
-
 
 @Composable
 fun Profile(
@@ -32,23 +30,26 @@ private fun Profile(
     val user = state.user
 
     Row(
-        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surfaceVariant),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(
+            space = 8.dp,
+            alignment = Alignment.Start
+        ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Image(url = user.profilePictureUrl)
         Column(
-            Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.Start,
+            modifier = Modifier.fillMaxWidth().padding(18.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
                 text = user.displayName,
-                style = MaterialTheme.typography.headlineLarge
+                style = MaterialTheme.typography.displayMedium
             )
             Text(
                 "${user.followerCount} followers",
-                style = MaterialTheme.typography.labelLarge
+                style = MaterialTheme.typography.labelMedium
             )
             Button(
                 content = {

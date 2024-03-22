@@ -27,7 +27,7 @@ fun dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.playlist.Pla
         id = this.id,
         name = this.name,
         description = this.description ?: "",
-        imageUrl = this.images.firstOrNull()?.url
+        images = Images.fromStandardImages(this.images)
     )
 }
 

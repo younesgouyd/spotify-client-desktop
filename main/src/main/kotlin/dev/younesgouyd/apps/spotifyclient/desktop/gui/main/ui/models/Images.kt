@@ -8,4 +8,8 @@ data class Images(
     val small: ImageUrl?,
 ) {
     companion object
+
+    fun preferablyMedium() = medium ?: small ?: large
+
+    fun preferablySmall() = small ?: medium ?: large
 }

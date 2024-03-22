@@ -24,7 +24,7 @@ fun Login(
     ) {
         Card {
             Column(
-                modifier = Modifier.padding(20.dp)
+                modifier = Modifier.padding(24.dp)
             ) {
                 TextField(
                     isError = errorMessage.isNotEmpty(),
