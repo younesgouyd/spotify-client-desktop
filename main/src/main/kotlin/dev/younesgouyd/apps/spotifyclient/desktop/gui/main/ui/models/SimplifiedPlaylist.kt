@@ -4,6 +4,6 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.PlaylistId
 
 data class SimplifiedPlaylist(
     val id: PlaylistId,
-    val name: String,
+    val name: String?,
     val images: Images
 )

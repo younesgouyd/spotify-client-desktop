@@ -6,27 +6,30 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.Image
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * GET /me/albums
+ */
 @Serializable
 data class SavedAlbums(
-    val items: List<SavedAlbum>
+    val items: List<SavedAlbum>?
 ) {
     @Serializable
     data class SavedAlbum(
         @SerialName("added_at")
-        val addedAt: String,
-        val album: Album
+        val addedAt: String?,
+        val album: Album?
     ) {
         @Serializable
         data class Album(
             val id: AlbumId,
-            val images: List<Image>,
-            val name: String,
-            val artists: List<Artist>
+            val images: List<Image>?,
+            val name: String?,
+            val artists: List<Artist>?
         ) {
             @Serializable
             data class Artist(
                 val id: ArtistId,
-                val name: String
+                val name: String?
             )
         }
     }

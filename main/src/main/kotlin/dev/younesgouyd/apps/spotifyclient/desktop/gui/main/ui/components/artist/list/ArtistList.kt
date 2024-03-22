@@ -76,7 +76,7 @@ private fun ArtistItem(
             }
             Text(
                 modifier = Modifier.padding(8.dp),
-                text = artist.name,
+                text = artist.name ?: "",
                 style = MaterialTheme.typography.titleLarge
             )
         }

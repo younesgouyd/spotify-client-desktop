@@ -88,11 +88,11 @@ private fun PlaylistInfo(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = playlist.name,
+                text = playlist.name ?: "",
                 style = MaterialTheme.typography.displayMedium
             )
             Text(
-                text = playlist.description,
+                text = playlist.description ?: "",
                 style = MaterialTheme.typography.bodyMedium
             )
             IconButton(
@@ -126,7 +126,7 @@ private fun TrackItem(
                 url = track.images.preferablySmall()
             )
             Text(
-                text = track.name,
+                text = track.name ?: "",
                 style = MaterialTheme.typography.titleMedium
             )
         }

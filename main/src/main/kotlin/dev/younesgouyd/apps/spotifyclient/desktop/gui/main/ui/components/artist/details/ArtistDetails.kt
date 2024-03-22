@@ -113,7 +113,7 @@ private fun ArtistInfo(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = artist.name,
+                text = artist.name ?: "",
                 style = MaterialTheme.typography.displayMedium
             )
             IconButton(
@@ -157,7 +157,7 @@ private fun TopTracks(
                         url = track.images.small
                     )
                     Text(
-                        text = track.name,
+                        text = track.name ?: "",
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
@@ -193,7 +193,7 @@ private fun AlbumItem(
             }
             Text(
                 modifier = Modifier.padding(12.dp),
-                text = album.name,
+                text = album.name ?: "",
                 style = MaterialTheme.typography.titleMedium
             )
         }

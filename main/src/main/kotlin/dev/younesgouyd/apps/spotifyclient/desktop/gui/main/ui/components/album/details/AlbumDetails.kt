@@ -86,7 +86,7 @@ private fun AlbumInfo(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = album.name,
+                text = album.name ?: "",
                 style = MaterialTheme.typography.displayMedium
             )
             IconButton(
@@ -108,7 +108,7 @@ private fun TrackItem(
         contentAlignment = Alignment.CenterStart
     ) {
         Text(
-            text = track.name,
+            text = track.name ?: "",
             style = MaterialTheme.typography.titleMedium
         )
     }

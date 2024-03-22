@@ -78,7 +78,7 @@ private fun AlbumItem(
             }
             Text(
                 modifier = Modifier.padding(12.dp),
-                text = album.name,
+                text = album.name ?: "",
                 style = MaterialTheme.typography.titleMedium
             )
         }

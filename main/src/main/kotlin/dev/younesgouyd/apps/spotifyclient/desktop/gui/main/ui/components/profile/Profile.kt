@@ -44,7 +44,7 @@ private fun Profile(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = user.displayName,
+                text = user.displayName ?: "",
                 style = MaterialTheme.typography.displayMedium
             )
             Text(

@@ -50,6 +50,10 @@ class TrackRepo(
         }
     }
 
+    /**
+     * GET /artists/{id}/top-tracks
+     * Get Spotify catalog information about an artist's top tracks by country.
+     */
     suspend fun getArtistTopTracks(id: ArtistId): List<Artist.Track> {
         return withContext(Dispatchers.IO) {
             client.get("artists/$id/top-tracks") {

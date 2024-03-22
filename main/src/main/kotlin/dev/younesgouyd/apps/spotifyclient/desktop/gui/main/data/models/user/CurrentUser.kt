@@ -7,14 +7,17 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.Image
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * GET /me
+ */
 @Serializable
 data class CurrentUser(
     @SerialName("display_name")
     val displayName: String?,
-    val email: String,
-    val followers: Followers,
-    val href: String,
+    val email: String?,
+    val followers: Followers?,
+    val href: String?,
     val id: UserId,
-    val images: List<Image>,
-    val uri: SpotifyUri
+    val images: List<Image>?,
+    val uri: SpotifyUri?
 )

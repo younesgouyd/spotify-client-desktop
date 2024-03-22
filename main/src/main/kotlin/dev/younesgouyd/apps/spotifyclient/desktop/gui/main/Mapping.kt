@@ -13,20 +13,20 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.user.Curr
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.*
 
 fun Playlists.toModel(): List<SimplifiedPlaylist> {
-    return this.items.map {
+    return this.items?.map {
         SimplifiedPlaylist(
             id = it.id,
             name = it.name,
             images = Images.fromStandardImages(it.images)
         )
-    }
+    } ?: emptyList()
 }
 
 fun dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.playlist.Playlist.toModel(): Playlist {
     return Playlist(
         id = this.id,
         name = this.name,
-        description = this.description ?: "",
+        description = this.description,
         images = Images.fromStandardImages(this.images)
     )
 }
@@ -34,94 +34,96 @@ fun dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.playlist.Pla
 fun CurrentUser.toModel(): User {
     return User(
         id = this.id,
-        displayName = this.displayName ?: "",
-        followerCount = this.followers.total,
-        profilePictureUrl = try { this.images[1].url } catch (ignored: Exception) { null }
+        displayName = this.displayName,
+        followerCount = this.followers?.total,
+        profilePictureUrl = try { this.images?.get(1)?.url } catch (ignored: Exception) { null }
     )
 }
 
 fun PlaylistTracks.toModel(): List<Playlist.Track> {
-    return this.items.map {
+    return this.items?.filter { it.track != null }?.map { (_, _, _, track) ->
         Playlist.Track(
-            id = it.track.id,
-            name = it.track.name,
-            artists = it.track.artists.map {
+            id = track!!.id,
+            name = track.name,
+            artists = track.artists?.map {
                 Playlist.Track.Artist(
                     id = it.id,
                     name = it.name
                 )
-            },
-            album = Playlist.Track.Album(
-                id = it.track.album.id,
-                name = it.track.album.name
-            ),
-            images = Images.fromStandardImages(it.track.album.images),
+            } ?: emptyList(),
+            album = if (track.album != null) Playlist.Track.Album(
+                id = track.album.id,
+                name = track.album.name
+            ) else null,
+            images = Images.fromStandardImages(track.album?.images),
             playing = false
         )
-    }
+    } ?: emptyList()
 }
 
-fun SavedAlbums.toModel(): List<Album> = this.items.map { (_, savedAlbum) ->
-    Album(
-        id = savedAlbum.id,
-        name = savedAlbum.name,
-        artist = savedAlbum.artists.map {
-            Album.Artist(
-                id = it.id,
-                name = it.name
-            )
-        },
-        images = Images.fromStandardImages(savedAlbum.images)
-    )
+fun SavedAlbums.toModel(): List<Album> {
+    return this.items?.filter { it.album != null }?.map { (_, album) ->
+        Album(
+            id = album!!.id,
+            name = album.name,
+            artist = album.artists?.map {
+                Album.Artist(
+                    id = it.id,
+                    name = it.name
+                )
+            } ?: emptyList(),
+            images = Images.fromStandardImages(album.images)
+        )
+    } ?: emptyList()
 }
 
 fun dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.album.Album.toModel(): Album {
     return Album(
         id = this.id,
         name = this.name,
-        artist = this.artists.map {
+        artist = this.artists?.map {
             Album.Artist(
                 id = it.id,
                 name = it.name
             )
-        },
+        } ?: emptyList(),
         images = Images.fromStandardImages(this.images)
     )
 }
 
 fun AlbumTracks.toModel(): List<Album.Track> {
-    return this.items.map {
+    return this.items?.map {
         Album.Track(
             id = it.id,
             name = it.name
         )
-    }
+    } ?: emptyList()
 }
 
 fun FollowedArtists.toModel(): List<Artist> {
-    return this.artists.items.map {
+    return this.artists?.items?.map {
         Artist(
             id = it.id,
             name = it.name,
             images = Images.fromStandardImages(it.images)
         )
-    }
+    } ?: emptyList()
 }
 
 fun ArtistAlbums.toModel(): List<Album> {
-    return this.items.map {
+    return this.items?.map { simplifiedAlbum ->
         Album(
-            id = it.id,
-            name = it.name,
-            artist = it.artists.map {
+            id = simplifiedAlbum.id,
+            name = simplifiedAlbum.name,
+            artist = simplifiedAlbum.artists?.map {
                 Album.Artist(
                     id = it.id,
                     name = it.name
                 )
-            },
-            images = Images.fromStandardImages(it.images)
+            } ?: emptyList(),
+            images = Images.fromStandardImages(simplifiedAlbum.images)
         )
-    }
+    } ?: emptyList()
 }
 
 fun dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.artist.Artist.toModel(): Artist {
@@ -132,6 +134,16 @@ fun dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.artist.Artis
     )
 }
 
+fun ArtistTopTracks.toModel(): List<Artist.Track> {
+    return this.tracks?.map {
+        Artist.Track(
+            id = it.id,
+            name = it.name,
+            images = Images.fromImagesOfFloatSize(it.album?.images)
+        )
+    } ?: emptyList()
+}
+
 fun Images.Companion.fromStandardImages(list: List<Image>?): Images {
     return if (list == null) empty() else Images(
         large = try { list[0].url } catch (ignored: Exception) { null },
@@ -140,20 +152,10 @@ fun Images.Companion.fromStandardImages(list: List<Image>?): Images {
     )
 }
 
-fun Images.Companion.fromImagesOfFloatSize(list: List<ImageOfFloatSize>): Images {
-    return Images(
+fun Images.Companion.fromImagesOfFloatSize(list: List<ImageOfFloatSize>?): Images {
+    return if (list == null) empty() else Images(
         large = try { list[0].url } catch (ignored: Exception) { null },
         medium = try { list[1].url } catch (ignored: Exception) { null },
         small = try { list[2].url } catch (ignored: Exception) { null }
     )
-}
-
-fun ArtistTopTracks.toModel(): List<Artist.Track> {
-    return this.tracks.map {
-        Artist.Track(
-            id = it.id,
-            name = it.name,
-            images = Images.fromImagesOfFloatSize(it.album.images)
-        )
-    }
 }

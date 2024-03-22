@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ImageOfFloatSize(
-    val url: String,
+    val url: String?,
     val height: Float?,
     val width: Float?
 )

@@ -78,7 +78,7 @@ private fun PlaylistItem(
             }
             Text(
                 modifier = Modifier.padding(12.dp),
-                text = playlist.name,
+                text = playlist.name ?: "",
                 style = MaterialTheme.typography.titleMedium
             )
         }
