@@ -56,30 +56,32 @@ private fun ArtistDetails(
         columns = StaggeredGridCells.FixedSize(200.dp)
     ) {
         item(span = StaggeredGridItemSpan.FullLine) {
-            Column(
+            ArtistInfo(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(
-                    space = 8.dp,
-                    alignment = Alignment.CenterVertically
-                )
-            ) {
-                ArtistInfo(
-                    modifier = Modifier.fillMaxWidth(),
-                    artist = artist,
-                    onPlayClick = onPlayClick
-                )
-                TopTracks(
-                    modifier = Modifier.fillMaxWidth(),
-                    tracks = topTracks,
-                    onPlayTrackClick = onPlayTrackClick
-                )
-                Text(
-                    modifier = Modifier.fillMaxWidth().padding(8.dp),
-                    text = "Discography",
-                    style = MaterialTheme.typography.headlineMedium
-                )
-            }
+                artist = artist,
+                onPlayClick = onPlayClick
+            )
+        }
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = "Top Tracks",
+                style = MaterialTheme.typography.headlineMedium
+            )
+        }
+        item(span = StaggeredGridItemSpan.FullLine) {
+            TopTracks(
+                modifier = Modifier.fillMaxWidth(),
+                tracks = topTracks,
+                onPlayTrackClick = onPlayTrackClick
+            )
+        }
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = "Discography",
+                style = MaterialTheme.typography.headlineMedium
+            )
         }
         items(
             items = albums
@@ -133,37 +135,26 @@ private fun TopTracks(
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.Top
     ) {
-        Text(
-            modifier = Modifier.fillMaxWidth().padding(8.dp),
-            text = "Top Tracks",
-            style = MaterialTheme.typography.headlineMedium
-        )
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
-        ) {
-            for (track in tracks) {
-                Row(
-                    modifier = Modifier.fillMaxWidth()
-                        .clickable { onPlayTrackClick(track.id) },
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        modifier = Modifier.size(64.dp),
-                        url = track.images.small
-                    )
-                    Text(
-                        text = track.name ?: "",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-                if (track != tracks.last()) {
-                    HorizontalDivider()
-                }
+        for (track in tracks) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .clickable { onPlayTrackClick(track.id) },
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    modifier = Modifier.size(64.dp),
+                    url = track.images.small
+                )
+                Text(
+                    text = track.name ?: "",
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+            if (track != tracks.last()) {
+                HorizontalDivider()
             }
         }
     }
