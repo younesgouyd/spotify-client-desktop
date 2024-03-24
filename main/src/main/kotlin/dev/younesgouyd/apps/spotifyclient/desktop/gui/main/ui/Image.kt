@@ -10,7 +10,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.res.loadImageBitmap
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.URI
 
@@ -25,12 +24,11 @@ fun Image(
 ) {
     var loading by remember { mutableStateOf(true) }
     var img by remember { mutableStateOf<ImageBitmap?>(null) }
-    val scope = rememberCoroutineScope()
 
     if (url == null) {
         BrokenImage(modifier)
     } else {
-        scope.launch {
+        LaunchedEffect(Unit) {
             withContext(Dispatchers.IO) {
                 loading = true
                 val fromCache = cache[url]
