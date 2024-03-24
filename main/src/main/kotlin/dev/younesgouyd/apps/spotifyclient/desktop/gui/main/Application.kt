@@ -11,19 +11,27 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.components.Content
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.components.Login
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.components.SplashScreen
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.RepoStore
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.DARK_MODE_SETTING
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.Theme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 object Application {
     private val coroutineScope = CoroutineScope(SupervisorJob())
     private val repoStore = RepoStore()
     private val currentComponent: MutableStateFlow<Component>
+    private val darkTheme: StateFlow<DarkThemeOptions?>
 
     init {
+        darkTheme = repoStore.settingsRepo.getDarkThemeFlow().stateIn(
+            scope = coroutineScope,
+            started = SharingStarted.Lazily,
+            initialValue = null
+        )
         currentComponent = MutableStateFlow(
             SplashScreen(
                 repoStore = repoStore,
@@ -36,6 +44,7 @@ object Application {
     fun start() {
         application {
             val currentComponent by currentComponent.collectAsState()
+            val darkTheme by darkTheme.collectAsState()
 
             Window(
                 state = rememberWindowState(
@@ -45,7 +54,7 @@ object Application {
                 onCloseRequest = ::exitApplication,
             ) {
                 Theme(
-                    darkTheme = DARK_MODE_SETTING,
+                    darkTheme = darkTheme ?: DarkThemeOptions.SystemDefault,
                     content = {
                         Surface(
                             modifier = Modifier.fillMaxSize()

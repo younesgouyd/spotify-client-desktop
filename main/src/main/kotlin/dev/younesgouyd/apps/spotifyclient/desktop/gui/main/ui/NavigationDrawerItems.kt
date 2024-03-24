@@ -4,5 +4,6 @@ enum class NavigationDrawerItems {
     Profile,
     Playlists,
     Albums,
-    Artists
+    Artists,
+    Settings
 }

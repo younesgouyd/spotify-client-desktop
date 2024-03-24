@@ -19,6 +19,7 @@ class SplashScreen(
     init {
         coroutineScope.launch {
             repoStore.appDataRepo.init()
+            repoStore.settingsRepo.init()
             if (repoStore.authRepo.isAuthorized()) {
                 repoStore.authRepo.refreshTokenIfNeeded()
                 showContent()

@@ -34,6 +34,7 @@ class RepoStore {
     }
 
     val appDataRepo by lazy { AppDataRepo() }
+    val settingsRepo by lazy { SettingsRepo(appDataRepo) }
     val authRepo by lazy { AuthRepo(authClient, appDataRepo) }
     val albumRepo by lazy { AlbumRepo(client, authRepo) }
     val artistRepo by lazy { ArtistRepo(client, authRepo) }

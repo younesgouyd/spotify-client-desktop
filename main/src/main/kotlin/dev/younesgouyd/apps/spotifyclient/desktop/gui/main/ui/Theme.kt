@@ -6,6 +6,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.DarkThemeOptions
 
 val md_theme_light_primary = Color(0xFF6750A4)
 val md_theme_light_onPrimary = Color(0xFFFFFFFF)
@@ -134,11 +135,15 @@ private val DarkColors = darkColorScheme(
 
 @Composable
 fun Theme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: DarkThemeOptions = DarkThemeOptions.SystemDefault,
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
-        colorScheme = if (!darkTheme) LightColors else DarkColors,
+        colorScheme = when (darkTheme) {
+            DarkThemeOptions.SystemDefault -> if (isSystemInDarkTheme()) DarkColors else LightColors
+            DarkThemeOptions.Disabled -> LightColors
+            DarkThemeOptions.Enabled -> DarkColors
+        },
         content = content
     )
 }

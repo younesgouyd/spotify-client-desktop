@@ -53,6 +53,7 @@ class Content(
                                     NavigationDrawerItems.Playlists -> mainComponentController.showPlaylistList()
                                     NavigationDrawerItems.Albums -> mainComponentController.showAlbumList()
                                     NavigationDrawerItems.Artists -> mainComponentController.showArtistList()
+                                    NavigationDrawerItems.Settings -> mainComponentController.showSettings()
                                 }
                             }
                         )
@@ -64,6 +65,11 @@ class Content(
     }
 
     private inner class MainComponentController {
+        fun showSettings() {
+            currentMainComponent.update { componentsFactory.getSettings() }
+            selectedNavigationDrawerItem.update { NavigationDrawerItems.Settings }
+        }
+
         fun showProfile() {
             currentMainComponent.update { componentsFactory.getProfile() }
             selectedNavigationDrawerItem.update { NavigationDrawerItems.Profile }
@@ -101,6 +107,12 @@ class Content(
     }
 
     private inner class ComponentsFactory {
+        fun getSettings(): Settings {
+            return Settings(
+                repoStore = repoStore
+            )
+        }
+
         fun getProfile(): Profile {
             return Profile(
                 repoStore = repoStore,
