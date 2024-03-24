@@ -7,6 +7,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.Component
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.RepoStore
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.components.settings.Settings
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.components.settings.SettingsState
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -40,5 +41,9 @@ class Settings(
         val state by state.collectAsState()
 
         Settings(state)
+    }
+
+    override fun clear() {
+        coroutineScope.cancel()
     }
 }
