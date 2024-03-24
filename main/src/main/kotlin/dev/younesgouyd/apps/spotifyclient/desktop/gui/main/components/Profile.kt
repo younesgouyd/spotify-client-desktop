@@ -7,6 +7,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.Component
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.RepoStore
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.components.profile.Profile
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.components.profile.ProfileState
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -37,5 +38,9 @@ class Profile(
         val state by state.collectAsState()
 
         Profile(state)
+    }
+
+    override fun clear() {
+        coroutineScope.cancel()
     }
 }

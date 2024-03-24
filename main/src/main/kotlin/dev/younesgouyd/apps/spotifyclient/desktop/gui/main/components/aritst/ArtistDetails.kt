@@ -9,6 +9,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.Component
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.RepoStore
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.components.artist.details.ArtistDetails
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.components.artist.details.ArtistDetailsState
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -40,5 +41,9 @@ class ArtistDetails(
         val state by state.collectAsState()
 
         ArtistDetails(state)
+    }
+
+    override fun clear() {
+        coroutineScope.cancel()
     }
 }
