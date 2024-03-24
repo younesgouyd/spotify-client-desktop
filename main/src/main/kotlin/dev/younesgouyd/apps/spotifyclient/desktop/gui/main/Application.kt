@@ -16,6 +16,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.Theme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 object Application {
@@ -59,14 +60,20 @@ object Application {
     }
 
     private fun showLogin() {
-        currentComponent.value = Login(
-            repoStore = repoStore,
-            onDone = { currentComponent.value = Content(repoStore, ::logout) }
-        )
+        currentComponent.update {
+            it.clear()
+            Login(
+                repoStore = repoStore,
+                onDone = { currentComponent.value = Content(repoStore, ::logout) }
+            )
+        }
     }
 
     private fun showContent() {
-        currentComponent.value = Content(repoStore, ::logout)
+        currentComponent.update {
+            it.clear()
+            Content(repoStore, ::logout)
+        }
     }
 
     private fun logout() {

@@ -21,6 +21,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.components.playlist.P
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.components.playlist.PlaylistList
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.RepoStore
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.NavigationDrawerItems
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 
@@ -65,37 +66,58 @@ class Content(
 
     private inner class MainComponentController {
         fun showProfile() {
-            currentMainComponent.update { componentsFactory.getProfile() }
+            currentMainComponent.update {
+                it.clear()
+                componentsFactory.getProfile()
+            }
             selectedNavigationDrawerItem.update { NavigationDrawerItems.Profile }
         }
 
         fun showPlaylistList() {
-            currentMainComponent.update { componentsFactory.getPlaylistList() }
+            currentMainComponent.update {
+                it.clear()
+                componentsFactory.getPlaylistList()
+            }
             selectedNavigationDrawerItem.update { NavigationDrawerItems.Playlists }
         }
 
         fun showPlaylistDetails(id: PlaylistId) {
-            currentMainComponent.update { componentsFactory.getPlaylistDetails(id) }
+            currentMainComponent.update {
+                it.clear()
+                componentsFactory.getPlaylistDetails(id)
+            }
             selectedNavigationDrawerItem.update { NavigationDrawerItems.Playlists }
         }
 
         fun showAlbumList() {
-            currentMainComponent.update { componentsFactory.getAlbumList() }
+            currentMainComponent.update {
+                it.clear()
+                componentsFactory.getAlbumList()
+            }
             selectedNavigationDrawerItem.update { NavigationDrawerItems.Albums }
         }
 
         fun showAlbumDetails(id: AlbumId) {
-            currentMainComponent.update { componentsFactory.getAlbumDetails(id) }
+            currentMainComponent.update {
+                it.clear()
+                componentsFactory.getAlbumDetails(id)
+            }
             selectedNavigationDrawerItem.update { NavigationDrawerItems.Albums }
         }
 
         fun showArtistList() {
-            currentMainComponent.update { componentsFactory.getArtistList() }
+            currentMainComponent.update {
+                it.clear()
+                componentsFactory.getArtistList()
+            }
             selectedNavigationDrawerItem.update { NavigationDrawerItems.Artists }
         }
 
         fun showArtistDetails(id: ArtistId) {
-            currentMainComponent.update { componentsFactory.getArtistDetails(id) }
+            currentMainComponent.update {
+                it.clear()
+                componentsFactory.getArtistDetails(id)
+            }
             selectedNavigationDrawerItem.update { NavigationDrawerItems.Artists }
         }
     }
@@ -150,5 +172,10 @@ class Content(
                 showAlbumDetails = { mainComponentController.showAlbumDetails(it) }
             )
         }
+    }
+
+    override fun clear() {
+        currentMainComponent.value.clear()
+        coroutineScope.cancel()
     }
 }

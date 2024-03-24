@@ -8,6 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.Component
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.RepoStore
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 class SplashScreen(
@@ -36,5 +37,9 @@ class SplashScreen(
         ) {
             Text("Loading...")
         }
+    }
+
+    override fun clear() {
+        coroutineScope.cancel()
     }
 }

@@ -9,4 +9,6 @@ abstract class Component {
 
     @Composable
     abstract fun show()
+
+    abstract fun clear()
 }
