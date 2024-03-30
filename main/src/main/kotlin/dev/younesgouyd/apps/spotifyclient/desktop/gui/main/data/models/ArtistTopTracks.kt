@@ -1,7 +1,6 @@
-package dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.track
+package dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models
 
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.TrackId
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.ImageOfFloatSize
 import kotlinx.serialization.Serializable
 
 /**

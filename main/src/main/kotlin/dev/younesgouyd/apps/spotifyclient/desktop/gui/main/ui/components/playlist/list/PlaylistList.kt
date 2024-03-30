@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.PlaylistId
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.Image
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.Item
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.SimplifiedPlaylist
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.PlaylistListItem
 
 @Composable
 fun PlaylistList(state: PlaylistListState) {
@@ -33,7 +33,7 @@ private fun PlaylistList(state: PlaylistListState.State) {
 
 @Composable
 private fun PlaylistList(
-    playlists: List<SimplifiedPlaylist>,
+    playlists: List<PlaylistListItem>,
     onPlaylistClick: (PlaylistId) -> Unit
 ) {
     LazyVerticalStaggeredGrid (
@@ -57,7 +57,7 @@ private fun PlaylistList(
 @Composable
 private fun PlaylistItem(
     modifier: Modifier = Modifier,
-    playlist: SimplifiedPlaylist,
+    playlist: PlaylistListItem,
     onPlaylistClick: (PlaylistId) -> Unit
 ) {
     Item (

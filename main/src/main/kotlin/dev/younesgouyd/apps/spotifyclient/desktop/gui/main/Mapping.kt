@@ -1,5 +1,7 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.gui.main
 
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.ArtistTopTracks
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.CurrentUser
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.Image
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.ImageOfFloatSize
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.album.AlbumTracks
@@ -8,13 +10,11 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.album.Sav
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.artist.FollowedArtists
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.playlist.PlaylistTracks
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.playlist.Playlists
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.track.ArtistTopTracks
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.user.CurrentUser
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.*
 
-fun Playlists.toModel(): List<SimplifiedPlaylist> {
+fun Playlists.toModel(): List<PlaylistListItem> {
     return this.items?.map {
-        SimplifiedPlaylist(
+        PlaylistListItem(
             id = it.id,
             name = it.name,
             images = Images.fromStandardImages(it.images)
@@ -41,37 +41,20 @@ fun CurrentUser.toModel(): User {
 }
 
 fun PlaylistTracks.toModel(): List<Playlist.Track> {
-    return this.items?.filter { it.track != null }?.map { (_, _, _, track) ->
+    return this.items?.filter { it.track != null }?.map { (track) ->
         Playlist.Track(
             id = track!!.id,
             name = track.name,
-            artists = track.artists?.map {
-                Playlist.Track.Artist(
-                    id = it.id,
-                    name = it.name
-                )
-            } ?: emptyList(),
-            album = if (track.album != null) Playlist.Track.Album(
-                id = track.album.id,
-                name = track.album.name
-            ) else null,
-            images = Images.fromStandardImages(track.album?.images),
-            playing = false
+            images = Images.fromStandardImages(track.album?.images)
         )
     } ?: emptyList()
 }
 
-fun SavedAlbums.toModel(): List<Album> {
-    return this.items?.filter { it.album != null }?.map { (_, album) ->
-        Album(
+fun SavedAlbums.toModel(): List<AlbumListItem> {
+    return this.items?.filter { it.album != null }?.map { (album) ->
+        AlbumListItem(
             id = album!!.id,
             name = album.name,
-            artist = album.artists?.map {
-                Album.Artist(
-                    id = it.id,
-                    name = it.name
-                )
-            } ?: emptyList(),
             images = Images.fromStandardImages(album.images)
         )
     } ?: emptyList()

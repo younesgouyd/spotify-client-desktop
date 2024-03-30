@@ -3,9 +3,9 @@ package dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.repoes
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.AlbumId
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ArtistId
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.PlaylistId
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.ArtistTopTracks
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.album.AlbumTracks
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.playlist.PlaylistTracks
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.track.ArtistTopTracks
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.toModel
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.Album
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.Artist

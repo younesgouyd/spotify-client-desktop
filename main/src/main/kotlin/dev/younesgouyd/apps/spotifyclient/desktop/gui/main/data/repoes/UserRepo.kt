@@ -1,8 +1,6 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.repoes
 
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.UserId
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.user.CurrentUser
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.user.User
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.CurrentUser
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.toModel
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -24,15 +22,5 @@ class UserRepo(
                 header("Authorization", "Bearer ${authRepo.getToken()}")
             }.body<CurrentUser>().toModel()
         }
-    }
-
-    /**
-     * GET /users/{user_id}
-     * @param userId The user's Spotify user ID
-     */
-    suspend fun get(userId: UserId): User {
-        return client.get("/users/$userId") {
-            header("Authorization", "Bearer ${authRepo.getToken()}")
-        }.body<User>()
     }
 }

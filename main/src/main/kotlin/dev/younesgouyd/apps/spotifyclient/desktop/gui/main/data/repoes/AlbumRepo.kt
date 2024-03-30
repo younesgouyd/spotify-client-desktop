@@ -6,6 +6,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.album.Art
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.album.SavedAlbums
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.toModel
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.Album
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.AlbumListItem
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -21,7 +22,7 @@ class AlbumRepo(
      * @param limit The maximum number of items to return. Default: 20. Minimum: 1. Maximum: 50.
      * @param offset The index of the first item to return. Default: 0 (the first item). Use with limit to get the next set of items.
      */
-    suspend fun getSavedAlbums(limit: Int, offset: Int): List<Album> {
+    suspend fun getSavedAlbums(limit: Int, offset: Int): List<AlbumListItem> {
         return withContext(Dispatchers.IO) {
             client.get("me/albums") {
                 header("Authorization", "Bearer ${authRepo.getToken()}")
