@@ -42,7 +42,7 @@ private fun AlbumDetails(
 ) {
     LazyColumn (
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
