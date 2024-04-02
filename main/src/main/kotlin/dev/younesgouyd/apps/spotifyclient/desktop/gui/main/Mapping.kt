@@ -12,13 +12,15 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.playlist.
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.playlist.Playlists
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.*
 
-fun Playlists.toModel(): List<PlaylistListItem> {
-    return this.items?.map {
-        PlaylistListItem(
-            id = it.id,
-            name = it.name,
-            images = Images.fromStandardImages(it.images)
-        )
+fun Playlists.toModel(): List<PlaylistListItem?> {
+    return this.items?.map { playlist ->
+        if (playlist != null) {
+            PlaylistListItem(
+                id = playlist.id,
+                name = playlist.name,
+                images = Images.fromStandardImages(playlist.images)
+            )
+        } else null
     } ?: emptyList()
 }
 
@@ -40,23 +42,27 @@ fun CurrentUser.toModel(): User {
     )
 }
 
-fun PlaylistTracks.toModel(): List<Playlist.Track> {
-    return this.items?.filter { it.track != null }?.map { (track) ->
-        Playlist.Track(
-            id = track!!.id,
-            name = track.name,
-            images = Images.fromStandardImages(track.album?.images)
-        )
+fun PlaylistTracks.toModel(): List<Playlist.Track?> {
+    return this.items?.map { (track) ->
+        if (track != null) {
+            Playlist.Track(
+                id = track.id,
+                name = track.name,
+                images = Images.fromStandardImages(track.album?.images)
+            )
+        } else null
     } ?: emptyList()
 }
 
-fun SavedAlbums.toModel(): List<AlbumListItem> {
-    return this.items?.filter { it.album != null }?.map { (album) ->
-        AlbumListItem(
-            id = album!!.id,
-            name = album.name,
-            images = Images.fromStandardImages(album.images)
-        )
+fun SavedAlbums.toModel(): List<AlbumListItem?> {
+    return this.items?.map { (album) ->
+        if (album != null) {
+            AlbumListItem(
+                id = album.id,
+                name = album.name,
+                images = Images.fromStandardImages(album.images)
+            )
+        } else null
     } ?: emptyList()
 }
 
@@ -93,17 +99,11 @@ fun FollowedArtists.toModel(): List<Artist> {
     } ?: emptyList()
 }
 
-fun ArtistAlbums.toModel(): List<Album> {
+fun ArtistAlbums.toModel(): List<Artist.Album> {
     return this.items?.map { simplifiedAlbum ->
-        Album(
+        Artist.Album(
             id = simplifiedAlbum.id,
             name = simplifiedAlbum.name,
-            artist = simplifiedAlbum.artists?.map {
-                Album.Artist(
-                    id = it.id,
-                    name = it.name
-                )
-            } ?: emptyList(),
             images = Images.fromStandardImages(simplifiedAlbum.images)
         )
     } ?: emptyList()

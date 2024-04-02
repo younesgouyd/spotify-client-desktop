@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class Playlists(
-    val items: List<SimplifiedPlaylist>?
+    val items: List<SimplifiedPlaylist?>?
 ) {
     @Serializable
     data class SimplifiedPlaylist(

@@ -2,23 +2,25 @@ package dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.components.artist
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
-import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.AlbumId
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.TrackId
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.Image
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.Item
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.Album
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.ScrollToTopFloatingActionButton
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.VerticalScrollbar
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.Artist
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 
 @Composable
 fun ArtistDetails(state: ArtistDetailsState) {
@@ -34,6 +36,8 @@ private fun ArtistDetails(state: ArtistDetailsState.State) {
         artist = state.artist,
         topTracks = state.topTracks,
         albums = state.albums,
+        loadingAlbums = state.loadingAlbums,
+        onLoadAlbums = state.onLoadAlbums,
         onPlayClick = state.onPlayClick,
         onAlbumClick = state.onAlbumClick,
         onPlayTrackClick = state.onPlayTrackClick
@@ -44,53 +48,85 @@ private fun ArtistDetails(state: ArtistDetailsState.State) {
 private fun ArtistDetails(
     artist: Artist,
     topTracks: List<Artist.Track>,
-    albums: List<Album>,
+    albums: StateFlow<List<Artist.Album>>,
+    loadingAlbums: StateFlow<Boolean>,
+    onLoadAlbums: () -> Unit,
     onPlayClick: () -> Unit,
     onAlbumClick: (AlbumId) -> Unit,
     onPlayTrackClick: (TrackId) -> Unit
 ) {
-    LazyVerticalStaggeredGrid (
+    val albums by albums.collectAsState()
+    val loadingAlbums by loadingAlbums.collectAsState()
+    val lazyGridState = rememberLazyGridState()
+
+    Scaffold(
         modifier = Modifier.fillMaxSize(),
-        horizontalArrangement = Arrangement.spacedBy(18.dp),
-        verticalItemSpacing = 18.dp,
-        columns = StaggeredGridCells.FixedSize(200.dp)
-    ) {
-        item(span = StaggeredGridItemSpan.FullLine) {
-            ArtistInfo(
-                modifier = Modifier.fillMaxWidth(),
-                artist = artist,
-                onPlayClick = onPlayClick
-            )
-        }
-        item(span = StaggeredGridItemSpan.FullLine) {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = "Top Tracks",
-                style = MaterialTheme.typography.headlineMedium
-            )
-        }
-        item(span = StaggeredGridItemSpan.FullLine) {
-            TopTracks(
-                modifier = Modifier.fillMaxWidth(),
-                tracks = topTracks,
-                onPlayTrackClick = onPlayTrackClick
-            )
-        }
-        item(span = StaggeredGridItemSpan.FullLine) {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = "Discography",
-                style = MaterialTheme.typography.headlineMedium
-            )
-        }
-        items(
-            items = albums
-        ) { item ->
-            AlbumItem(
-                album = item,
-                onAlbumClick = onAlbumClick
-            )
-        }
+        content = { paddingValues ->
+            Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+                VerticalScrollbar(lazyGridState)
+                LazyVerticalGrid(
+                    modifier = Modifier.fillMaxSize().padding(end = 16.dp),
+                    state = lazyGridState,
+                    horizontalArrangement = Arrangement.spacedBy(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(18.dp),
+                    columns = GridCells.FixedSize(200.dp)
+                ) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        ArtistInfo(
+                            modifier = Modifier.fillMaxWidth(),
+                            artist = artist,
+                            onPlayClick = onPlayClick
+                        )
+                    }
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = "Top Tracks",
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                    }
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        TopTracks(
+                            modifier = Modifier.fillMaxWidth(),
+                            tracks = topTracks,
+                            onPlayTrackClick = onPlayTrackClick
+                        )
+                    }
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        Text(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = "Discography",
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                    }
+                    items(
+                        items = albums,
+                        key = { it.id }
+                    ) { item ->
+                        AlbumItem(
+                            album = item,
+                            onAlbumClick = onAlbumClick
+                        )
+                    }
+                    if (loadingAlbums) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            Box(modifier = Modifier.fillMaxWidth().padding(10.dp), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator(modifier = Modifier.size(50.dp), strokeWidth = 2.dp)
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        floatingActionButton = { ScrollToTopFloatingActionButton(lazyGridState) }
+    )
+
+    LaunchedEffect(lazyGridState) {
+        snapshotFlow {
+            lazyGridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+        }.map { it == null || it >= (albums.size + 4) - 5 }
+            .filter { it }
+            .collect { onLoadAlbums() }
     }
 }
 
@@ -163,7 +199,7 @@ private fun TopTracks(
 @Composable
 private fun AlbumItem(
     modifier: Modifier = Modifier,
-    album: Album,
+    album: Artist.Album,
     onAlbumClick: (AlbumId) -> Unit
 ) {
     Item (
@@ -185,7 +221,10 @@ private fun AlbumItem(
             Text(
                 modifier = Modifier.padding(12.dp),
                 text = album.name ?: "",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                minLines = 2,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

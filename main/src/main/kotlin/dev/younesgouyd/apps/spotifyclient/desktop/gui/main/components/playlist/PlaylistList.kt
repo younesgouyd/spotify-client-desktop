@@ -8,8 +8,10 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.PlaylistId
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.RepoStore
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.components.playlist.list.PlaylistList
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.components.playlist.list.PlaylistListState
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.PlaylistListItem
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -18,12 +20,18 @@ class PlaylistList(
     private val showPlaylistDetails: (PlaylistId) -> Unit,
 ) : Component() {
     private val state: MutableStateFlow<PlaylistListState> = MutableStateFlow(PlaylistListState.Loading)
+    private val playlists: MutableStateFlow<List<PlaylistListItem>> = MutableStateFlow(emptyList())
+    private val loadingPlaylists: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    private var reachedTheEnd = false
+    private var offset = 0
 
     init {
         coroutineScope.launch {
             state.update {
                 PlaylistListState.State(
-                    playlists = repoStore.playlistRepo.getCurrentUserPlaylists(50, 0),
+                    playlists = playlists.asStateFlow(),
+                    loadingPlaylists = loadingPlaylists.asStateFlow(),
+                    onLoadPlaylists = ::loadPlaylists,
                     onPlaylistClick = showPlaylistDetails
                 )
             }
@@ -39,5 +47,18 @@ class PlaylistList(
 
     override fun clear() {
         coroutineScope.cancel()
+    }
+
+    private fun loadPlaylists() {
+        coroutineScope.launch {
+            if (!reachedTheEnd && !loadingPlaylists.value) {
+                loadingPlaylists.update { true }
+                val result = repoStore.playlistRepo.getCurrentUserPlaylists(20, offset)
+                offset += result.size
+                reachedTheEnd = result.isEmpty()
+                playlists.update { it + result.filterNotNull() }
+                loadingPlaylists.update { false }
+            }
+        }
     }
 }

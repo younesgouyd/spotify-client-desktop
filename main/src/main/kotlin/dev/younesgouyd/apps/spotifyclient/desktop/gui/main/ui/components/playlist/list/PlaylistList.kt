@@ -1,19 +1,25 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.components.playlist.list
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.PlaylistId
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.Image
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.Item
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.ScrollToTopFloatingActionButton
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.VerticalScrollbar
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.PlaylistListItem
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 
 @Composable
 fun PlaylistList(state: PlaylistListState) {
@@ -27,30 +33,64 @@ fun PlaylistList(state: PlaylistListState) {
 private fun PlaylistList(state: PlaylistListState.State) {
     PlaylistList(
         playlists = state.playlists,
+        loadingPlaylists = state.loadingPlaylists,
+        onLoadPlaylists = state.onLoadPlaylists,
         onPlaylistClick = state.onPlaylistClick
     )
 }
 
 @Composable
 private fun PlaylistList(
-    playlists: List<PlaylistListItem>,
+    playlists: StateFlow<List<PlaylistListItem>>,
+    loadingPlaylists: StateFlow<Boolean>,
+    onLoadPlaylists: () -> Unit,
     onPlaylistClick: (PlaylistId) -> Unit
 ) {
-    LazyVerticalStaggeredGrid (
+    val playlists by playlists.collectAsState()
+    val loadingPlaylists by loadingPlaylists.collectAsState()
+    val lazyGridState = rememberLazyGridState()
+
+    Scaffold(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(18.dp),
-        horizontalArrangement = Arrangement.spacedBy(18.dp),
-        verticalItemSpacing = 18.dp,
-        columns = StaggeredGridCells.FixedSize(200.dp)
-    ) {
-        items(
-            items = playlists
-        ) { item ->
-            PlaylistItem(
-                playlist = item,
-                onPlaylistClick = onPlaylistClick
-            )
-        }
+        content = { paddingValues ->
+            Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+                VerticalScrollbar(lazyGridState)
+                LazyVerticalGrid (
+                    modifier = Modifier.fillMaxSize().padding(end = 16.dp),
+                    state = lazyGridState,
+                    contentPadding = PaddingValues(18.dp),
+                    horizontalArrangement = Arrangement.spacedBy(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(18.dp),
+                    columns = GridCells.FixedSize(200.dp)
+                ) {
+                    items(
+                        items = playlists,
+                        key = { it.id }
+                    ) { item ->
+                        PlaylistItem(
+                            playlist = item,
+                            onPlaylistClick = onPlaylistClick
+                        )
+                    }
+                    if (loadingPlaylists) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            Box(modifier = Modifier.fillMaxWidth().padding(10.dp), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator(modifier = Modifier.size(50.dp), strokeWidth = 2.dp)
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        floatingActionButton = { ScrollToTopFloatingActionButton(lazyGridState) }
+    )
+
+    LaunchedEffect(lazyGridState) {
+        snapshotFlow {
+            lazyGridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+        }.map { it == null ||  it >= (playlists.size + 1) - 5 }
+            .filter { it }
+            .collect { onLoadPlaylists() }
     }
 }
 
@@ -72,14 +112,15 @@ private fun PlaylistItem(
                 modifier = Modifier.size(200.dp),
                 contentAlignment = Alignment.TopCenter // todo
             ) {
-                Image(
-                    url = playlist.images.preferablyMedium()
-                )
+                Image(url = playlist.images.preferablyMedium())
             }
             Text(
                 modifier = Modifier.padding(12.dp),
                 text = playlist.name ?: "",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                minLines = 2,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

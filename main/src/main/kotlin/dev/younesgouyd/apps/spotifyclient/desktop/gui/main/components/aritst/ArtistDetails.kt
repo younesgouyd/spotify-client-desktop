@@ -9,8 +9,10 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.Component
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.RepoStore
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.components.artist.details.ArtistDetails
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.components.artist.details.ArtistDetailsState
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.Artist
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -20,6 +22,9 @@ class ArtistDetails(
     private val showAlbumDetails: (AlbumId) -> Unit
 ) : Component() {
     private val state: MutableStateFlow<ArtistDetailsState> = MutableStateFlow(ArtistDetailsState.Loading)
+    private val albums: MutableStateFlow<List<Artist.Album>> = MutableStateFlow(emptyList())
+    private val loadingAlbums: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    private var reachedTheEnd = false
 
     init {
         coroutineScope.launch {
@@ -27,7 +32,9 @@ class ArtistDetails(
                 ArtistDetailsState.State(
                     artist = repoStore.artistRepo.get(id),
                     topTracks = repoStore.trackRepo.getArtistTopTracks(id),
-                    albums = repoStore.albumRepo.getArtistAlbums(id, 50, 0),
+                    albums = albums.asStateFlow(),
+                    loadingAlbums = loadingAlbums.asStateFlow(),
+                    onLoadAlbums = ::loadAlbums,
                     onAlbumClick = showAlbumDetails,
                     onPlayClick = {}, // todo
                     onPlayTrackClick = {} // todo
@@ -45,5 +52,17 @@ class ArtistDetails(
 
     override fun clear() {
         coroutineScope.cancel()
+    }
+
+    private fun loadAlbums() {
+        coroutineScope.launch {
+            if (!reachedTheEnd && !loadingAlbums.value) {
+                loadingAlbums.update { true }
+                val result = repoStore.albumRepo.getArtistAlbums(id, 20, albums.value.size)
+                reachedTheEnd = result.isEmpty()
+                albums.update { it + result }
+                loadingAlbums.update { false }
+            }
+        }
     }
 }

@@ -20,7 +20,7 @@ class PlaylistRepo(
      * @param limit The maximum number of items to return. Default: 20. Minimum: 1. Maximum: 50
      * @param offset The index of the first playlist to return. Default: 0 (the first object). Maximum offset: 100.000. Use with limit to get the next set of playlists
      */
-    suspend fun getCurrentUserPlaylists(limit: Int, offset: Int): List<PlaylistListItem> {
+    suspend fun getCurrentUserPlaylists(limit: Int, offset: Int): List<PlaylistListItem?> {
         return withContext(Dispatchers.IO) {
             client.get("me/playlists") {
                 header("Authorization", "Bearer ${authRepo.getToken()}")

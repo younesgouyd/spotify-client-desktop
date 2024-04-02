@@ -25,7 +25,7 @@ class TrackRepo(
      * @param limit The maximum number of items to return. Default: 20. Minimum: 1. Maximum: 50. Default: limit=20. Range: 0 - 50. Example: limit=10
      * @param offset The index of the first item to return. Default: 0 (the first item). Use with limit to get the next set of items. Default: offset=0. Example: offset=5
      */
-    suspend fun getPlaylistTracks(playlistId: PlaylistId, limit: Int?, offset: Int?): List<Playlist.Track> {
+    suspend fun getPlaylistTracks(playlistId: PlaylistId, limit: Int?, offset: Int?): List<Playlist.Track?> {
         return withContext(Dispatchers.IO) {
             client.get("playlists/$playlistId/tracks") {
                 header("Authorization", "Bearer ${authRepo.getToken()}")

@@ -8,8 +8,10 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.Component
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.RepoStore
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.components.album.details.AlbumDetails
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.components.album.details.AlbumDetailsState
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.Album
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -18,13 +20,18 @@ class AlbumDetails(
     private val repoStore: RepoStore
 ) : Component() {
     private val state: MutableStateFlow<AlbumDetailsState> = MutableStateFlow(AlbumDetailsState.Loading)
+    private val tracks: MutableStateFlow<List<Album.Track>> = MutableStateFlow(emptyList())
+    private val loadingTracks: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    private var reachedTheEnd = false
 
     init {
         coroutineScope.launch {
             state.update {
                 AlbumDetailsState.State(
                     album = repoStore.albumRepo.getAlbum(id),
-                    tracks = repoStore.trackRepo.getAlbumTracks(id, 50, 0),
+                    tracks = tracks.asStateFlow(),
+                    loadingTracks = loadingTracks.asStateFlow(),
+                    onLoadTracks = ::loadTracks,
                     onPlayClick = {}, // todo
                     onTrackClick = {} // todo
                 )
@@ -41,5 +48,17 @@ class AlbumDetails(
 
     override fun clear() {
         coroutineScope.cancel()
+    }
+
+    private fun loadTracks() {
+        coroutineScope.launch {
+            if (!reachedTheEnd && !loadingTracks.value) {
+                loadingTracks.update { true }
+                val result = repoStore.trackRepo.getAlbumTracks(id, 50, tracks.value.size)
+                reachedTheEnd = result.isEmpty()
+                tracks.update { it + result }
+                loadingTracks.update { false }
+            }
+        }
     }
 }

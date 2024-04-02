@@ -4,16 +4,22 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.TrackId
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.Image
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.ScrollToTopFloatingActionButton
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.VerticalScrollbar
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.Album
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 
 @Composable
 fun AlbumDetails(state: AlbumDetailsState) {
@@ -28,6 +34,8 @@ private fun AlbumDetails(state: AlbumDetailsState.State) {
     AlbumDetails(
         album = state.album,
         tracks = state.tracks,
+        loadingTracks = state.loadingTracks,
+        onLoadTracks = state.onLoadTracks,
         onPlayClick = state.onPlayClick,
         onTrackClick = state.onTrackClick
     )
@@ -36,32 +44,64 @@ private fun AlbumDetails(state: AlbumDetailsState.State) {
 @Composable
 private fun AlbumDetails(
     album: Album,
-    tracks: List<Album.Track>,
+    tracks: StateFlow<List<Album.Track>>,
+    loadingTracks: StateFlow<Boolean>,
+    onLoadTracks: () -> Unit,
     onPlayClick: () -> Unit,
     onTrackClick: (TrackId) -> Unit
 ) {
-    LazyColumn (
+    val tracks by tracks.collectAsState()
+    val loadingTracks by loadingTracks.collectAsState()
+    val lazyColumnState = rememberLazyListState()
+
+    Scaffold(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        item {
-            AlbumInfo(
-                modifier = Modifier.fillMaxWidth(),
-                album = album,
-                onPlayClick = onPlayClick
-            )
-        }
-        items(
-            items = tracks
-        ) { item ->
-            TrackItem(
-                modifier = Modifier.fillMaxWidth().height(64.dp),
-                track = item,
-                onTrackClick = onTrackClick
-            )
-            HorizontalDivider()
-        }
+        content = { paddingValues ->
+            Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+                VerticalScrollbar(lazyColumnState)
+                LazyColumn (
+                    modifier = Modifier.fillMaxSize().padding(end = 16.dp),
+                    state = lazyColumnState,
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    item {
+                        AlbumInfo(
+                            modifier = Modifier.fillMaxWidth(),
+                            album = album,
+                            onPlayClick = onPlayClick
+                        )
+                    }
+                    items(
+                        items = tracks,
+                        key = { it.id }
+                    ) { item ->
+                        TrackItem(
+                            modifier = Modifier.fillMaxWidth().height(64.dp),
+                            track = item,
+                            onTrackClick = onTrackClick
+                        )
+                        HorizontalDivider()
+                    }
+                    if (loadingTracks) {
+                        item {
+                            Box(modifier = Modifier.fillMaxWidth().padding(10.dp), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator(modifier = Modifier.size(50.dp), strokeWidth = 2.dp)
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        floatingActionButton = { ScrollToTopFloatingActionButton(lazyColumnState) }
+    )
+
+    LaunchedEffect(lazyColumnState) {
+        snapshotFlow {
+            lazyColumnState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+        }.map { it == null ||  it >= (tracks.size + 1) - 5  }
+            .filter { it }
+            .collect { onLoadTracks() }
     }
 }
 
