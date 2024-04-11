@@ -19,6 +19,7 @@ class PlaylistDetails(
     private val id: PlaylistId,
     private val repoStore: RepoStore
 ) : Component() {
+    override val title: String = "Playlist"
     private val state: MutableStateFlow<PlaylistDetailsState> = MutableStateFlow(PlaylistDetailsState.Loading)
     private val tracks: MutableStateFlow<List<Playlist.Track>> = MutableStateFlow(emptyList())
     private val loadingTracks: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -27,9 +28,10 @@ class PlaylistDetails(
 
     init {
         coroutineScope.launch {
+            val playlist = repoStore.playlistRepo.get(id)
             state.update {
                 PlaylistDetailsState.State(
-                    playlist = repoStore.playlistRepo.get(id),
+                    playlist = playlist,
                     tracks = tracks.asStateFlow(),
                     loadingTracks = loadingTracks.asStateFlow(),
                     onLoadTracks = ::loadTracks,

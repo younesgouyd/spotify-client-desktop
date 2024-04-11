@@ -16,6 +16,7 @@ class Profile(
     private val repoStore: RepoStore,
     private val onLogout: () -> Unit
 ) : Component() {
+    override val title: String = "Profile"
     private val state: MutableStateFlow<ProfileState> = MutableStateFlow(ProfileState.Loading)
 
     init {

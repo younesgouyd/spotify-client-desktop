@@ -19,6 +19,7 @@ class AlbumDetails(
     private val id: AlbumId,
     private val repoStore: RepoStore
 ) : Component() {
+    override val title: String = "Album"
     private val state: MutableStateFlow<AlbumDetailsState> = MutableStateFlow(AlbumDetailsState.Loading)
     private val tracks: MutableStateFlow<List<Album.Track>> = MutableStateFlow(emptyList())
     private val loadingTracks: MutableStateFlow<Boolean> = MutableStateFlow(false)

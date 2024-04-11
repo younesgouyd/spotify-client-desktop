@@ -19,6 +19,7 @@ class ArtistList(
     private val repoStore: RepoStore,
     private val showArtistDetails: (ArtistId) -> Unit
 ) : Component() {
+    override val title: String = "Artists"
     private val state: MutableStateFlow<ArtistListState> = MutableStateFlow(ArtistListState.Loading)
     private val artists: MutableStateFlow<List<Artist>> = MutableStateFlow(emptyList())
     private val loadingArtists: MutableStateFlow<Boolean> = MutableStateFlow(false)

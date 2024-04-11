@@ -19,6 +19,7 @@ class PlaylistList(
     private val repoStore: RepoStore,
     private val showPlaylistDetails: (PlaylistId) -> Unit,
 ) : Component() {
+    override val title: String = "Playlists"
     private val state: MutableStateFlow<PlaylistListState> = MutableStateFlow(PlaylistListState.Loading)
     private val playlists: MutableStateFlow<List<PlaylistListItem>> = MutableStateFlow(emptyList())
     private val loadingPlaylists: MutableStateFlow<Boolean> = MutableStateFlow(false)

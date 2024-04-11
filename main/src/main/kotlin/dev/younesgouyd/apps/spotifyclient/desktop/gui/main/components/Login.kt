@@ -15,6 +15,7 @@ class Login(
     private val repoStore: RepoStore,
     private val onDone: () -> Unit
 ) : Component() {
+    override val title: String = ""
     private val errorMessage = MutableStateFlow("")
     private val enabled = MutableStateFlow(true)
 

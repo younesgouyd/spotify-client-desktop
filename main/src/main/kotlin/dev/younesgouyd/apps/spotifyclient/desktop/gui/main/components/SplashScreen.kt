@@ -16,6 +16,7 @@ class SplashScreen(
     private val showLogin: () -> Unit,
     private val showContent: () -> Unit
 ) : Component() {
+    override val title: String = ""
 
     init {
         coroutineScope.launch {

@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 class Settings(
     private val repoStore: RepoStore
 ) : Component() {
+    override val title: String = "Settings"
     private val state: MutableStateFlow<SettingsState> = MutableStateFlow(SettingsState.Loading)
 
     init {
@@ -25,7 +26,7 @@ class Settings(
                 SettingsState.State(
                     darkTheme = repoStore.settingsRepo.getDarkThemeFlow().stateIn(
                         scope = coroutineScope,
-                        started = SharingStarted.Lazily,
+                        started = SharingStarted.WhileSubscribed(),
                         initialValue = null
                     ),
                     onDarkThemeChange = {

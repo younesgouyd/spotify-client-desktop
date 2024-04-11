@@ -9,18 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.AlbumId
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ArtistId
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.Component
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.PlaylistId
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.components.album.AlbumDetails
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.components.album.AlbumList
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.components.aritst.ArtistDetails
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.components.aritst.ArtistList
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.components.playlist.PlaylistDetails
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.components.playlist.PlaylistList
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.NavigationHost
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.RepoStore
-import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.NavigationDrawerItems
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -30,9 +21,16 @@ class Content(
     private val repoStore: RepoStore,
     private val onLogout: () -> Unit
 ) : Component() {
+    override val title: String = ""
     private val mainComponentController = MainComponentController()
-    private val componentsFactory = ComponentsFactory()
-    private val currentMainComponent = MutableStateFlow<Component>(componentsFactory.getProfile())
+
+    private val profileNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Profile, onLogout) }
+    private val playlistsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Playlists, onLogout) }
+    private val albumsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Albums, onLogout) }
+    private val artistsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Artists, onLogout) }
+    private val settingsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Settings, onLogout) }
+
+    private val currentMainComponent = MutableStateFlow(profileNavHost)
     private val selectedNavigationDrawerItem = MutableStateFlow(NavigationDrawerItems.Profile)
 
     @Composable
@@ -51,9 +49,9 @@ class Content(
                             onClick = {
                                 when (it) {
                                     NavigationDrawerItems.Profile -> mainComponentController.showProfile()
-                                    NavigationDrawerItems.Playlists -> mainComponentController.showPlaylistList()
-                                    NavigationDrawerItems.Albums -> mainComponentController.showAlbumList()
-                                    NavigationDrawerItems.Artists -> mainComponentController.showArtistList()
+                                    NavigationDrawerItems.Playlists -> mainComponentController.showPlaylists()
+                                    NavigationDrawerItems.Albums -> mainComponentController.showAlbums()
+                                    NavigationDrawerItems.Artists -> mainComponentController.showArtists()
                                     NavigationDrawerItems.Settings -> mainComponentController.showSettings()
                                 }
                             }
@@ -65,129 +63,41 @@ class Content(
         )
     }
 
+    override fun clear() {
+        profileNavHost.clear()
+        playlistsNavHost.clear()
+        albumsNavHost.clear()
+        artistsNavHost.clear()
+        settingsNavHost.clear()
+        coroutineScope.cancel()
+    }
+
+    private enum class NavigationDrawerItems { Profile, Playlists, Albums, Artists, Settings }
+
     private inner class MainComponentController {
         fun showSettings() {
-            currentMainComponent.update { componentsFactory.getSettings() }
+            currentMainComponent.update { settingsNavHost }
             selectedNavigationDrawerItem.update { NavigationDrawerItems.Settings }
         }
 
         fun showProfile() {
-            currentMainComponent.update {
-                it.clear()
-                componentsFactory.getProfile()
-            }
+            currentMainComponent.update { profileNavHost }
             selectedNavigationDrawerItem.update { NavigationDrawerItems.Profile }
         }
 
-        fun showPlaylistList() {
-            currentMainComponent.update {
-                it.clear()
-                componentsFactory.getPlaylistList()
-            }
+        fun showPlaylists() {
+            currentMainComponent.update { playlistsNavHost }
             selectedNavigationDrawerItem.update { NavigationDrawerItems.Playlists }
         }
 
-        fun showPlaylistDetails(id: PlaylistId) {
-            currentMainComponent.update {
-                it.clear()
-                componentsFactory.getPlaylistDetails(id)
-            }
-            selectedNavigationDrawerItem.update { NavigationDrawerItems.Playlists }
-        }
-
-        fun showAlbumList() {
-            currentMainComponent.update {
-                it.clear()
-                componentsFactory.getAlbumList()
-            }
+        fun showAlbums() {
+            currentMainComponent.update { albumsNavHost }
             selectedNavigationDrawerItem.update { NavigationDrawerItems.Albums }
         }
 
-        fun showAlbumDetails(id: AlbumId) {
-            currentMainComponent.update {
-                it.clear()
-                componentsFactory.getAlbumDetails(id)
-            }
-            selectedNavigationDrawerItem.update { NavigationDrawerItems.Albums }
-        }
-
-        fun showArtistList() {
-            currentMainComponent.update {
-                it.clear()
-                componentsFactory.getArtistList()
-            }
+        fun showArtists() {
+            currentMainComponent.update { artistsNavHost }
             selectedNavigationDrawerItem.update { NavigationDrawerItems.Artists }
         }
-
-        fun showArtistDetails(id: ArtistId) {
-            currentMainComponent.update {
-                it.clear()
-                componentsFactory.getArtistDetails(id)
-            }
-            selectedNavigationDrawerItem.update { NavigationDrawerItems.Artists }
-        }
-    }
-
-    private inner class ComponentsFactory {
-        fun getSettings(): Settings {
-            return Settings(
-                repoStore = repoStore
-            )
-        }
-
-        fun getProfile(): Profile {
-            return Profile(
-                repoStore = repoStore,
-                onLogout = onLogout
-            )
-        }
-
-        fun getPlaylistList(): PlaylistList {
-            return PlaylistList(
-                repoStore = repoStore,
-                showPlaylistDetails = { mainComponentController.showPlaylistDetails(it) }
-            )
-        }
-
-        fun getPlaylistDetails(id: PlaylistId): PlaylistDetails {
-            return PlaylistDetails(
-                id = id,
-                repoStore = repoStore,
-            )
-        }
-
-        fun getAlbumList(): AlbumList {
-            return AlbumList(
-                repoStore = repoStore,
-                showAlbumDetails = { mainComponentController.showAlbumDetails(it) }
-            )
-        }
-
-        fun getAlbumDetails(id: AlbumId): AlbumDetails {
-            return AlbumDetails(
-                id = id,
-                repoStore = repoStore,
-            )
-        }
-
-        fun getArtistList(): ArtistList {
-            return ArtistList(
-                repoStore = repoStore,
-                showArtistDetails = { mainComponentController.showArtistDetails(it) }
-            )
-        }
-
-        fun getArtistDetails(id: ArtistId): ArtistDetails {
-            return ArtistDetails(
-                id = id,
-                repoStore = repoStore,
-                showAlbumDetails = { mainComponentController.showAlbumDetails(it) }
-            )
-        }
-    }
-
-    override fun clear() {
-        currentMainComponent.value.clear()
-        coroutineScope.cancel()
     }
 }

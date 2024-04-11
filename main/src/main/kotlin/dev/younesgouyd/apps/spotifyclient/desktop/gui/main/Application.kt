@@ -26,7 +26,7 @@ object Application {
     init {
         darkTheme = repoStore.settingsRepo.getDarkThemeFlow().stateIn(
             scope = coroutineScope,
-            started = SharingStarted.Lazily,
+            started = SharingStarted.WhileSubscribed(),
             initialValue = null
         )
         currentComponent = MutableStateFlow(
