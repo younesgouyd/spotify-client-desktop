@@ -7,7 +7,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.TrackId
 data class Album(
     val id: AlbumId,
     val name: String?,
-    val artist: List<Artist>,
+    val artists: List<Artist>,
     val images: Images
 ) {
     data class Artist(

@@ -70,7 +70,7 @@ fun dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.album.Album.
     return Album(
         id = this.id,
         name = this.name,
-        artist = this.artists?.map {
+        artists = this.artists?.map {
             Album.Artist(
                 id = it.id,
                 name = it.name

@@ -157,6 +157,7 @@ class NavigationHost(
             return AlbumDetails(
                 id = id,
                 repoStore = repoStore,
+                showArtistDetails = { navigationController.navigateTo(getArtistDetails(it)) }
             )
         }
 

@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ArtistId
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.TrackId
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.Image
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.ScrollToTopFloatingActionButton
@@ -35,6 +36,7 @@ private fun AlbumDetails(state: AlbumDetailsState.State) {
         album = state.album,
         tracks = state.tracks,
         loadingTracks = state.loadingTracks,
+        onArtistClick = state.onArtistClick,
         onLoadTracks = state.onLoadTracks,
         onPlayClick = state.onPlayClick,
         onTrackClick = state.onTrackClick
@@ -46,6 +48,7 @@ private fun AlbumDetails(
     album: Album,
     tracks: StateFlow<List<Album.Track>>,
     loadingTracks: StateFlow<Boolean>,
+    onArtistClick: (ArtistId) -> Unit,
     onLoadTracks: () -> Unit,
     onPlayClick: () -> Unit,
     onTrackClick: (TrackId) -> Unit
@@ -69,6 +72,7 @@ private fun AlbumDetails(
                         AlbumInfo(
                             modifier = Modifier.fillMaxWidth(),
                             album = album,
+                            onArtistClick = onArtistClick,
                             onPlayClick = onPlayClick
                         )
                     }
@@ -109,6 +113,7 @@ private fun AlbumDetails(
 private fun AlbumInfo(
     modifier: Modifier,
     album: Album,
+    onArtistClick: (ArtistId) -> Unit,
     onPlayClick: () -> Unit
 ) {
     Row(
@@ -129,6 +134,14 @@ private fun AlbumInfo(
                 text = album.name ?: "",
                 style = MaterialTheme.typography.displayMedium
             )
+            Row {
+                for (artist in album.artists) {
+                    TextButton(
+                        content = { Text(text = artist.name ?: "", style = MaterialTheme.typography.labelMedium) },
+                        onClick = { onArtistClick(artist.id) }
+                    )
+                }
+            }
             IconButton(
                 content = { Icon(Icons.Default.PlayCircle, null) },
                 onClick = onPlayClick
