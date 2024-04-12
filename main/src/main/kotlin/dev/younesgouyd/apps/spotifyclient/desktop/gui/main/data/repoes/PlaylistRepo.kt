@@ -1,10 +1,13 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.repoes
 
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.PlaylistId
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.UserId
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.playlist.Playlists
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.playlist.UserPlaylists
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.toModel
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.Playlist
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.PlaylistListItem
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.User
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -39,6 +42,19 @@ class PlaylistRepo(
             client.get("playlists/$playlistId") {
                 header("Authorization", "Bearer ${authRepo.getToken()}")
             }.body<dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.playlist.Playlist>().toModel()
+        }
+    }
+
+    /**
+     * GET /users/{user_id}/playlists
+     */
+    suspend fun getUserPlaylists(userId: UserId, limit: Int, offset: Int): List<User.Playlist?> {
+        return withContext(Dispatchers.IO) {
+            client.get("users/$userId/playlists") {
+                header("Authorization", "Bearer ${authRepo.getToken()}")
+                parameter("limit", limit)
+                parameter("offset", offset)
+            }.body<UserPlaylists>().toModel()
         }
     }
 }

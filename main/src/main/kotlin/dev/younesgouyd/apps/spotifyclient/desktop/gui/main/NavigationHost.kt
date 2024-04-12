@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.components.Profile
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.components.Settings
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.components.User
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.components.album.AlbumDetails
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.components.album.AlbumList
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.components.aritst.ArtistDetails
@@ -143,6 +144,15 @@ class NavigationHost(
             return PlaylistDetails(
                 id = id,
                 repoStore = repoStore,
+                showUserDetails = { navigationController.navigateTo(getUser(it)) }
+            )
+        }
+
+        fun getUser(id: UserId): User {
+            return User(
+                id = id,
+                repoStore = repoStore,
+                showPlaylistDetails = { navigationController.navigateTo(getPlaylistDetails(it)) }
             )
         }
 

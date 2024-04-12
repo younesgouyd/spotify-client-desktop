@@ -10,6 +10,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.album.Sav
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.artist.FollowedArtists
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.playlist.PlaylistTracks
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.playlist.Playlists
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.playlist.UserPlaylists
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.models.*
 
 fun Playlists.toModel(): List<PlaylistListItem?> {
@@ -29,11 +30,21 @@ fun dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.playlist.Pla
         id = this.id,
         name = this.name,
         description = this.description,
-        images = Images.fromStandardImages(this.images)
+        images = Images.fromStandardImages(this.images),
+        owner = this.owner?.let { Playlist.Owner(id = it.id, name = it.displayName) }
     )
 }
 
 fun CurrentUser.toModel(): User {
+    return User(
+        id = this.id,
+        displayName = this.displayName,
+        followerCount = this.followers?.total,
+        profilePictureUrl = try { this.images?.get(1)?.url } catch (ignored: Exception) { null }
+    )
+}
+
+fun dev.younesgouyd.apps.spotifyclient.desktop.gui.main.data.models.User.toModel(): User {
     return User(
         id = this.id,
         displayName = this.displayName,
@@ -106,6 +117,19 @@ fun ArtistAlbums.toModel(): List<Artist.Album> {
             name = simplifiedAlbum.name,
             images = Images.fromStandardImages(simplifiedAlbum.images)
         )
+    } ?: emptyList()
+}
+
+fun UserPlaylists.toModel(): List<User.Playlist?> {
+    return this.items?.map {
+        if (it != null) {
+            User.Playlist(
+                id = it.id,
+                name = it.name,
+                description = it.description,
+                images = Images.fromStandardImages(it.images)
+            )
+        } else null
     } ?: emptyList()
 }
 

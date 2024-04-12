@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.TrackId
+import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.UserId
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.Image
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.Item
 import dev.younesgouyd.apps.spotifyclient.desktop.gui.main.ui.ScrollToTopFloatingActionButton
@@ -35,6 +36,7 @@ private fun PlaylistDetails(state: PlaylistDetailsState.State) {
         playlist = state.playlist,
         tracks = state.tracks,
         loadingTracks = state.loadingTracks,
+        onOwnerClick = state.onOwnerClick,
         onLoadTracks = state.onLoadTracks,
         onPlayClick = state.onPlayClick,
         onTrackClick = state.onTrackClick
@@ -46,6 +48,7 @@ private fun PlaylistDetails(
     playlist: Playlist,
     tracks: StateFlow<List<Playlist.Track>>,
     loadingTracks: StateFlow<Boolean>,
+    onOwnerClick: (UserId) -> Unit,
     onLoadTracks: () -> Unit,
     onPlayClick: () -> Unit,
     onTrackClick: (TrackId) -> Unit
@@ -69,6 +72,7 @@ private fun PlaylistDetails(
                         PlaylistInfo(
                             modifier = Modifier.fillMaxWidth(),
                             playlist = playlist,
+                            onOwnerClick = onOwnerClick,
                             onPlayClick = onPlayClick
                         )
                     }
@@ -108,6 +112,7 @@ private fun PlaylistDetails(
 private fun PlaylistInfo(
     modifier: Modifier,
     playlist: Playlist,
+    onOwnerClick: (UserId) -> Unit,
     onPlayClick: () -> Unit
 ) {
     Row(
@@ -132,6 +137,12 @@ private fun PlaylistInfo(
                 text = playlist.description ?: "",
                 style = MaterialTheme.typography.bodyMedium
             )
+            if (playlist.owner != null) {
+                TextButton(
+                    content = { Text(text = playlist.owner.name ?: "", style = MaterialTheme.typography.labelMedium) },
+                    onClick = { onOwnerClick(playlist.owner.id) }
+                )
+            }
             IconButton(
                 content = { Icon(Icons.Default.PlayCircle, null) },
                 onClick = onPlayClick
