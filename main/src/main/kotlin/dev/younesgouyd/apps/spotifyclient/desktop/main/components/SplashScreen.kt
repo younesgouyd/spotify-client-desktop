@@ -1,0 +1,47 @@
+package dev.younesgouyd.apps.spotifyclient.desktop.main.components
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import dev.younesgouyd.apps.spotifyclient.desktop.main.Component
+import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+
+class SplashScreen(
+    private val repoStore: RepoStore,
+    private val showLogin: () -> Unit,
+    private val showContent: () -> Unit
+) : Component() {
+    override val title: String = ""
+
+    init {
+        coroutineScope.launch {
+            repoStore.appDataRepo.init()
+            repoStore.settingsRepo.init()
+            if (repoStore.authRepo.isAuthorized()) {
+                repoStore.authRepo.refreshTokenIfNeeded()
+                showContent()
+            } else {
+                showLogin()
+            }
+        }
+    }
+
+    @Composable
+    override fun show() {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Loading...")
+        }
+    }
+
+    override fun clear() {
+        coroutineScope.cancel()
+    }
+}

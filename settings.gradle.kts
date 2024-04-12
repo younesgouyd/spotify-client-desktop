@@ -1,4 +1,4 @@
-rootProject.name = "spotify-client-desktop-gui"
+rootProject.name = "spotify-client-desktop"
 
 include(":main")
 
