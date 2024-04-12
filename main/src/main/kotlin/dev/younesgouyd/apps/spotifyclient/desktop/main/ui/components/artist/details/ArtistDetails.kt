@@ -138,7 +138,10 @@ private fun ArtistInfo(
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.Start,
+        horizontalArrangement = Arrangement.spacedBy(
+            space = 8.dp,
+            alignment = Alignment.Start
+        ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(

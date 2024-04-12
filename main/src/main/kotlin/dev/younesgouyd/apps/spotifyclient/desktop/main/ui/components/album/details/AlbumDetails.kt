@@ -18,7 +18,6 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.ScrollToTopFloatingActionButton
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.VerticalScrollbar
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Album
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.album.details.AlbumDetailsState
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -119,7 +118,10 @@ private fun AlbumInfo(
 ) {
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.Start,
+        horizontalArrangement = Arrangement.spacedBy(
+            space = 8.dp,
+            alignment = Alignment.Start
+        ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
