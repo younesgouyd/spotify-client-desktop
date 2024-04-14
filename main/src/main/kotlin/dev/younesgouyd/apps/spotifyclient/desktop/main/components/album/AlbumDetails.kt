@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.Component
+import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.album.details.AlbumDetails
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.album.details.AlbumDetailsState
@@ -19,7 +20,9 @@ import kotlinx.coroutines.launch
 class AlbumDetails(
     private val id: AlbumId,
     private val repoStore: RepoStore,
-    private val showArtistDetails: (ArtistId) -> Unit
+    private val showArtistDetails: (ArtistId) -> Unit,
+    play: () -> Unit,
+    playTrack: (TrackId) -> Unit
 ) : Component() {
     override val title: String = "Album"
     private val state: MutableStateFlow<AlbumDetailsState> = MutableStateFlow(AlbumDetailsState.Loading)
@@ -36,8 +39,8 @@ class AlbumDetails(
                     loadingTracks = loadingTracks.asStateFlow(),
                     onArtistClick = showArtistDetails,
                     onLoadTracks = ::loadTracks,
-                    onPlayClick = {}, // todo
-                    onTrackClick = {} // todo
+                    onPlayClick = play,
+                    onTrackClick = playTrack
                 )
             }
         }

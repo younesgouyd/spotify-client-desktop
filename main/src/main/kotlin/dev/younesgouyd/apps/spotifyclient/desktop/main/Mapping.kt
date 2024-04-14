@@ -12,6 +12,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.playlist.Play
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.playlist.Playlists
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.playlist.UserPlaylists
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.*
+import kotlin.time.Duration.Companion.milliseconds
 
 fun Playlists.toModel(): List<PlaylistListItem?> {
     return this.items?.map { playlist ->
@@ -149,6 +150,33 @@ fun ArtistTopTracks.toModel(): List<Artist.Track> {
             images = Images.fromImagesOfFloatSize(it.album?.images)
         )
     } ?: emptyList()
+}
+
+fun dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.PlaybackState.toModel(): PlaybackState {
+    return PlaybackState(
+        track = this.item?.let { track ->
+            PlaybackState.Track(
+                id = track.id,
+                title = track.name,
+                artists = track.artists?.let { artists ->
+                    artists.filterNotNull().map { PlaybackState.Track.Artist(id = it.id, name = it.name) }
+                } ?: emptyList(),
+                album = track.album?.let { PlaybackState.Track.Album(id = it.id, name = it.name) },
+                images = Images.fromStandardImages(track.album?.images),
+                duration = track.durationMs?.milliseconds
+            )
+        },
+        elapsedTime = this.progressMs?.milliseconds,
+        playing = this.isPlaying,
+        repeatState = this.repeatState?.let {
+            when (it) {
+                dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.PlaybackState.RepeatState.Off -> PlaybackState.RepeatState.Off
+                dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.PlaybackState.RepeatState.Track -> PlaybackState.RepeatState.Track
+                dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.PlaybackState.RepeatState.Context -> PlaybackState.RepeatState.List
+            }
+        },
+        shuffleState = shuffleState
+    )
 }
 
 fun Images.Companion.fromStandardImages(list: List<Image>?): Images {

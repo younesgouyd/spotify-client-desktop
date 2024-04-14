@@ -1,17 +1,11 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.main.components
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.PermanentDrawerSheet
-import androidx.compose.material3.PermanentNavigationDrawer
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import dev.younesgouyd.apps.spotifyclient.desktop.main.Component
-import dev.younesgouyd.apps.spotifyclient.desktop.main.NavigationHost
+import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.Content
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -23,12 +17,18 @@ class Content(
 ) : Component() {
     override val title: String = ""
     private val mainComponentController = MainComponentController()
+    private val playerController: PlayerController = PlayerController(repoStore)
 
-    private val profileNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Profile, onLogout) }
-    private val playlistsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Playlists, onLogout) }
-    private val albumsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Albums, onLogout) }
-    private val artistsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Artists, onLogout) }
-    private val settingsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Settings, onLogout) }
+    private val profileNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Profile, onLogout, playerController) }
+    private val playlistsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Playlists, onLogout, playerController) }
+    private val albumsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Albums, onLogout, playerController) }
+    private val artistsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Artists, onLogout, playerController) }
+    private val settingsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Settings, onLogout, playerController) }
+    private val player = Player(
+        playerController = playerController,
+        showAlbumDetails = mainComponentController::showAlbums,
+        showArtistDetails = mainComponentController::showArtists
+    )
 
     private val currentMainComponent = MutableStateFlow(profileNavHost)
     private val selectedNavigationDrawerItem = MutableStateFlow(NavigationDrawerItems.Profile)
@@ -38,28 +38,19 @@ class Content(
         val currentMainComponent by currentMainComponent.collectAsState()
         val selectedNavigationDrawerItem by selectedNavigationDrawerItem.collectAsState()
 
-        PermanentNavigationDrawer(
-            modifier = Modifier.fillMaxSize(),
-            drawerContent = {
-                PermanentDrawerSheet {
-                    NavigationDrawerItems.entries.forEach {
-                        NavigationDrawerItem(
-                            label = { Text(it.toString()) },
-                            selected = it == selectedNavigationDrawerItem,
-                            onClick = {
-                                when (it) {
-                                    NavigationDrawerItems.Profile -> mainComponentController.showProfile()
-                                    NavigationDrawerItems.Playlists -> mainComponentController.showPlaylists()
-                                    NavigationDrawerItems.Albums -> mainComponentController.showAlbums()
-                                    NavigationDrawerItems.Artists -> mainComponentController.showArtists()
-                                    NavigationDrawerItems.Settings -> mainComponentController.showSettings()
-                                }
-                            }
-                        )
-                    }
+        Content(
+            currentMainComponent = currentMainComponent,
+            selectedNavigationDrawerItem = selectedNavigationDrawerItem,
+            player = player,
+            onNavigationDrawerItemClick = {
+                when (it) {
+                    NavigationDrawerItems.Profile -> mainComponentController.showProfile()
+                    NavigationDrawerItems.Playlists -> mainComponentController.showPlaylists()
+                    NavigationDrawerItems.Albums -> mainComponentController.showAlbums(null)
+                    NavigationDrawerItems.Artists -> mainComponentController.showArtists(null)
+                    NavigationDrawerItems.Settings -> mainComponentController.showSettings()
                 }
-            },
-            content = { currentMainComponent.show() }
+            }
         )
     }
 
@@ -69,10 +60,11 @@ class Content(
         albumsNavHost.clear()
         artistsNavHost.clear()
         settingsNavHost.clear()
+        player.clear()
         coroutineScope.cancel()
     }
 
-    private enum class NavigationDrawerItems { Profile, Playlists, Albums, Artists, Settings }
+    enum class NavigationDrawerItems { Profile, Playlists, Albums, Artists, Settings }
 
     private inner class MainComponentController {
         fun showSettings() {
@@ -90,14 +82,16 @@ class Content(
             selectedNavigationDrawerItem.update { NavigationDrawerItems.Playlists }
         }
 
-        fun showAlbums() {
+        fun showAlbums(id: AlbumId?) {
             currentMainComponent.update { albumsNavHost }
             selectedNavigationDrawerItem.update { NavigationDrawerItems.Albums }
+            if (id != null) { albumsNavHost.toAlbumDetails(id) }
         }
 
-        fun showArtists() {
+        fun showArtists(id: ArtistId?) {
             currentMainComponent.update { artistsNavHost }
             selectedNavigationDrawerItem.update { NavigationDrawerItems.Artists }
+            if (id != null) { artistsNavHost.toArtistDetails(id) }
         }
     }
 }

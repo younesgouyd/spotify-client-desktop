@@ -17,3 +17,11 @@ value class SpotifyUri(val value: String) {
         return value
     }
 }
+
+fun TrackId.toUri() = SpotifyUri("spotify:track:$value")
+
+fun ArtistId.toUri() = SpotifyUri("spotify:artist:$value")
+
+fun AlbumId.toUri() = SpotifyUri("spotify:album:$value")
+
+fun PlaylistId.toUri() = SpotifyUri("spotify:playlist:$value")

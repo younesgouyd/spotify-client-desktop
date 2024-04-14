@@ -29,7 +29,7 @@ fun Image(
     if (url == null) {
         BrokenImage(modifier)
     } else {
-        LaunchedEffect(Unit) {
+        LaunchedEffect(url) {
             loading = true
             image = Cache.get(url)
             loading = false

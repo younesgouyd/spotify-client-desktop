@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import dev.younesgouyd.apps.spotifyclient.desktop.main.Component
 import dev.younesgouyd.apps.spotifyclient.desktop.main.PlaylistId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.UserId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.playlist.details.PlaylistDetails
@@ -19,7 +20,9 @@ import kotlinx.coroutines.launch
 class PlaylistDetails(
     private val id: PlaylistId,
     private val repoStore: RepoStore,
-    showUserDetails: (UserId) -> Unit
+    showUserDetails: (UserId) -> Unit,
+    play: () -> Unit,
+    playTrack: (TrackId) -> Unit
 ) : Component() {
     override val title: String = "Playlist"
     private val state: MutableStateFlow<PlaylistDetailsState> = MutableStateFlow(PlaylistDetailsState.Loading)
@@ -38,8 +41,8 @@ class PlaylistDetails(
                     loadingTracks = loadingTracks.asStateFlow(),
                     onOwnerClick = showUserDetails,
                     onLoadTracks = ::loadTracks,
-                    onPlayClick = {}, // todo
-                    onTrackClick = {}, // todo
+                    onPlayClick = play,
+                    onTrackClick = playTrack
                 )
             }
         }

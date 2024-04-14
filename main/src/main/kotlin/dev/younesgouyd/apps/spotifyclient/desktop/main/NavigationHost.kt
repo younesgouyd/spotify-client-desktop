@@ -22,12 +22,14 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.util.*
 
 class NavigationHost(
     repoStore: RepoStore,
     startDestination: Destination,
-    private val onLogout: () -> Unit
+    private val onLogout: () -> Unit,
+    private val playerController: PlayerController
 ) : Component() {
     override val title: String
     private val destinationFactory: DestinationFactory
@@ -84,6 +86,10 @@ class NavigationHost(
         }
         coroutineScope.cancel()
     }
+
+    fun toAlbumDetails(id: AlbumId) { navigationController.navigateTo(destinationFactory.getAlbumDetails(id)) }
+
+    fun toArtistDetails(id: ArtistId) { navigationController.navigateTo(destinationFactory.getArtistDetails(id)) }
 
     enum class Destination { Profile, Playlists, Albums, Artists, Settings }
 
@@ -144,7 +150,9 @@ class NavigationHost(
             return PlaylistDetails(
                 id = id,
                 repoStore = repoStore,
-                showUserDetails = { navigationController.navigateTo(getUser(it)) }
+                showUserDetails = { navigationController.navigateTo(getUser(it)) },
+                play = { coroutineScope.launch { playerController.play(id.toUri()) } },
+                playTrack = { coroutineScope.launch { playerController.play(uris = listOf(it.toUri())) } }
             )
         }
 
@@ -167,7 +175,9 @@ class NavigationHost(
             return AlbumDetails(
                 id = id,
                 repoStore = repoStore,
-                showArtistDetails = { navigationController.navigateTo(getArtistDetails(it)) }
+                showArtistDetails = { navigationController.navigateTo(getArtistDetails(it)) },
+                play = { coroutineScope.launch { playerController.play(id.toUri()) } },
+                playTrack = { coroutineScope.launch { playerController.play(uris = listOf(it.toUri())) } }
             )
         }
 
@@ -182,7 +192,9 @@ class NavigationHost(
             return ArtistDetails(
                 id = id,
                 repoStore = repoStore,
-                showAlbumDetails = { navigationController.navigateTo(getAlbumDetails(it)) }
+                showAlbumDetails = { navigationController.navigateTo(getAlbumDetails(it)) },
+                play = { coroutineScope.launch { playerController.play(id.toUri()) } },
+                playTrack = { coroutineScope.launch { playerController.play(uris = listOf(it.toUri())) } }
             )
         }
     }
