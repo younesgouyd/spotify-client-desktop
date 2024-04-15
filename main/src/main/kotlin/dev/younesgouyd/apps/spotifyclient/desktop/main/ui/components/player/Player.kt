@@ -138,9 +138,6 @@ private fun _Player(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            LaunchedEffect(playbackState.track?.images) {
-                println("new playback state: ${playbackState.track?.images}")
-            }
             Image(modifier = Modifier.size(170.dp), url = playbackState.track?.images?.preferablyMedium())
             Column(
                 horizontalAlignment = Alignment.Start,
