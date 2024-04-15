@@ -1,9 +1,9 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes
 
 import dev.younesgouyd.apps.spotifyclient.desktop.main.DarkThemeOptions
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import java.util.*
 
 class SettingsRepo(
@@ -32,7 +32,7 @@ class SettingsRepo(
             darkThemeCallbacks += callback
             callback.onNewValue(getDarkTheme())
             awaitClose { darkThemeCallbacks.removeIf { it.id == callback.id } }
-        }.flowOn(Dispatchers.IO)
+        }
     }
 
     suspend fun updateDarkTheme(theme: DarkThemeOptions) {

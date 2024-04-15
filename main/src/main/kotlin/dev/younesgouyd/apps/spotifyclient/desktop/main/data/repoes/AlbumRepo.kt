@@ -11,8 +11,6 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Artist
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class AlbumRepo(
     private val client: HttpClient,
@@ -24,13 +22,11 @@ class AlbumRepo(
      * @param offset The index of the first item to return. Default: 0 (the first item). Use with limit to get the next set of items.
      */
     suspend fun getSavedAlbums(limit: Int, offset: Int): List<AlbumListItem?> {
-        return withContext(Dispatchers.IO) {
-            client.get("me/albums") {
-                header("Authorization", "Bearer ${authRepo.getToken()}")
-                parameter("limit", limit)
-                parameter("offset", offset)
-            }.body<SavedAlbums>().toModel()
-        }
+        return client.get("me/albums") {
+            header("Authorization", "Bearer ${authRepo.getToken()}")
+            parameter("limit", limit)
+            parameter("offset", offset)
+        }.body<SavedAlbums>().toModel()
     }
 
     /**
@@ -40,13 +36,11 @@ class AlbumRepo(
      * @param offset The index of the first item to return. Default: 0 (the first item). Use with limit to get the next set of items
      */
     suspend fun getArtistAlbums(id: ArtistId, limit: Int, offset: Int): List<Artist.Album> {
-        return withContext(Dispatchers.IO) {
-            client.get("artists/$id/albums") {
-                header("Authorization", "Bearer ${authRepo.getToken()}")
-                parameter("limit", limit)
-                parameter("offset", offset)
-            }.body<ArtistAlbums>().toModel()
-        }
+        return client.get("artists/$id/albums") {
+            header("Authorization", "Bearer ${authRepo.getToken()}")
+            parameter("limit", limit)
+            parameter("offset", offset)
+        }.body<ArtistAlbums>().toModel()
     }
 
     /**
@@ -54,10 +48,8 @@ class AlbumRepo(
      * @param id The Spotify ID of the album
      */
     suspend fun getAlbum(id: AlbumId): Album {
-        return withContext(Dispatchers.IO) {
-            client.get("albums/$id") {
-                header("Authorization", "Bearer ${authRepo.getToken()}")
-            }.body<dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.album.Album>().toModel()
-        }
+        return client.get("albums/$id") {
+            header("Authorization", "Bearer ${authRepo.getToken()}")
+        }.body<dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.album.Album>().toModel()
     }
 }

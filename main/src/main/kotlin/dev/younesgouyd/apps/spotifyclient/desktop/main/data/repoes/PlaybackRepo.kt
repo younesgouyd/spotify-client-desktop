@@ -8,8 +8,6 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.PlaybackState
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -21,11 +19,9 @@ class PlaybackRepo internal constructor(
      * GET /me/player
      */
     suspend fun getPlaybackState(): PlaybackState {
-        return withContext(Dispatchers.IO) {
-            client.get("me/player") {
-                header("Authorization", "Bearer ${authRepo.getToken()}")
-            }.body<dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.PlaybackState>().toModel()
-        }
+        return client.get("me/player") {
+            header("Authorization", "Bearer ${authRepo.getToken()}")
+        }.body<dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.PlaybackState>().toModel()
     }
 
     /**
@@ -47,19 +43,17 @@ class PlaybackRepo internal constructor(
         offset: Offset?,
         positionMs: Long?
     ) {
-        withContext(Dispatchers.IO) {
-            client.put("me/player/play") {
-                header("Authorization", "Bearer ${authRepo.getToken()}")
-                header("Content-Type", "application/json")
-                setBody<String>(
-                    JSONObject().apply {
-                        if (contextUri != null) put("context_uri", contextUri)
-                        if (uris.isNotEmpty()) { put("uris", JSONArray().apply { for (uri in uris) put(uri) }) }
-                        if (offset != null) put("offset", offset.toJson())
-                        if (positionMs != null) put("position_ms", positionMs)
-                    }.toString()
-                )
-            }
+        client.put("me/player/play") {
+            header("Authorization", "Bearer ${authRepo.getToken()}")
+            header("Content-Type", "application/json")
+            setBody<String>(
+                JSONObject().apply {
+                    if (contextUri != null) put("context_uri", contextUri)
+                    if (uris.isNotEmpty()) { put("uris", JSONArray().apply { for (uri in uris) put(uri) }) }
+                    if (offset != null) put("offset", offset.toJson())
+                    if (positionMs != null) put("position_ms", positionMs)
+                }.toString()
+            )
         }
     }
 
@@ -67,10 +61,8 @@ class PlaybackRepo internal constructor(
      * GET /me/player/pause
      */
     suspend fun pause() {
-        withContext(Dispatchers.IO) {
-            client.put("me/player/pause") {
-                header("Authorization", "Bearer ${authRepo.getToken()}")
-            }
+        client.put("me/player/pause") {
+            header("Authorization", "Bearer ${authRepo.getToken()}")
         }
     }
 
@@ -78,10 +70,8 @@ class PlaybackRepo internal constructor(
      * GET /me/player/next
      */
     suspend fun next() {
-        withContext(Dispatchers.IO) {
-            client.post("me/player/next") {
-                header("Authorization", "Bearer ${authRepo.getToken()}")
-            }
+        client.post("me/player/next") {
+            header("Authorization", "Bearer ${authRepo.getToken()}")
         }
     }
 
@@ -89,10 +79,8 @@ class PlaybackRepo internal constructor(
      * GET /me/player/previous
      */
     suspend fun previous() {
-        withContext(Dispatchers.IO) {
-            client.post("me/player/previous") {
-                header("Authorization", "Bearer ${authRepo.getToken()}")
-            }
+        client.post("me/player/previous") {
+            header("Authorization", "Bearer ${authRepo.getToken()}")
         }
     }
 
@@ -101,11 +89,9 @@ class PlaybackRepo internal constructor(
      * @param positionMs The position in milliseconds to seek to. Must be a positive number. Passing in a position that is greater than the length of the track will cause the player to start playing the next song. Example: position_ms=25000
      */
     suspend fun seek(positionMs: Long) {
-        withContext(Dispatchers.IO) {
-            client.put("me/player/seek") {
-                header("Authorization", "Bearer ${authRepo.getToken()}")
-                parameter("position_ms", positionMs.toString())
-            }
+        client.put("me/player/seek") {
+            header("Authorization", "Bearer ${authRepo.getToken()}")
+            parameter("position_ms", positionMs.toString())
         }
     }
 
@@ -118,11 +104,9 @@ class PlaybackRepo internal constructor(
      *        Example: state=context
      */
     suspend fun repeat(state: dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.PlaybackState.RepeatState) {
-        withContext(Dispatchers.IO) {
-            client.put("me/player/repeat") {
-                header("Authorization", "Bearer ${authRepo.getToken()}")
-                parameter("state", state.name.lowercase())
-            }
+        client.put("me/player/repeat") {
+            header("Authorization", "Bearer ${authRepo.getToken()}")
+            parameter("state", state.name.lowercase())
         }
     }
 
@@ -133,11 +117,9 @@ class PlaybackRepo internal constructor(
      *        Example: state=true
      */
     suspend fun shuffle(state: Boolean) {
-        withContext(Dispatchers.IO) {
-            client.put("me/player/shuffle") {
-                header("Authorization", "Bearer ${authRepo.getToken()}")
-                parameter("state", state)
-            }
+        client.put("me/player/shuffle") {
+            header("Authorization", "Bearer ${authRepo.getToken()}")
+            parameter("state", state)
         }
     }
 }

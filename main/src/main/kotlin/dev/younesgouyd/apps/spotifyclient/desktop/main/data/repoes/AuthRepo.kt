@@ -42,19 +42,17 @@ class AuthRepo(
     }
 
     suspend fun getToken(): String {
-        return withContext(Dispatchers.IO) {
-            token?.let {
-                if (it.expired()) {
-                    refreshToken()
-                    return@withContext it.accessToken
-                }
-            }
-            loadTokenFromCache()
-            if (token!!.expired()) {
+        token?.let {
+            if (it.expired()) {
                 refreshToken()
+                return it.accessToken
             }
-            return@withContext token!!.accessToken
         }
+        loadTokenFromCache()
+        if (token!!.expired()) {
+            refreshToken()
+        }
+        return token!!.accessToken
     }
 
     suspend fun login(spotifyClientId: String): LoginResult {
@@ -182,17 +180,15 @@ class AuthRepo(
         }
 
         suspend fun getNewToken(httpClient: HttpClient, spotifyClientId: String, refreshToken: String): JSONObject {
-            return withContext(Dispatchers.IO) {
-                JSONObject(
-                    httpClient.post {
-                        url("https://$DOMAIN/api/token")
-                        header("Content-Type", "application/x-www-form-urlencoded")
-                        parameter("grant_type", "refresh_token")
-                        parameter("refresh_token", refreshToken)
-                        parameter("client_id", spotifyClientId)
-                    }.bodyAsText()
-                )
-            }
+            return JSONObject(
+                httpClient.post {
+                    url("https://$DOMAIN/api/token")
+                    header("Content-Type", "application/x-www-form-urlencoded")
+                    parameter("grant_type", "refresh_token")
+                    parameter("refresh_token", refreshToken)
+                    parameter("client_id", spotifyClientId)
+                }.bodyAsText()
+            )
         }
 
         private suspend fun getToken(httpClient: HttpClient, spotifyClientId: String, code: String, verifier: String): Result<String> {
