@@ -9,6 +9,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.main.PlaylistId
@@ -62,7 +64,7 @@ private fun User(
                     state = lazyGridState,
                     horizontalArrangement = Arrangement.spacedBy(18.dp),
                     verticalArrangement = Arrangement.spacedBy(18.dp),
-                    columns = GridCells.FixedSize(200.dp)
+                    columns = GridCells.Adaptive(250.dp)
                 ) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         UserInfo(user = user)
@@ -144,15 +146,17 @@ private fun LazyGridScope.playlists(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                Box(
-                    modifier = Modifier.size(200.dp),
-                    content = { Image(url = item.images.preferablyMedium()) },
-                    contentAlignment = Alignment.TopCenter // todo
+                Image(
+                    modifier = Modifier.aspectRatio(1f),
+                    url = item.images.preferablyMedium(),
+                    contentScale = ContentScale.FillWidth,
+                    alignment = Alignment.TopCenter
                 )
                 Text(
-                    modifier = Modifier.padding(12.dp),
+                    modifier = Modifier.fillMaxWidth().padding(12.dp),
                     text = item.name ?: "",
                     style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center,
                     minLines = 2,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis

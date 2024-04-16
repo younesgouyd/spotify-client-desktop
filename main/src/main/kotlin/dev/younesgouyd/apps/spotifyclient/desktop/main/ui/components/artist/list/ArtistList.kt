@@ -9,6 +9,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
@@ -61,7 +63,7 @@ private fun ArtistList(
                     contentPadding = PaddingValues(18.dp),
                     horizontalArrangement = Arrangement.spacedBy(18.dp),
                     verticalArrangement = Arrangement.spacedBy(18.dp),
-                    columns = GridCells.FixedSize(200.dp)
+                    columns = GridCells.Adaptive(250.dp)
                 ) {
                     items(
                         items = artists,
@@ -96,28 +98,29 @@ private fun ArtistList(
 
 @Composable
 private fun ArtistItem(
+    modifier: Modifier = Modifier,
     artist: Artist,
     onArtistClick: (ArtistId) -> Unit
 ) {
     Item(
+        modifier = modifier,
         onClick = { onArtistClick(artist.id) }
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Box(
-                modifier = Modifier.size(200.dp),
-                contentAlignment = Alignment.TopCenter // todo
-            ) {
-                Image(
-                    url = artist.images.preferablyMedium()
-                )
-            }
+            Image(
+                modifier = Modifier.aspectRatio(1f),
+                url = artist.images.preferablyMedium(),
+                contentScale = ContentScale.FillWidth,
+                alignment = Alignment.TopCenter
+            )
             Text(
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier.fillMaxWidth().padding(8.dp),
                 text = artist.name ?: "",
                 style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center,
                 minLines = 2,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis

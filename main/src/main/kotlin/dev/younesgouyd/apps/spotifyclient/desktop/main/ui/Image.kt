@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asSkiaBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.loadImageBitmap
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
@@ -21,7 +22,9 @@ typealias ImageUrl = String
 @Composable
 fun Image(
     modifier: Modifier = Modifier,
-    url: ImageUrl?
+    url: ImageUrl?,
+    contentScale: ContentScale = ContentScale.Fit,
+    alignment: Alignment = Alignment.Center
 ) {
     var loading by remember { mutableStateOf(true) }
     var image by remember { mutableStateOf<ImageBitmap?>(null) }
@@ -42,7 +45,9 @@ fun Image(
                     androidx.compose.foundation.Image(
                         modifier = modifier,
                         bitmap = it,
-                        contentDescription = null
+                        contentDescription = null,
+                        contentScale = contentScale,
+                        alignment = alignment
                     )
                 } ?: BrokenImage(modifier)
             }
@@ -55,22 +60,25 @@ private fun LoadingImage(
     modifier: Modifier = Modifier
 ) {
     Box(
-        modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
+        modifier = modifier,
+        contentAlignment = Alignment.Center,
+        content = { CircularProgressIndicator() }
+    )
 }
 
 @Composable
 private fun BrokenImage(
     modifier: Modifier = Modifier
 ) {
-    androidx.compose.foundation.Image(
+    Box(
         modifier = modifier,
-        imageVector = Icons.Default.BrokenImage,
-        contentDescription = null
-    )
+        contentAlignment = Alignment.Center
+    ) {
+        androidx.compose.foundation.Image(
+            imageVector = Icons.Default.BrokenImage,
+            contentDescription = null
+        )
+    }
 }
 
 private object Cache {

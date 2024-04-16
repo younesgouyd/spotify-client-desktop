@@ -9,6 +9,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
@@ -69,7 +71,7 @@ private fun ArtistDetails(
                     state = lazyGridState,
                     horizontalArrangement = Arrangement.spacedBy(18.dp),
                     verticalArrangement = Arrangement.spacedBy(18.dp),
-                    columns = GridCells.FixedSize(200.dp)
+                    columns = GridCells.Adaptive(250.dp)
                 ) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
                         ArtistInfo(
@@ -213,18 +215,17 @@ private fun AlbumItem(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Box(
-                modifier = Modifier.size(200.dp),
-                contentAlignment = Alignment.TopCenter // todo
-            ) {
-                Image(
-                    url = album.images.preferablyMedium()
-                )
-            }
+            Image(
+                modifier = Modifier.aspectRatio(1f),
+                url = album.images.preferablyMedium(),
+                contentScale = ContentScale.FillWidth,
+                alignment = Alignment.TopCenter
+            )
             Text(
-                modifier = Modifier.padding(12.dp),
+                modifier = Modifier.fillMaxWidth().padding(12.dp),
                 text = album.name ?: "",
                 style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center,
                 minLines = 2,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
