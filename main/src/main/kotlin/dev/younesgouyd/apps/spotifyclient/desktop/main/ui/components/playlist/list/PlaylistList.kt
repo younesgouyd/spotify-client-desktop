@@ -2,14 +2,12 @@ package dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.playlist.l
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -37,7 +35,8 @@ private fun PlaylistList(state: PlaylistListState.State) {
         playlists = state.playlists,
         loadingPlaylists = state.loadingPlaylists,
         onLoadPlaylists = state.onLoadPlaylists,
-        onPlaylistClick = state.onPlaylistClick
+        onPlaylistClick = state.onPlaylistClick,
+        onPlayPlaylistClick = state.onPlayPlaylistClick
     )
 }
 
@@ -46,7 +45,8 @@ private fun PlaylistList(
     playlists: StateFlow<List<PlaylistListItem>>,
     loadingPlaylists: StateFlow<Boolean>,
     onLoadPlaylists: () -> Unit,
-    onPlaylistClick: (PlaylistId) -> Unit
+    onPlaylistClick: (PlaylistId) -> Unit,
+    onPlayPlaylistClick: (PlaylistId) -> Unit
 ) {
     val playlists by playlists.collectAsState()
     val loadingPlaylists by loadingPlaylists.collectAsState()
@@ -71,7 +71,8 @@ private fun PlaylistList(
                     ) { item ->
                         PlaylistItem(
                             playlist = item,
-                            onPlaylistClick = onPlaylistClick
+                            onClick = onPlaylistClick,
+                            onPlayClick = onPlayPlaylistClick
                         )
                     }
                     if (loadingPlaylists) {
@@ -100,20 +101,21 @@ private fun PlaylistList(
 private fun PlaylistItem(
     modifier: Modifier = Modifier,
     playlist: PlaylistListItem,
-    onPlaylistClick: (PlaylistId) -> Unit
+    onClick: (PlaylistId) -> Unit,
+    onPlayClick: (PlaylistId) -> Unit
 ) {
     Item (
         modifier = modifier,
-        onClick = { onPlaylistClick(playlist.id) }
+        onClick = { onClick(playlist.id) }
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Image(
-                modifier = Modifier.aspectRatio(1f),
+                modifier = Modifier.fillMaxWidth().aspectRatio(1f),
                 url = playlist.images.preferablyMedium(),
-                contentScale = ContentScale.FillWidth,
+//                contentScale = ContentScale.FillWidth,
                 alignment = Alignment.TopCenter
             )
             Text(
@@ -125,6 +127,16 @@ private fun PlaylistItem(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    content = { Icon(Icons.Default.PlayCircle, null) },
+                    onClick = { onPlayClick(playlist.id) }
+                )
+            }
         }
     }
 }

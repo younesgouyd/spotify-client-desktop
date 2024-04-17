@@ -2,10 +2,9 @@ package dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.album.list
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +36,8 @@ private fun AlbumList(state: AlbumListState.State) {
         albums = state.albums,
         loadingAlbums = state.loadingAlbums,
         onLoadAlbums = state.onLoadAlbums,
-        onAlbumClick = state.onAlbumClick
+        onAlbumClick = state.onAlbumClick,
+        onPlayAlbumClick = state.onPlayAlbumClick
     )
 }
 
@@ -46,7 +46,8 @@ private fun AlbumList(
     albums: StateFlow<List<AlbumListItem>>,
     loadingAlbums: StateFlow<Boolean>,
     onLoadAlbums: () -> Unit,
-    onAlbumClick: (AlbumId) -> Unit
+    onAlbumClick: (AlbumId) -> Unit,
+    onPlayAlbumClick: (AlbumId) -> Unit
 ) {
     val albums by albums.collectAsState()
     val loadingAlbums by loadingAlbums.collectAsState()
@@ -71,7 +72,8 @@ private fun AlbumList(
                     ) { item ->
                         AlbumItem(
                             album = item,
-                            onAlbumClick = onAlbumClick
+                            onClick = onAlbumClick,
+                            onPlayClick = onPlayAlbumClick
                         )
                     }
                     if (loadingAlbums) {
@@ -100,11 +102,12 @@ private fun AlbumList(
 private fun AlbumItem(
     modifier: Modifier = Modifier,
     album: AlbumListItem,
-    onAlbumClick: (AlbumId) -> Unit
+    onClick: (AlbumId) -> Unit,
+    onPlayClick: (AlbumId) -> Unit
 ) {
     Item (
         modifier = modifier,
-        onClick = { onAlbumClick(album.id) },
+        onClick = { onClick(album.id) },
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -125,6 +128,16 @@ private fun AlbumItem(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    content = { Icon(Icons.Default.PlayCircle, null) },
+                    onClick = { onPlayClick(album.id) }
+                )
+            }
         }
     }
 }

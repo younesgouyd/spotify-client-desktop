@@ -41,8 +41,9 @@ private fun ArtistDetails(state: ArtistDetailsState.State) {
         loadingAlbums = state.loadingAlbums,
         onLoadAlbums = state.onLoadAlbums,
         onPlayClick = state.onPlayClick,
+        onPlayTrackClick = state.onPlayTrackClick,
         onAlbumClick = state.onAlbumClick,
-        onPlayTrackClick = state.onPlayTrackClick
+        onPlayAlbumClick = state.onPlayAlbumClick
     )
 }
 
@@ -54,8 +55,9 @@ private fun ArtistDetails(
     loadingAlbums: StateFlow<Boolean>,
     onLoadAlbums: () -> Unit,
     onPlayClick: () -> Unit,
+    onPlayTrackClick: (TrackId) -> Unit,
     onAlbumClick: (AlbumId) -> Unit,
-    onPlayTrackClick: (TrackId) -> Unit
+    onPlayAlbumClick: (AlbumId) -> Unit
 ) {
     val albums by albums.collectAsState()
     val loadingAlbums by loadingAlbums.collectAsState()
@@ -107,7 +109,8 @@ private fun ArtistDetails(
                     ) { item ->
                         AlbumItem(
                             album = item,
-                            onAlbumClick = onAlbumClick
+                            onClick = onAlbumClick,
+                            onPlayClick = onPlayAlbumClick
                         )
                     }
                     if (loadingAlbums) {
@@ -171,7 +174,7 @@ private fun ArtistInfo(
 private fun TopTracks(
     modifier: Modifier = Modifier,
     tracks: List<Artist.Track>,
-    onPlayTrackClick: (TrackId) -> Unit
+    onPlayTrackClick: (TrackId) -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -205,11 +208,12 @@ private fun TopTracks(
 private fun AlbumItem(
     modifier: Modifier = Modifier,
     album: Artist.Album,
-    onAlbumClick: (AlbumId) -> Unit
+    onClick: (AlbumId) -> Unit,
+    onPlayClick: (AlbumId) -> Unit
 ) {
     Item (
         modifier = modifier,
-        onClick = { onAlbumClick(album.id) },
+        onClick = { onClick(album.id) },
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -230,6 +234,16 @@ private fun AlbumItem(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(
+                    content = { Icon(Icons.Default.PlayCircle, null) },
+                    onClick = { onPlayClick(album.id) }
+                )
+            }
         }
     }
 }

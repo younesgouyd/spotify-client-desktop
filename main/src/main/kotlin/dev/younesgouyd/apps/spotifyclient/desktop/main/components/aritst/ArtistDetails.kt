@@ -22,7 +22,8 @@ class ArtistDetails(
     private val repoStore: RepoStore,
     private val showAlbumDetails: (AlbumId) -> Unit,
     play: () -> Unit,
-    playTrack: (TrackId) -> Unit
+    playTrack: (TrackId) -> Unit,
+    playAlbum: (AlbumId) -> Unit
 ) : Component() {
     override val title: String = "Artist"
     private val state: MutableStateFlow<ArtistDetailsState> = MutableStateFlow(ArtistDetailsState.Loading)
@@ -39,9 +40,10 @@ class ArtistDetails(
                     albums = albums.asStateFlow(),
                     loadingAlbums = loadingAlbums.asStateFlow(),
                     onLoadAlbums = ::loadAlbums,
-                    onAlbumClick = showAlbumDetails,
                     onPlayClick = play,
-                    onPlayTrackClick = playTrack
+                    onPlayTrackClick = playTrack,
+                    onAlbumClick = showAlbumDetails,
+                    onPlayAlbumClick = playAlbum
                 )
             }
         }

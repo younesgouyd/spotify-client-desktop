@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 class PlaylistList(
     private val repoStore: RepoStore,
     private val showPlaylistDetails: (PlaylistId) -> Unit,
+    playPlaylist: (PlaylistId) -> Unit
 ) : Component() {
     override val title: String = "Playlists"
     private val state: MutableStateFlow<PlaylistListState> = MutableStateFlow(PlaylistListState.Loading)
@@ -33,7 +34,8 @@ class PlaylistList(
                     playlists = playlists.asStateFlow(),
                     loadingPlaylists = loadingPlaylists.asStateFlow(),
                     onLoadPlaylists = ::loadPlaylists,
-                    onPlaylistClick = showPlaylistDetails
+                    onPlaylistClick = showPlaylistDetails,
+                    onPlayPlaylistClick = playPlaylist
                 )
             }
         }

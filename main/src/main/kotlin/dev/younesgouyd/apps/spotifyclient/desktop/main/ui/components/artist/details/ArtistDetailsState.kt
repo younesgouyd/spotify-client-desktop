@@ -15,7 +15,8 @@ sealed class ArtistDetailsState {
         val loadingAlbums: StateFlow<Boolean>,
         val onLoadAlbums: () -> Unit,
         val onPlayClick: () -> Unit,
+        val onPlayTrackClick: (TrackId) -> Unit,
         val onAlbumClick: (AlbumId) -> Unit,
-        val onPlayTrackClick: (TrackId) -> Unit
+        val onPlayAlbumClick: (AlbumId) -> Unit
     ) : ArtistDetailsState()
 }

@@ -2,10 +2,9 @@ package dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.user
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,7 +37,8 @@ private fun User(state: UserState.State) {
         loadingPlaylists = state.loadingPlaylists,
         playlists = state.playlists,
         onLoadPlaylists = state.onLoadPlaylists,
-        onPlaylistClick = state.onPlaylistClick
+        onPlaylistClick = state.onPlaylistClick,
+        onPlayPlaylistClick = state.onPlayPlaylistClick
     )
 }
 
@@ -48,7 +48,8 @@ private fun User(
     loadingPlaylists: StateFlow<Boolean>,
     playlists: StateFlow<List<User.Playlist>>,
     onLoadPlaylists: () -> Unit,
-    onPlaylistClick: (PlaylistId) -> Unit
+    onPlaylistClick: (PlaylistId) -> Unit,
+    onPlayPlaylistClick: (PlaylistId) -> Unit
 ) {
     val loadingPlaylists by loadingPlaylists.collectAsState()
     val playlists by playlists.collectAsState()
@@ -66,10 +67,8 @@ private fun User(
                     verticalArrangement = Arrangement.spacedBy(18.dp),
                     columns = GridCells.Adaptive(250.dp)
                 ) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        UserInfo(user = user)
-                    }
-                    playlists(playlists, onPlaylistClick)
+                    item(content = { UserInfo(user = user) }, span = { GridItemSpan(maxLineSpan) })
+                    playlists(playlists, onPlaylistClick, onPlayPlaylistClick)
                     if (loadingPlaylists) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             Box(modifier = Modifier.fillMaxWidth().padding(10.dp), contentAlignment = Alignment.Center) {
@@ -128,7 +127,8 @@ private fun UserInfo(
 
 private fun LazyGridScope.playlists(
     playlists: List<User.Playlist>,
-    onPlaylistClick: (PlaylistId) -> Unit
+    onPlaylistClick: (PlaylistId) -> Unit,
+    onPlayPlaylistClick: (PlaylistId) -> Unit
 ) {
     item(span = { GridItemSpan(maxLineSpan) }) {
         Text(
@@ -140,27 +140,37 @@ private fun LazyGridScope.playlists(
     items(
         items = playlists,
         key = { it.id }
-    ) { item ->
-        Item(onClick = { onPlaylistClick(item.id) }) {
+    ) { playlist ->
+        Item(onClick = { onPlaylistClick(playlist.id) }) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
                 Image(
                     modifier = Modifier.aspectRatio(1f),
-                    url = item.images.preferablyMedium(),
+                    url = playlist.images.preferablyMedium(),
                     contentScale = ContentScale.FillWidth,
                     alignment = Alignment.TopCenter
                 )
                 Text(
                     modifier = Modifier.fillMaxWidth().padding(12.dp),
-                    text = item.name ?: "",
+                    text = playlist.name ?: "",
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Center,
                     minLines = 2,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        content = { Icon(Icons.Default.PlayCircle, null) },
+                        onClick = { onPlayPlaylistClick(playlist.id) }
+                    )
+                }
             }
         }
     }

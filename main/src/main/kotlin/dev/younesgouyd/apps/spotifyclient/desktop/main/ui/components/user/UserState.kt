@@ -12,6 +12,7 @@ sealed class UserState {
         val playlists: StateFlow<List<User.Playlist>>,
         val loadingPlaylists: StateFlow<Boolean>,
         val onLoadPlaylists: () -> Unit,
-        val onPlaylistClick: (PlaylistId) -> Unit
+        val onPlaylistClick: (PlaylistId) -> Unit,
+        val onPlayPlaylistClick: (PlaylistId) -> Unit
     ) : UserState()
 }

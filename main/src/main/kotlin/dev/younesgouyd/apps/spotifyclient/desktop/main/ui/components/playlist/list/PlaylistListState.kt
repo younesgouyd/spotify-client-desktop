@@ -11,6 +11,7 @@ sealed class PlaylistListState {
         val playlists: StateFlow<List<PlaylistListItem>>,
         val loadingPlaylists: StateFlow<Boolean>,
         val onLoadPlaylists: () -> Unit,
-        val onPlaylistClick: (PlaylistId) -> Unit
+        val onPlaylistClick: (PlaylistId) -> Unit,
+        val onPlayPlaylistClick: (PlaylistId) -> Unit
     ) : PlaylistListState()
 }

@@ -11,6 +11,7 @@ sealed class AlbumListState {
         val albums: StateFlow<List<AlbumListItem>>,
         val loadingAlbums: StateFlow<Boolean>,
         val onLoadAlbums: () -> Unit,
-        val onAlbumClick: (AlbumId) -> Unit
+        val onAlbumClick: (AlbumId) -> Unit,
+        val onPlayAlbumClick: (AlbumId) -> Unit
     ) : AlbumListState()
 }

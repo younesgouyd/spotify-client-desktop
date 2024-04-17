@@ -18,6 +18,7 @@ import kotlinx.coroutines.launch
 class AlbumList(
     private val repoStore: RepoStore,
     private val showAlbumDetails: (AlbumId) -> Unit,
+    playAlbum: (AlbumId) -> Unit
 ) : Component() {
     override val title: String = "Albums"
     private val state: MutableStateFlow<AlbumListState> = MutableStateFlow(AlbumListState.Loading)
@@ -34,6 +35,7 @@ class AlbumList(
                     loadingAlbums = loadingAlbums.asStateFlow(),
                     onLoadAlbums = ::loadAlbums,
                     onAlbumClick = showAlbumDetails,
+                    onPlayAlbumClick = playAlbum
                 )
             }
         }
