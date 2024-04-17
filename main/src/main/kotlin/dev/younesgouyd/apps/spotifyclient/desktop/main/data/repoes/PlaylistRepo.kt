@@ -2,6 +2,7 @@ package dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes
 
 import dev.younesgouyd.apps.spotifyclient.desktop.main.PlaylistId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.UserId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.CategoryPlaylists
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.playlist.Playlists
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.playlist.UserPlaylists
 import dev.younesgouyd.apps.spotifyclient.desktop.main.toModel
@@ -48,5 +49,16 @@ class PlaylistRepo(
             parameter("limit", limit)
             parameter("offset", offset)
         }.body<UserPlaylists>().toModel()
+    }
+
+    /**
+     * GET /browse/categories/{category_id}/playlists
+     */
+    suspend fun getDiscoverPlaylists(limit: Int, offset: Int): List<PlaylistListItem?> {
+        return client.get("browse/categories/discover/playlists") {
+            header("Authorization", "Bearer ${authRepo.getToken()}")
+            parameter("limit", limit)
+            parameter("offset", offset)
+        }.body<CategoryPlaylists>().toModel()
     }
 }

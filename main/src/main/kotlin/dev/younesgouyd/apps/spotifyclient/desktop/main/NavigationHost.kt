@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import dev.younesgouyd.apps.spotifyclient.desktop.main.components.Discover
 import dev.younesgouyd.apps.spotifyclient.desktop.main.components.Profile
 import dev.younesgouyd.apps.spotifyclient.desktop.main.components.Settings
 import dev.younesgouyd.apps.spotifyclient.desktop.main.components.User
@@ -46,6 +47,7 @@ class NavigationHost(
                 Destination.Playlists -> destinationFactory.getPlaylistList()
                 Destination.Albums -> destinationFactory.getAlbumList()
                 Destination.Artists -> destinationFactory.getArtistList()
+                Destination.Discover -> destinationFactory.getDiscover()
                 Destination.Settings -> destinationFactory.getSettings()
             }
         )
@@ -91,7 +93,7 @@ class NavigationHost(
 
     fun toArtistDetails(id: ArtistId) { navigationController.navigateTo(destinationFactory.getArtistDetails(id)) }
 
-    enum class Destination { Profile, Playlists, Albums, Artists, Settings }
+    enum class Destination { Profile, Playlists, Albums, Artists, Discover, Settings }
 
     private inner class BackStack(startDestination: Component) {
         val inHome: MutableStateFlow<Boolean>
@@ -199,6 +201,14 @@ class NavigationHost(
                 play = { coroutineScope.launch { playerController.play(id.toUri()) } },
                 playTrack = { coroutineScope.launch { playerController.play(uris = listOf(it.toUri())) } },
                 playAlbum = { coroutineScope.launch { playerController.play(it.toUri()) } }
+            )
+        }
+
+        fun getDiscover(): Discover {
+            return Discover(
+                repoStore = repoStore,
+                showPlaylistDetails = { navigationController.navigateTo(getPlaylistDetails(it)) },
+                playPlaylist = { coroutineScope.launch { playerController.play(it.toUri()) } }
             )
         }
     }

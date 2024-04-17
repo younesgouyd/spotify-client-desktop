@@ -23,6 +23,7 @@ class Content(
     private val playlistsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Playlists, onLogout, playerController) }
     private val albumsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Albums, onLogout, playerController) }
     private val artistsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Artists, onLogout, playerController) }
+    private val discoverNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Discover, onLogout, playerController) }
     private val settingsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Settings, onLogout, playerController) }
     private val player = Player(
         playerController = playerController,
@@ -48,6 +49,7 @@ class Content(
                     NavigationDrawerItems.Playlists -> mainComponentController.showPlaylists()
                     NavigationDrawerItems.Albums -> mainComponentController.showAlbums(null)
                     NavigationDrawerItems.Artists -> mainComponentController.showArtists(null)
+                    NavigationDrawerItems.Discover -> mainComponentController.showDiscover()
                     NavigationDrawerItems.Settings -> mainComponentController.showSettings()
                 }
             }
@@ -59,12 +61,13 @@ class Content(
         playlistsNavHost.clear()
         albumsNavHost.clear()
         artistsNavHost.clear()
+        discoverNavHost.clear()
         settingsNavHost.clear()
         player.clear()
         coroutineScope.cancel()
     }
 
-    enum class NavigationDrawerItems { Profile, Playlists, Albums, Artists, Settings }
+    enum class NavigationDrawerItems { Profile, Playlists, Albums, Artists, Discover, Settings }
 
     private inner class MainComponentController {
         fun showSettings() {
@@ -92,6 +95,11 @@ class Content(
             currentMainComponent.update { artistsNavHost }
             selectedNavigationDrawerItem.update { NavigationDrawerItems.Artists }
             if (id != null) { artistsNavHost.toArtistDetails(id) }
+        }
+
+        fun showDiscover() {
+            currentMainComponent.update { discoverNavHost }
+            selectedNavigationDrawerItem.update { NavigationDrawerItems.Discover }
         }
     }
 }

@@ -1,9 +1,6 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.main
 
-import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.ArtistTopTracks
-import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.CurrentUser
-import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.Image
-import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.ImageOfFloatSize
+import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.album.AlbumTracks
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.album.ArtistAlbums
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.album.SavedAlbums
@@ -12,6 +9,8 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.playlist.Play
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.playlist.Playlists
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.playlist.UserPlaylists
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.*
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.PlaybackState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.User
 import kotlin.time.Duration.Companion.milliseconds
 
 fun Playlists.toModel(): List<PlaylistListItem?> {
@@ -177,6 +176,22 @@ fun dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.PlaybackState.to
         },
         shuffleState = shuffleState
     )
+}
+
+fun CategoryPlaylists.toModel(): List<PlaylistListItem?> {
+    return this.playlists?.let {
+        it.items?.let {
+            it.map {
+                it?.let {
+                    PlaylistListItem(
+                        id = it.id,
+                        name = it.name,
+                        images = Images.fromStandardImages(it.images)
+                    )
+                }
+            }
+        }
+    } ?: emptyList()
 }
 
 fun Images.Companion.fromStandardImages(list: List<Image>?): Images {
