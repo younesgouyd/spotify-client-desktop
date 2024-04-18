@@ -1,4 +1,4 @@
-package dev.younesgouyd.apps.spotifyclient.desktop.main
+package dev.younesgouyd.apps.spotifyclient.desktop.main.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.components.Discover
 import dev.younesgouyd.apps.spotifyclient.desktop.main.components.Profile
 import dev.younesgouyd.apps.spotifyclient.desktop.main.components.Settings

@@ -3,8 +3,12 @@ package dev.younesgouyd.apps.spotifyclient.desktop.main.components
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import dev.younesgouyd.apps.spotifyclient.desktop.main.*
+import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.Component
+import dev.younesgouyd.apps.spotifyclient.desktop.main.PlayerController
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.NavigationHost
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.Content
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
