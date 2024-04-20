@@ -28,6 +28,7 @@ class Content(
     private val albumsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Albums, onLogout, playerController) }
     private val artistsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Artists, onLogout, playerController) }
     private val discoverNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Discover, onLogout, playerController) }
+    private val searchNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Search, onLogout, playerController) }
     private val settingsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Settings, onLogout, playerController) }
     private val player = Player(
         playerController = playerController,
@@ -54,6 +55,7 @@ class Content(
                     NavigationDrawerItems.Albums -> mainComponentController.showAlbums(null)
                     NavigationDrawerItems.Artists -> mainComponentController.showArtists(null)
                     NavigationDrawerItems.Discover -> mainComponentController.showDiscover()
+                    NavigationDrawerItems.Search -> mainComponentController.showSearch()
                     NavigationDrawerItems.Settings -> mainComponentController.showSettings()
                 }
             }
@@ -66,12 +68,13 @@ class Content(
         albumsNavHost.clear()
         artistsNavHost.clear()
         discoverNavHost.clear()
+        searchNavHost.clear()
         settingsNavHost.clear()
         player.clear()
         coroutineScope.cancel()
     }
 
-    enum class NavigationDrawerItems { Profile, Playlists, Albums, Artists, Discover, Settings }
+    enum class NavigationDrawerItems { Profile, Playlists, Albums, Artists, Discover, Search, Settings }
 
     private inner class MainComponentController {
         fun showSettings() {
@@ -104,6 +107,11 @@ class Content(
         fun showDiscover() {
             currentMainComponent.update { discoverNavHost }
             selectedNavigationDrawerItem.update { NavigationDrawerItems.Discover }
+        }
+
+        fun showSearch() {
+            currentMainComponent.update { searchNavHost }
+            selectedNavigationDrawerItem.update { NavigationDrawerItems.Search }
         }
     }
 }

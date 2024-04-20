@@ -42,4 +42,5 @@ class RepoStore {
     val trackRepo by lazy { TrackRepo(client, authRepo) }
     val userRepo by lazy { UserRepo(client, authRepo) }
     val playbackRepo by lazy { PlaybackRepo(client, authRepo) }
+    val searchRepo by lazy { SearchRepo(client, authRepo) }
 }

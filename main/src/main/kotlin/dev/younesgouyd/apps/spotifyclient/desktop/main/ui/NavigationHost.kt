@@ -10,10 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import dev.younesgouyd.apps.spotifyclient.desktop.main.*
-import dev.younesgouyd.apps.spotifyclient.desktop.main.components.Discover
-import dev.younesgouyd.apps.spotifyclient.desktop.main.components.Profile
-import dev.younesgouyd.apps.spotifyclient.desktop.main.components.Settings
-import dev.younesgouyd.apps.spotifyclient.desktop.main.components.User
+import dev.younesgouyd.apps.spotifyclient.desktop.main.components.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.components.album.AlbumDetails
 import dev.younesgouyd.apps.spotifyclient.desktop.main.components.album.AlbumList
 import dev.younesgouyd.apps.spotifyclient.desktop.main.components.aritst.ArtistDetails
@@ -49,6 +46,7 @@ class NavigationHost(
                 Destination.Albums -> destinationFactory.getAlbumList()
                 Destination.Artists -> destinationFactory.getArtistList()
                 Destination.Discover -> destinationFactory.getDiscover()
+                Destination.Search -> destinationFactory.getSearch()
                 Destination.Settings -> destinationFactory.getSettings()
             }
         )
@@ -94,7 +92,7 @@ class NavigationHost(
 
     fun toArtistDetails(id: ArtistId) { navigationController.navigateTo(destinationFactory.getArtistDetails(id)) }
 
-    enum class Destination { Profile, Playlists, Albums, Artists, Discover, Settings }
+    enum class Destination { Profile, Playlists, Albums, Artists, Discover, Search, Settings }
 
     private inner class BackStack(startDestination: Component) {
         val inHome: MutableStateFlow<Boolean>
@@ -209,6 +207,19 @@ class NavigationHost(
             return Discover(
                 repoStore = repoStore,
                 showPlaylistDetails = { navigationController.navigateTo(getPlaylistDetails(it)) },
+                playPlaylist = { coroutineScope.launch { playerController.play(it.toUri()) } }
+            )
+        }
+
+        fun getSearch(): Search {
+            return Search(
+                repoStore = repoStore,
+                showArtist = { navigationController.navigateTo(getArtistDetails(it)) },
+                showAlbum = { navigationController.navigateTo(getAlbumDetails(it)) },
+                showPlaylist = { navigationController.navigateTo(getPlaylistDetails(it)) },
+                playTrack = { coroutineScope.launch { playerController.play(uris = listOf(it.toUri())) } },
+                playArtist = { coroutineScope.launch { playerController.play(it.toUri()) } },
+                playAlbum = { coroutineScope.launch { playerController.play(it.toUri()) } },
                 playPlaylist = { coroutineScope.launch { playerController.play(it.toUri()) } }
             )
         }

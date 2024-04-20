@@ -10,6 +10,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.playlist.Play
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.playlist.UserPlaylists
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.PlaybackState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.SearchResult
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.User
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -192,6 +193,50 @@ fun CategoryPlaylists.toModel(): List<PlaylistListItem?> {
             }
         }
     } ?: emptyList()
+}
+
+fun dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.SearchResult.toModel(): SearchResult {
+    return SearchResult(
+        tracks = this.tracks?.items?.filterNotNull()?.let { tracks ->
+            tracks.map { trackObject ->
+                SearchResult.Track(
+                    id = trackObject.id,
+                    name = trackObject.name,
+                    images = Images.fromStandardImages(trackObject.album?.images),
+                    artists = trackObject.artists?.filterNotNull()?.map {
+                        SearchResult.Track.Artist(id = it.id, name = it.name)
+                    } ?: emptyList()
+                )
+            }
+        } ?: emptyList(),
+        artists = this.artists?.items?.filterNotNull()?.let {  artists ->
+            artists.map { artistObject ->
+                SearchResult.Artist(
+                    id = artistObject.id,
+                    name = artistObject.name,
+                    images = Images.fromImagesOfFloatSize(artistObject.images)
+                )
+            }
+        } ?: emptyList(),
+        albums = this.albums?.items?.filterNotNull()?.let { albums ->
+            albums.map { albumObject ->
+                SearchResult.Album(
+                    id = albumObject.id,
+                    name = albumObject.name,
+                    images = Images.fromStandardImages(albumObject.images)
+                )
+            }
+        } ?: emptyList(),
+        playlists = this.playlists?.items?.filterNotNull()?.let { playlists ->
+            playlists.map { playlistObject ->
+                SearchResult.Playlist(
+                    id = playlistObject.id,
+                    name = playlistObject.name,
+                    images = Images.fromStandardImages(playlistObject.images)
+                )
+            }
+        } ?: emptyList()
+    )
 }
 
 fun Images.Companion.fromStandardImages(list: List<Image>?): Images {
