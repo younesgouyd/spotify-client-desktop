@@ -123,7 +123,10 @@ class AuthRepo(
                 " user-follow-read" +
                 " user-top-read" +
                 " user-library-read" +
-                " user-read-email"
+                " user-read-email" +
+                " user-read-playback-state" +
+                " user-read-currently-playing" +
+                " user-modify-playback-state"
 
         private val encodedRedirectUri get() =  URLEncoder.encode(REDIRECT_URI, Charsets.UTF_8)
 
