@@ -8,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -113,9 +114,9 @@ private fun PlaylistItem(
             verticalArrangement = Arrangement.Center
         ) {
             Image(
-                modifier = Modifier.fillMaxWidth().aspectRatio(1f),
+                modifier = Modifier.aspectRatio(1f),
                 url = playlist.images.preferablyMedium(),
-//                contentScale = ContentScale.FillWidth,
+                contentScale = ContentScale.FillWidth,
                 alignment = Alignment.TopCenter
             )
             Text(
