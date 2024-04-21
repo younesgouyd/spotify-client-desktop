@@ -13,6 +13,8 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.awt.Desktop
@@ -31,6 +33,7 @@ class AuthRepo(
     private val appDataRepo: AppDataRepo
 ) {
     private var token: Token? = null
+    private val mutex = Mutex()
 
     suspend fun isAuthorized(): Boolean {
         try {
@@ -42,17 +45,16 @@ class AuthRepo(
     }
 
     suspend fun getToken(): String {
-        token?.let {
-            if (it.expired()) {
-                refreshToken()
-                return it.accessToken
+        mutex.withLock {
+            if (token == null) {
+                loadTokenFromCache()
             }
+            if (token!!.expired()) {
+                refreshToken()
+                loadTokenFromCache()
+            }
+            return token!!.accessToken
         }
-        loadTokenFromCache()
-        if (token!!.expired()) {
-            refreshToken()
-        }
-        return token!!.accessToken
     }
 
     suspend fun login(spotifyClientId: String): LoginResult {
@@ -94,12 +96,6 @@ class AuthRepo(
             spotifyClientId = data.getString("client_id"),
             refreshToken = data.getJSONObject("token").getString("refresh_token")
         ).put("received_at", Instant.now().epochSecond)
-        token = Token(
-            accessToken = newTokenJson.getString("access_token"),
-            expiresIn = newTokenJson.getInt("expires_in"),
-            receivedAt = newTokenJson.getLong("received_at"),
-            refreshToken = newTokenJson.getString("refresh_token")
-        )
         data.put("token", newTokenJson)
         appDataRepo.save(data)
     }
