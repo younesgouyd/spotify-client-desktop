@@ -147,7 +147,6 @@ class AuthRepo(
                         "&code_challenge_method=S256" +
                         "&code_challenge=$challenge"
 
-                // wait for callback
                 var server: NettyApplicationEngine? = null
 
                 val code = suspendCancellableCoroutine { continuation ->
@@ -171,7 +170,6 @@ class AuthRepo(
                 }
 
                 server!!.stop(1, 5, TimeUnit.SECONDS)
-                // wait for callback
 
                 return@withContext getToken(
                     httpClient = httpClient,
