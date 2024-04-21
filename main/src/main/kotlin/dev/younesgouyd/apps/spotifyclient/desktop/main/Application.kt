@@ -69,7 +69,7 @@ object Application {
             it.clear()
             Login(
                 repoStore = repoStore,
-                onDone = { currentComponent.value = Content(repoStore, ::logout) }
+                onDone = ::showContent
             )
         }
     }

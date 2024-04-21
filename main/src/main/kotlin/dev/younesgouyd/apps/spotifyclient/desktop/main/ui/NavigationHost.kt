@@ -113,7 +113,9 @@ class NavigationHost(
 
         fun pop() {
             stack.pop()
-            currentDestination.update { stack.peek() }
+            if (stack.isNotEmpty()) {
+                currentDestination.update { stack.peek() }
+            }
             inHome.update { stack.size == 1 }
         }
 
