@@ -154,7 +154,11 @@ class NavigationHost(
                 repoStore = repoStore,
                 showUserDetails = { navigationController.navigateTo(getUser(it)) },
                 play = { coroutineScope.launch { playerController.play(id.toUri()) } },
-                playTrack = { coroutineScope.launch { playerController.play(uris = listOf(it.toUri())) } }
+                playTrack = {
+                    coroutineScope.launch {
+                        playerController.play(contextUri = id.toUri(), offset = Offset.Uri(it.toUri()))
+                    }
+                }
             )
         }
 
@@ -181,7 +185,11 @@ class NavigationHost(
                 repoStore = repoStore,
                 showArtistDetails = { navigationController.navigateTo(getArtistDetails(it)) },
                 play = { coroutineScope.launch { playerController.play(id.toUri()) } },
-                playTrack = { coroutineScope.launch { playerController.play(uris = listOf(it.toUri())) } }
+                playTrack = {
+                    coroutineScope.launch {
+                        playerController.play(contextUri = id.toUri(), offset = Offset.Uri(it.toUri()))
+                    }
+                }
             )
         }
 
