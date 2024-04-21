@@ -217,6 +217,7 @@ class NavigationHost(
                 showArtist = { navigationController.navigateTo(getArtistDetails(it)) },
                 showAlbum = { navigationController.navigateTo(getAlbumDetails(it)) },
                 showPlaylist = { navigationController.navigateTo(getPlaylistDetails(it)) },
+                showUser = { navigationController.navigateTo(getUser(it)) },
                 playTrack = { coroutineScope.launch { playerController.play(uris = listOf(it.toUri())) } },
                 playArtist = { coroutineScope.launch { playerController.play(it.toUri()) } },
                 playAlbum = { coroutineScope.launch { playerController.play(it.toUri()) } },

@@ -38,6 +38,7 @@ fun Search(
     onAlbumClick: (AlbumId) -> Unit,
     onPlayAlbumClick: (AlbumId) -> Unit,
     onPlaylistClick: (PlaylistId) -> Unit,
+    onPlaylistOwnerClick: (UserId) -> Unit,
     onPlayPlaylistClick: (PlaylistId) -> Unit
 ) {
     val types = remember {
@@ -60,6 +61,7 @@ fun Search(
             onAlbumClick = onAlbumClick,
             onPlayAlbumClick = onPlayAlbumClick,
             onPlaylistClick = onPlaylistClick,
+            onPlaylistOwnerClick = onPlaylistOwnerClick,
             onPlayPlaylistClick = onPlayPlaylistClick
         )
     }
@@ -120,6 +122,7 @@ private fun SearchResult(
     onAlbumClick: (AlbumId) -> Unit,
     onPlayAlbumClick: (AlbumId) -> Unit,
     onPlaylistClick: (PlaylistId) -> Unit,
+    onPlaylistOwnerClick: (UserId) -> Unit,
     onPlayPlaylistClick: (PlaylistId) -> Unit
 ) {
     val searchResult by searchResult.collectAsState()
@@ -135,14 +138,20 @@ private fun SearchResult(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 if (types.contains(SearchType.Track)) {
-                    item{
+                    item {
                         ResultItems<SearchResult.Track>(
                             modifier = Modifier.fillMaxWidth(),
                             headline = "Tracks",
                             items = result.tracks,
                             key = { it.id },
                             onItemClick = { onTrackClick(it.id) },
-                            itemContent = { TrackItemContent(track = it, onPlayClick = { onPlayTrackClick(it.id) }) }
+                            itemContent = {
+                                TrackItemContent(
+                                    track = it,
+                                    onArtistClick = onArtistClick,
+                                    onPlayClick = { onPlayTrackClick(it.id) }
+                                )
+                            }
                         )
                     }
                 }
@@ -166,7 +175,13 @@ private fun SearchResult(
                             items = result.albums,
                             key = { it.id },
                             onItemClick = { onAlbumClick(it.id) },
-                            itemContent = { AlbumItemContent(album = it, onPlayClick = { onPlayAlbumClick(it.id) }) }
+                            itemContent = {
+                                AlbumItemContent(
+                                    album = it,
+                                    onArtistClick = onArtistClick,
+                                    onPlayClick = { onPlayAlbumClick(it.id) }
+                                )
+                            }
                         )
                     }
                 }
@@ -178,7 +193,13 @@ private fun SearchResult(
                             items = result.playlists,
                             key = { it.id },
                             onItemClick = { onPlaylistClick(it.id) },
-                            itemContent = { PlaylistItemContent(playlist = it, onPlayClick = { onPlayPlaylistClick(it.id) }) }
+                            itemContent = {
+                                PlaylistItemContent(
+                                    playlist = it,
+                                    onOwnerClick = onPlaylistOwnerClick,
+                                    onPlayClick = { onPlayPlaylistClick(it.id) }
+                                )
+                            }
                         )
                     }
                 }
@@ -223,6 +244,7 @@ private fun <T> ResultItems(
 private fun TrackItemContent(
     modifier: Modifier = Modifier,
     track: SearchResult.Track,
+    onArtistClick: (ArtistId) -> Unit,
     onPlayClick: () -> Unit
 ) {
     Column(
@@ -245,6 +267,19 @@ private fun TrackItemContent(
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            items(items = track.artists, key = { it.id }) { artist ->
+                TextButton(
+                    content = { Text(text = artist.name ?: "", style = MaterialTheme.typography.labelMedium) },
+                    onClick = { onArtistClick(artist.id) }
+                )
+            }
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End,
@@ -301,6 +336,7 @@ private fun ArtistItemContent(
 private fun AlbumItemContent(
     modifier: Modifier = Modifier,
     album: SearchResult.Album,
+    onArtistClick: (ArtistId) -> Unit,
     onPlayClick: () -> Unit
 ) {
     Column(
@@ -323,6 +359,19 @@ private fun AlbumItemContent(
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            items(items = album.artists, key = { it.id }) { artist ->
+                TextButton(
+                    content = { Text(text = artist.name ?: "", style = MaterialTheme.typography.labelMedium) },
+                    onClick = { onArtistClick(artist.id) }
+                )
+            }
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End,
@@ -340,6 +389,7 @@ private fun AlbumItemContent(
 private fun PlaylistItemContent(
     modifier: Modifier = Modifier,
     playlist: SearchResult.Playlist,
+    onOwnerClick: (UserId) -> Unit,
     onPlayClick: () -> Unit
 ) {
     Column(
@@ -361,6 +411,11 @@ private fun PlaylistItemContent(
             minLines = 2,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
+        )
+        TextButton(
+            modifier = Modifier.padding(horizontal = 4.dp),
+            content = { Text(text = playlist.owner?.name ?: "", style = MaterialTheme.typography.labelMedium) },
+            onClick = { playlist.owner?.let { onOwnerClick(it.id) } }
         )
         Row(
             modifier = Modifier.fillMaxWidth(),

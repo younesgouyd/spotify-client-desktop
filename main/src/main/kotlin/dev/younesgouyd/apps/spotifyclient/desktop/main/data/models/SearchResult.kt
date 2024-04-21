@@ -1,9 +1,7 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.main.data.models
 
-import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.PlaylistId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.*
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -60,8 +58,15 @@ data class SearchResult(
         data class SimplifiedAlbumObject(
             val id: AlbumId,
             val images: List<Image>,
-            val name: String?
-        )
+            val name: String?,
+            val artists: List<SimplifiedArtistObject?>?
+        ) {
+            @Serializable
+            data class SimplifiedArtistObject(
+                val id: ArtistId,
+                val name: String?
+            )
+        }
     }
 
     @Serializable
@@ -72,7 +77,15 @@ data class SearchResult(
         data class SimplifiedPlaylistObject(
             val id: PlaylistId,
             val images: List<Image>,
-            val name: String?
-        )
+            val name: String?,
+            val owner: Owner?
+        ) {
+            @Serializable
+            data class Owner(
+                val id: UserId,
+                @SerialName("display_name")
+                val displayName: String?
+            )
+        }
     }
 }

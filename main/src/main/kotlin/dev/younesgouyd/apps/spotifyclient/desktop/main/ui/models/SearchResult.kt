@@ -1,9 +1,6 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models
 
-import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.PlaylistId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 
 data class SearchResult(
     val tracks: List<Track>,
@@ -32,12 +29,21 @@ data class SearchResult(
     data class Album(
         val id: AlbumId,
         val name: String?,
-        val images: Images
-    )
+        val images: Images,
+        val artists: List<Artist>
+    ) {
+        data class Artist(val id: ArtistId, val name: String?)
+    }
 
     data class Playlist(
         val id: PlaylistId,
         val name: String?,
-        val images: Images
-    )
+        val images: Images,
+        val owner: Owner?
+    ) {
+        data class Owner(
+            val id: UserId,
+            val name: String?
+        )
+    }
 }

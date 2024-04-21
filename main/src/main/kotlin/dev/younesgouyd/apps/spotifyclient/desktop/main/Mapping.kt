@@ -223,7 +223,10 @@ fun dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.SearchResult.toM
                 SearchResult.Album(
                     id = albumObject.id,
                     name = albumObject.name,
-                    images = Images.fromStandardImages(albumObject.images)
+                    images = Images.fromStandardImages(albumObject.images),
+                    artists = albumObject.artists?.filterNotNull()?.map {
+                        SearchResult.Album.Artist(id = it.id, name = it.name)
+                    } ?: emptyList()
                 )
             }
         } ?: emptyList(),
@@ -232,7 +235,8 @@ fun dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.SearchResult.toM
                 SearchResult.Playlist(
                     id = playlistObject.id,
                     name = playlistObject.name,
-                    images = Images.fromStandardImages(playlistObject.images)
+                    images = Images.fromStandardImages(playlistObject.images),
+                    owner = playlistObject.owner?.let { SearchResult.Playlist.Owner(id = it.id, name = it.displayName) }
                 )
             }
         } ?: emptyList()
