@@ -9,8 +9,11 @@ data class Playlist(
     val name: String?,
     val description: String?,
     val images: Images,
-    val owner: Owner?
+    val owner: Owner?,
+    val followed: Boolean
 ) {
+    val canUnfollow get() = owner?.id?.value != "spotify"
+
     data class Track(
         val id: TrackId,
         val name: String?,

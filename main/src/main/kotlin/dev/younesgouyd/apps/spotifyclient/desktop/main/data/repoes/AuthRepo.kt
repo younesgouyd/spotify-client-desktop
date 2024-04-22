@@ -124,7 +124,9 @@ class AuthRepo(
                 " user-read-currently-playing" +
                 // write-access
                 " user-follow-modify" +
-                " user-modify-playback-state"
+                " user-modify-playback-state" +
+                " playlist-modify-public" +
+                " playlist-modify-private"
 
         private val encodedRedirectUri get() =  URLEncoder.encode(REDIRECT_URI, Charsets.UTF_8)
 

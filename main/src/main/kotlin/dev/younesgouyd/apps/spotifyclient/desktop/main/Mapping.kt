@@ -26,13 +26,14 @@ fun Playlists.toModel(): List<PlaylistListItem?> {
     } ?: emptyList()
 }
 
-fun dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.playlist.Playlist.toModel(): Playlist {
+fun dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.playlist.Playlist.toModel(followed: Boolean): Playlist {
     return Playlist(
         id = this.id,
         name = this.name,
         description = this.description,
         images = Images.fromStandardImages(this.images),
-        owner = this.owner?.let { Playlist.Owner(id = it.id, name = it.displayName) }
+        owner = this.owner?.let { Playlist.Owner(id = it.id, name = it.displayName) },
+        followed = followed
     )
 }
 

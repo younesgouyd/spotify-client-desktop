@@ -5,11 +5,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.PlaylistRemove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.UserId
@@ -34,9 +37,11 @@ fun PlaylistDetails(state: PlaylistDetailsState) {
 private fun PlaylistDetails(state: PlaylistDetailsState.State) {
     PlaylistDetails(
         playlist = state.playlist,
+        followButtonEnabledState = state.followButtonEnabledState,
         tracks = state.tracks,
         loadingTracks = state.loadingTracks,
         onOwnerClick = state.onOwnerClick,
+        onPlaylistFollowStateChange = state.onPlaylistFollowStateChange,
         onLoadTracks = state.onLoadTracks,
         onPlayClick = state.onPlayClick,
         onTrackClick = state.onTrackClick
@@ -45,14 +50,18 @@ private fun PlaylistDetails(state: PlaylistDetailsState.State) {
 
 @Composable
 private fun PlaylistDetails(
-    playlist: Playlist,
+    playlist: StateFlow<Playlist>,
+    followButtonEnabledState: StateFlow<Boolean>,
     tracks: StateFlow<List<Playlist.Track>>,
     loadingTracks: StateFlow<Boolean>,
     onOwnerClick: (UserId) -> Unit,
+    onPlaylistFollowStateChange: (state: Boolean) -> Unit,
     onLoadTracks: () -> Unit,
     onPlayClick: () -> Unit,
     onTrackClick: (TrackId) -> Unit
 ) {
+    val playlist by playlist.collectAsState()
+    val followButtonEnabledState by followButtonEnabledState.collectAsState()
     val tracks by tracks.collectAsState()
     val loadingTracks by loadingTracks.collectAsState()
     val lazyColumnState = rememberLazyListState()
@@ -72,7 +81,9 @@ private fun PlaylistDetails(
                         PlaylistInfo(
                             modifier = Modifier.fillMaxWidth(),
                             playlist = playlist,
+                            followButtonEnabledState = followButtonEnabledState,
                             onOwnerClick = onOwnerClick,
+                            onPlaylistFollowStateChange = onPlaylistFollowStateChange,
                             onPlayClick = onPlayClick
                         )
                     }
@@ -112,25 +123,25 @@ private fun PlaylistDetails(
 private fun PlaylistInfo(
     modifier: Modifier,
     playlist: Playlist,
+    followButtonEnabledState: Boolean,
     onOwnerClick: (UserId) -> Unit,
+    onPlaylistFollowStateChange: (state: Boolean) -> Unit,
     onPlayClick: () -> Unit
 ) {
     Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(
-            space = 8.dp,
-            alignment = Alignment.Start
-        ),
+        modifier = modifier.height(300.dp),
+        horizontalArrangement = Arrangement.spacedBy(space = 12.dp, alignment = Alignment.Start),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
-            modifier = Modifier.size(300.dp),
-            url = playlist.images.preferablyMedium()
+            modifier = Modifier.fillMaxHeight(),
+            url = playlist.images.preferablyMedium(),
+            contentScale = ContentScale.FillHeight
         )
         Column(
-            modifier = Modifier.fillMaxWidth().padding(18.dp),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(space = 12.dp, alignment = Alignment.CenterVertically)
         ) {
             Text(
                 text = playlist.name ?: "",
@@ -146,10 +157,42 @@ private fun PlaylistInfo(
                     onClick = { onOwnerClick(playlist.owner.id) }
                 )
             }
-            IconButton(
-                content = { Icon(Icons.Default.PlayCircle, null) },
-                onClick = onPlayClick
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(space = 12.dp, alignment = Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    content = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.PlayCircle, null)
+                            Text(text = "Play", style = MaterialTheme.typography.labelMedium)
+                        }
+                    },
+                    onClick = onPlayClick
+                )
+                Button(
+                    content = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (!playlist.followed) {
+                                Icon(Icons.AutoMirrored.Default.PlaylistAdd, null)
+                                Text(text = "Follow", style = MaterialTheme.typography.labelMedium)
+                            } else {
+                                Icon(Icons.Default.PlaylistRemove, null)
+                                Text(text = "Unfollow", style = MaterialTheme.typography.labelMedium)
+                            }
+                        }
+                    },
+                    onClick = { if (playlist.canUnfollow) onPlaylistFollowStateChange(!playlist.followed) },
+                    enabled = followButtonEnabledState && playlist.canUnfollow
+                )
+            }
         }
     }
 }

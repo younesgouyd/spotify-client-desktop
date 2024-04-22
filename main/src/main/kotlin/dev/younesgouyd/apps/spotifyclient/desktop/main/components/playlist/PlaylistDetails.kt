@@ -12,9 +12,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.playlist.de
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.playlist.details.PlaylistDetailsState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Playlist
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class PlaylistDetails(
@@ -26,6 +24,8 @@ class PlaylistDetails(
 ) : Component() {
     override val title: String = "Playlist"
     private val state: MutableStateFlow<PlaylistDetailsState> = MutableStateFlow(PlaylistDetailsState.Loading)
+    private val playlist: MutableStateFlow<Playlist?> = MutableStateFlow(null)
+    private val followButtonEnabledState: MutableStateFlow<Boolean> = MutableStateFlow(true)
     private val tracks: MutableStateFlow<List<Playlist.Track>> = MutableStateFlow(emptyList())
     private val loadingTracks: MutableStateFlow<Boolean> = MutableStateFlow(false)
     private var reachedTheEnd = false
@@ -33,13 +33,22 @@ class PlaylistDetails(
 
     init {
         coroutineScope.launch {
-            val playlist = repoStore.playlistRepo.get(id)
+            reloadPlaylist()
             state.update {
                 PlaylistDetailsState.State(
-                    playlist = playlist,
+                    playlist = playlist.asStateFlow().filterNotNull().stateIn(coroutineScope),
+                    followButtonEnabledState = followButtonEnabledState.asStateFlow(),
                     tracks = tracks.asStateFlow(),
                     loadingTracks = loadingTracks.asStateFlow(),
                     onOwnerClick = showUserDetails,
+                    onPlaylistFollowStateChange = {
+                        coroutineScope.launch {
+                            followButtonEnabledState.update { false }
+                            repoStore.playlistRepo.changePlaylistFollowState(id, it)
+                            reloadPlaylist()
+                            followButtonEnabledState.update { true }
+                        }
+                    },
                     onLoadTracks = ::loadTracks,
                     onPlayClick = play,
                     onTrackClick = playTrack
@@ -70,5 +79,9 @@ class PlaylistDetails(
                 loadingTracks.update { false }
             }
         }
+    }
+
+    private suspend fun reloadPlaylist() {
+        playlist.update { repoStore.playlistRepo.get(id) }
     }
 }

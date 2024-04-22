@@ -9,10 +9,12 @@ sealed class PlaylistDetailsState {
     data object Loading : PlaylistDetailsState()
 
     data class State(
-        val playlist: Playlist,
+        val playlist: StateFlow<Playlist>,
+        val followButtonEnabledState: StateFlow<Boolean>,
         val tracks: StateFlow<List<Playlist.Track>>,
         val loadingTracks: StateFlow<Boolean>,
         val onOwnerClick: (UserId) -> Unit,
+        val onPlaylistFollowStateChange: (state: Boolean) -> Unit,
         val onLoadTracks: () -> Unit,
         val onPlayClick: () -> Unit,
         val onTrackClick: (TrackId) -> Unit
