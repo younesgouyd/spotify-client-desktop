@@ -1,6 +1,7 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.main
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -54,7 +55,8 @@ object Application {
                     darkTheme = darkTheme ?: DarkThemeOptions.SystemDefault,
                     content = {
                         Surface(
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.background
                         ) {
                             currentComponent.show()
                         }
