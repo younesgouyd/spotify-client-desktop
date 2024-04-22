@@ -106,7 +106,8 @@ fun FollowedArtists.toModel(): List<Artist> {
         Artist(
             id = it.id,
             name = it.name,
-            images = Images.fromStandardImages(it.images)
+            images = Images.fromStandardImages(it.images),
+            followed = true
         )
     } ?: emptyList()
 }
@@ -134,11 +135,12 @@ fun UserPlaylists.toModel(): List<User.Playlist?> {
     } ?: emptyList()
 }
 
-fun dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.artist.Artist.toModel(): Artist {
+fun dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.artist.Artist.toModel(followed: Boolean): Artist {
     return Artist(
         id = this.id,
         name = this.name,
-        images = Images.fromImagesOfFloatSize(this.images)
+        images = Images.fromImagesOfFloatSize(this.images),
+        followed = followed
     )
 }
 

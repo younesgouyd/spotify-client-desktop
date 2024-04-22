@@ -12,9 +12,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.deta
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.details.ArtistDetailsState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Artist
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class ArtistDetails(
@@ -27,15 +25,19 @@ class ArtistDetails(
 ) : Component() {
     override val title: String = "Artist"
     private val state: MutableStateFlow<ArtistDetailsState> = MutableStateFlow(ArtistDetailsState.Loading)
+    private val artist: MutableStateFlow<Artist?> = MutableStateFlow(null)
+    private val followButtonEnabledState: MutableStateFlow<Boolean> = MutableStateFlow(true)
     private val albums: MutableStateFlow<List<Artist.Album>> = MutableStateFlow(emptyList())
     private val loadingAlbums: MutableStateFlow<Boolean> = MutableStateFlow(false)
     private var reachedTheEnd = false
 
     init {
         coroutineScope.launch {
+            reloadArtist()
             state.update {
                 ArtistDetailsState.State(
-                    artist = repoStore.artistRepo.get(id),
+                    artist = artist.asStateFlow().filterNotNull().stateIn(coroutineScope),
+                    followButtonEnabledState = followButtonEnabledState.asStateFlow(),
                     topTracks = repoStore.trackRepo.getArtistTopTracks(id),
                     albums = albums.asStateFlow(),
                     loadingAlbums = loadingAlbums.asStateFlow(),
@@ -43,7 +45,15 @@ class ArtistDetails(
                     onPlayClick = play,
                     onPlayTrackClick = playTrack,
                     onAlbumClick = showAlbumDetails,
-                    onPlayAlbumClick = playAlbum
+                    onPlayAlbumClick = playAlbum,
+                    onArtistFollowStateChange = {
+                        coroutineScope.launch {
+                            followButtonEnabledState.update { false }
+                            repoStore.artistRepo.changeArtistFollowState(id, it)
+                            reloadArtist()
+                            followButtonEnabledState.update { true }
+                        }
+                    }
                 )
             }
         }
@@ -70,5 +80,9 @@ class ArtistDetails(
                 loadingAlbums.update { false }
             }
         }
+    }
+
+    private suspend fun reloadArtist() {
+        artist.update { repoStore.artistRepo.get(id) }
     }
 }

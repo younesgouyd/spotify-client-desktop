@@ -9,7 +9,8 @@ sealed class ArtistDetailsState {
     data object Loading : ArtistDetailsState()
 
     data class State(
-        val artist: Artist,
+        val artist: StateFlow<Artist>,
+        val followButtonEnabledState: StateFlow<Boolean>,
         val topTracks: List<Artist.Track>,
         val albums: StateFlow<List<Artist.Album>>,
         val loadingAlbums: StateFlow<Boolean>,
@@ -17,6 +18,7 @@ sealed class ArtistDetailsState {
         val onPlayClick: () -> Unit,
         val onPlayTrackClick: (TrackId) -> Unit,
         val onAlbumClick: (AlbumId) -> Unit,
-        val onPlayAlbumClick: (AlbumId) -> Unit
+        val onPlayAlbumClick: (AlbumId) -> Unit,
+        val onArtistFollowStateChange: (state: Boolean) -> Unit
     ) : ArtistDetailsState()
 }

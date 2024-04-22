@@ -4,6 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.PersonRemove
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,6 +38,7 @@ fun ArtistDetails(state: ArtistDetailsState) {
 private fun ArtistDetails(state: ArtistDetailsState.State) {
     ArtistDetails(
         artist = state.artist,
+        followButtonEnabledState = state.followButtonEnabledState,
         topTracks = state.topTracks,
         albums = state.albums,
         loadingAlbums = state.loadingAlbums,
@@ -43,22 +46,27 @@ private fun ArtistDetails(state: ArtistDetailsState.State) {
         onPlayClick = state.onPlayClick,
         onPlayTrackClick = state.onPlayTrackClick,
         onAlbumClick = state.onAlbumClick,
-        onPlayAlbumClick = state.onPlayAlbumClick
+        onPlayAlbumClick = state.onPlayAlbumClick,
+        onArtistFollowStateChange = state.onArtistFollowStateChange
     )
 }
 
 @Composable
 private fun ArtistDetails(
-    artist: Artist,
+    artist: StateFlow<Artist>,
+    followButtonEnabledState: StateFlow<Boolean>,
     topTracks: List<Artist.Track>,
     albums: StateFlow<List<Artist.Album>>,
     loadingAlbums: StateFlow<Boolean>,
     onLoadAlbums: () -> Unit,
     onPlayClick: () -> Unit,
+    onArtistFollowStateChange: (state: Boolean) -> Unit,
     onPlayTrackClick: (TrackId) -> Unit,
     onAlbumClick: (AlbumId) -> Unit,
     onPlayAlbumClick: (AlbumId) -> Unit
 ) {
+    val artist by artist.collectAsState()
+    val followButtonEnabledState by followButtonEnabledState.collectAsState()
     val albums by albums.collectAsState()
     val loadingAlbums by loadingAlbums.collectAsState()
     val lazyGridState = rememberLazyGridState()
@@ -79,7 +87,9 @@ private fun ArtistDetails(
                         ArtistInfo(
                             modifier = Modifier.fillMaxWidth(),
                             artist = artist,
-                            onPlayClick = onPlayClick
+                            followButtonEnabledState = followButtonEnabledState,
+                            onPlayClick = onPlayClick,
+                            onArtistFollowStateChange = onArtistFollowStateChange
                         )
                     }
                     item(span = { GridItemSpan(maxLineSpan) }) {
@@ -139,33 +149,65 @@ private fun ArtistDetails(
 private fun ArtistInfo(
     modifier: Modifier = Modifier,
     artist: Artist,
-    onPlayClick: () -> Unit
+    followButtonEnabledState: Boolean,
+    onPlayClick: () -> Unit,
+    onArtistFollowStateChange: (state: Boolean) -> Unit
 ) {
     Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(
-            space = 8.dp,
-            alignment = Alignment.Start
-        ),
+        modifier = modifier.height(300.dp),
+        horizontalArrangement = Arrangement.spacedBy(space = 12.dp, alignment = Alignment.Start),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
-            modifier = Modifier.size(300.dp),
-            url = artist.images.preferablyMedium()
+            modifier = Modifier.fillMaxHeight(),
+            url = artist.images.preferablyMedium(),
+            contentScale = ContentScale.FillHeight
         )
         Column(
-            modifier = Modifier.fillMaxWidth().padding(18.dp),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(space = 12.dp, alignment = Alignment.CenterVertically)
         ) {
             Text(
                 text = artist.name ?: "",
                 style = MaterialTheme.typography.displayMedium
             )
-            IconButton(
-                content = { Icon(Icons.Default.PlayCircle, null) },
-                onClick = onPlayClick
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(space = 12.dp, alignment = Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    content = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.PlayCircle, null)
+                            Text(text = "Play", style = MaterialTheme.typography.labelMedium)
+                        }
+                    },
+                    onClick = onPlayClick
+                )
+                Button(
+                    content = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (!artist.followed) {
+                                Icon(Icons.Default.PersonAdd, null)
+                                Text(text = "Follow", style = MaterialTheme.typography.labelMedium)
+                            } else {
+                                Icon(Icons.Default.PersonRemove, null)
+                                Text(text = "Unfollow", style = MaterialTheme.typography.labelMedium)
+                            }
+                        }
+                    },
+                    onClick = { onArtistFollowStateChange(!artist.followed) },
+                    enabled = followButtonEnabledState
+                )
+            }
         }
     }
 }
