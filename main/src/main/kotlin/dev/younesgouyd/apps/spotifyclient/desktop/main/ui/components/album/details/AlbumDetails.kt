@@ -6,11 +6,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
@@ -34,8 +37,12 @@ fun AlbumDetails(state: AlbumDetailsState) {
 private fun AlbumDetails(state: AlbumDetailsState.State) {
     AlbumDetails(
         album = state.album,
+        saved = state.saved,
+        saveRemoveButtonEnabled = state.saveRemoveButtonEnabled,
         tracks = state.tracks,
         loadingTracks = state.loadingTracks,
+        onSaveClick = state.onSaveClick,
+        onRemoveClick = state.onRemoveClick,
         onArtistClick = state.onArtistClick,
         onLoadTracks = state.onLoadTracks,
         onPlayClick = state.onPlayClick,
@@ -46,13 +53,19 @@ private fun AlbumDetails(state: AlbumDetailsState.State) {
 @Composable
 private fun AlbumDetails(
     album: Album,
+    saved: StateFlow<Boolean>,
+    saveRemoveButtonEnabled: StateFlow<Boolean>,
     tracks: StateFlow<List<Album.Track>>,
     loadingTracks: StateFlow<Boolean>,
+    onSaveClick: () -> Unit,
+    onRemoveClick: () -> Unit,
     onArtistClick: (ArtistId) -> Unit,
     onLoadTracks: () -> Unit,
     onPlayClick: () -> Unit,
     onTrackClick: (TrackId) -> Unit
 ) {
+    val saved by saved.collectAsState()
+    val saveRemoveButtonEnabled by saveRemoveButtonEnabled.collectAsState()
     val tracks by tracks.collectAsState()
     val loadingTracks by loadingTracks.collectAsState()
     val lazyColumnState = rememberLazyListState()
@@ -72,8 +85,12 @@ private fun AlbumDetails(
                         AlbumInfo(
                             modifier = Modifier.fillMaxWidth(),
                             album = album,
+                            saved = saved,
+                            saveRemoveButtonEnabled = saveRemoveButtonEnabled,
                             onArtistClick = onArtistClick,
-                            onPlayClick = onPlayClick
+                            onPlayClick = onPlayClick,
+                            onSaveClick = onSaveClick,
+                            onRemoveClick = onRemoveClick
                         )
                     }
                     items(
@@ -113,31 +130,36 @@ private fun AlbumDetails(
 private fun AlbumInfo(
     modifier: Modifier,
     album: Album,
+    saved: Boolean,
+    saveRemoveButtonEnabled: Boolean,
     onArtistClick: (ArtistId) -> Unit,
-    onPlayClick: () -> Unit
+    onPlayClick: () -> Unit,
+    onSaveClick: () -> Unit,
+    onRemoveClick: () -> Unit
 ) {
     Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(
-            space = 8.dp,
-            alignment = Alignment.Start
-        ),
+        modifier = modifier.height(300.dp),
+        horizontalArrangement = Arrangement.spacedBy(space = 12.dp, alignment = Alignment.Start),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
-            modifier = Modifier.size(300.dp),
-            url = album.images.preferablyMedium()
+            modifier = Modifier.fillMaxHeight(),
+            url = album.images.preferablyMedium(),
+            contentScale = ContentScale.FillHeight
         )
         Column(
-            modifier = Modifier.fillMaxWidth().padding(18.dp),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(space = 12.dp, alignment = Alignment.CenterVertically)
         ) {
             Text(
                 text = album.name ?: "",
                 style = MaterialTheme.typography.displayMedium
             )
-            Row {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 for (artist in album.artists) {
                     TextButton(
                         content = { Text(text = artist.name ?: "", style = MaterialTheme.typography.labelMedium) },
@@ -145,10 +167,42 @@ private fun AlbumInfo(
                     )
                 }
             }
-            IconButton(
-                content = { Icon(Icons.Default.PlayCircle, null) },
-                onClick = onPlayClick
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(space = 12.dp, alignment = Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    content = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.PlayCircle, null)
+                            Text(text = "Play", style = MaterialTheme.typography.labelMedium)
+                        }
+                    },
+                    onClick = onPlayClick
+                )
+                Button(
+                    content = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (!saved) {
+                                Icon(Icons.Default.Add, null)
+                                Text(text = "Save", style = MaterialTheme.typography.labelMedium)
+                            } else {
+                                Icon(Icons.Default.Remove, null)
+                                Text(text = "Remove", style = MaterialTheme.typography.labelMedium)
+                            }
+                        }
+                    },
+                    onClick = { if (!saved) onSaveClick() else onRemoveClick() },
+                    enabled = saveRemoveButtonEnabled
+                )
+            }
         }
     }
 }

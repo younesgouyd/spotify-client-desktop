@@ -52,4 +52,25 @@ class AlbumRepo(
             header("Authorization", "Bearer ${authRepo.getToken()}")
         }.body<dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.album.Album>().toModel()
     }
+
+    suspend fun saveAlbum(id: AlbumId) {
+        client.put("me/albums") {
+            header("Authorization", "Bearer ${authRepo.getToken()}")
+            parameter("ids", id)
+        }
+    }
+
+    suspend fun removeAlbum(id: AlbumId) {
+        client.delete("me/albums") {
+            header("Authorization", "Bearer ${authRepo.getToken()}")
+            parameter("ids", id)
+        }
+    }
+
+    suspend fun isAlbumSaved(id: AlbumId): Boolean {
+        return client.get("me/albums/contains") {
+            header("Authorization", "Bearer ${authRepo.getToken()}")
+            parameter("ids", id)
+        }.body<List<Boolean>>().first()
+    }
 }

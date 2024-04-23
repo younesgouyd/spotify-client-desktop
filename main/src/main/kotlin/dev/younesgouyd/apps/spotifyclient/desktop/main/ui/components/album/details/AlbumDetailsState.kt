@@ -10,8 +10,12 @@ sealed class AlbumDetailsState {
 
     data class State(
         val album: Album,
+        val saved: StateFlow<Boolean>,
+        val saveRemoveButtonEnabled: StateFlow<Boolean>,
         val tracks: StateFlow<List<Album.Track>>,
         val loadingTracks: StateFlow<Boolean>,
+        val onSaveClick: () -> Unit,
+        val onRemoveClick: () -> Unit,
         val onArtistClick: (ArtistId) -> Unit,
         val onLoadTracks: () -> Unit,
         val onPlayClick: () -> Unit,

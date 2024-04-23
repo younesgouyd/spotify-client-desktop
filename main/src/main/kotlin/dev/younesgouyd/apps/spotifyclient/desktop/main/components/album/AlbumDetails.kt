@@ -12,9 +12,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.album.detai
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.album.details.AlbumDetailsState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Album
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class AlbumDetails(
@@ -26,17 +24,38 @@ class AlbumDetails(
 ) : Component() {
     override val title: String = "Album"
     private val state: MutableStateFlow<AlbumDetailsState> = MutableStateFlow(AlbumDetailsState.Loading)
+    private val saved: MutableStateFlow<Boolean?> = MutableStateFlow(null)
+    private val saveRemoveButtonEnabled: MutableStateFlow<Boolean> = MutableStateFlow(true)
     private val tracks: MutableStateFlow<List<Album.Track>> = MutableStateFlow(emptyList())
     private val loadingTracks: MutableStateFlow<Boolean> = MutableStateFlow(false)
     private var reachedTheEnd = false
 
     init {
         coroutineScope.launch {
+            reloadSaved()
             state.update {
                 AlbumDetailsState.State(
                     album = repoStore.albumRepo.getAlbum(id),
+                    saved = saved.asStateFlow().filterNotNull().stateIn(coroutineScope),
+                    saveRemoveButtonEnabled = saveRemoveButtonEnabled.asStateFlow(),
                     tracks = tracks.asStateFlow(),
                     loadingTracks = loadingTracks.asStateFlow(),
+                    onSaveClick = {
+                        coroutineScope.launch {
+                            saveRemoveButtonEnabled.update { false }
+                            repoStore.albumRepo.saveAlbum(id)
+                            reloadSaved()
+                            saveRemoveButtonEnabled.update { true }
+                        }
+                    },
+                    onRemoveClick = {
+                        coroutineScope.launch {
+                            saveRemoveButtonEnabled.update { false }
+                            repoStore.albumRepo.removeAlbum(id)
+                            reloadSaved()
+                            saveRemoveButtonEnabled.update { true }
+                        }
+                    },
                     onArtistClick = showArtistDetails,
                     onLoadTracks = ::loadTracks,
                     onPlayClick = play,
@@ -67,5 +86,9 @@ class AlbumDetails(
                 loadingTracks.update { false }
             }
         }
+    }
+
+    private suspend fun reloadSaved() {
+        saved.update { repoStore.albumRepo.isAlbumSaved(id) }
     }
 }
