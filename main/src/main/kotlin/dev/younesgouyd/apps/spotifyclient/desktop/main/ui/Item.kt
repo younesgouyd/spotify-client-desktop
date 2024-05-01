@@ -18,16 +18,30 @@ fun Item(
     contentAlignment: Alignment = Alignment.Center,
     content: @Composable () -> Unit
 ) {
-    Card(
-        content = {
-            Box(
-                modifier = modifier.fillMaxSize(),
-                contentAlignment = contentAlignment,
-                content = { content() }
-            )
-        },
-        onClick = { if (onClick != null) onClick() },
-        elevation = CardDefaults.elevatedCardElevation(),
-        colors = CardDefaults.elevatedCardColors()
-    )
+    if (onClick != null) {
+        Card(
+            content = {
+                Box(
+                    modifier = modifier.fillMaxSize(),
+                    contentAlignment = contentAlignment,
+                    content = { content() }
+                )
+            },
+            onClick = onClick,
+            elevation = CardDefaults.elevatedCardElevation(),
+            colors = CardDefaults.elevatedCardColors()
+        )
+    } else {
+        Card(
+            content = {
+                Box(
+                    modifier = modifier.fillMaxSize(),
+                    contentAlignment = contentAlignment,
+                    content = { content() }
+                )
+            },
+            elevation = CardDefaults.elevatedCardElevation(),
+            colors = CardDefaults.elevatedCardColors()
+        )
+    }
 }
