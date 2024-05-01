@@ -87,10 +87,7 @@ private fun PlaylistDetails(
                             onPlayClick = onPlayClick
                         )
                     }
-                    items(
-                        items = tracks,
-                        key = { it.id }
-                    ) { item ->
+                    items(items = tracks) { item ->
                         TrackItem(
                             modifier = Modifier.fillMaxWidth(),
                             track = item,
