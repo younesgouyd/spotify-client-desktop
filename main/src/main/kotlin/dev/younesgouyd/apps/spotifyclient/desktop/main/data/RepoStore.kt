@@ -40,7 +40,7 @@ class RepoStore {
     val artistRepo by lazy { ArtistRepo(client, authRepo) }
     val playlistRepo by lazy { PlaylistRepo(client, authRepo) }
     val trackRepo by lazy { TrackRepo(client, authRepo) }
-    val userRepo by lazy { UserRepo(client, authRepo) }
+    val userRepo by lazy { UserRepo(client, authRepo, appDataRepo) }
     val playbackRepo by lazy { PlaybackRepo(client, authRepo) }
     val searchRepo by lazy { SearchRepo(client, authRepo) }
 }
