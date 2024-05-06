@@ -23,7 +23,7 @@ dependencyResolutionManagement {
             val versions = object {
                 val java = version("java", "20")
                 val kotlin = version("kotlin", "1.9.22")
-                val ktor = version("ktor", "2.3.2")
+                val ktor = version("ktor", "2.3.10")
                 val coroutines = version("coroutines", "1.8.0")
                 val logback = version("logback", "1.4.14")
                 val compose = version("compose", "1.6.1")

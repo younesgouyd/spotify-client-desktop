@@ -1,12 +1,14 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes
 
-import dev.younesgouyd.apps.spotifyclient.desktop.main.*
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
+import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.artist.FollowedArtists
+import dev.younesgouyd.apps.spotifyclient.desktop.main.toModel
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Artist
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.http.*
 
 class ArtistRepo(
     private val client: HttpClient,

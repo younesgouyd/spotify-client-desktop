@@ -9,7 +9,6 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Artist
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.http.*
 
 class AlbumRepo(
     private val client: HttpClient,
