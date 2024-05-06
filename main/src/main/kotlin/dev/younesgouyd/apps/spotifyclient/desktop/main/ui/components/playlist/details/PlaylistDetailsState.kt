@@ -1,5 +1,7 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.playlist.details
 
+import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
+import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
 import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.UserId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Playlist
@@ -11,11 +13,9 @@ sealed class PlaylistDetailsState {
     data class State(
         val playlist: StateFlow<Playlist>,
         val followButtonEnabledState: StateFlow<Boolean>,
-        val tracks: StateFlow<List<Playlist.Track>>,
-        val loadingTracks: StateFlow<Boolean>,
+        val tracks: LazilyLoadedItems<Playlist.Track, Offset.Index>,
         val onOwnerClick: (UserId) -> Unit,
         val onPlaylistFollowStateChange: (state: Boolean) -> Unit,
-        val onLoadTracks: () -> Unit,
         val onPlayClick: () -> Unit,
         val onTrackClick: (TrackId) -> Unit
     ) : PlaylistDetailsState()

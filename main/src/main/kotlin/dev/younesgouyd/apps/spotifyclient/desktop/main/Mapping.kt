@@ -14,16 +14,17 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.SearchResult
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.User
 import kotlin.time.Duration.Companion.milliseconds
 
-fun Playlists.toModel(): List<PlaylistListItem?> {
-    return this.items?.map { playlist ->
-        if (playlist != null) {
+fun Playlists.toModel(): LazilyLoadedItems.Page<PlaylistListItem, Offset.Index> {
+    return LazilyLoadedItems.Page(
+        nextOffset = Offset.Index.fromUrl(this.next),
+        items = this.items?.filterNotNull()?.map { playlist ->
             PlaylistListItem(
                 id = playlist.id,
                 name = playlist.name,
                 images = Images.fromStandardImages(playlist.images)
             )
-        } else null
-    } ?: emptyList()
+        } ?: emptyList()
+    )
 }
 
 fun dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.playlist.Playlist.toModel(followed: Boolean): Playlist {
@@ -55,28 +56,30 @@ fun dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.User.toModel(): 
     )
 }
 
-fun PlaylistTracks.toModel(): List<Playlist.Track?> {
-    return this.items?.map { (track) ->
-        if (track != null) {
+fun PlaylistTracks.toModel(): LazilyLoadedItems.Page<Playlist.Track, Offset.Index> {
+    return LazilyLoadedItems.Page(
+        nextOffset = Offset.Index.fromUrl(this.next),
+        items = this.items?.filterNotNull()?.filter { it.track != null }?.map { playlistTrackObject ->
             Playlist.Track(
-                id = track.id,
-                name = track.name,
-                images = Images.fromStandardImages(track.album?.images)
+                id = playlistTrackObject.track!!.id,
+                name = playlistTrackObject.track.name,
+                images = Images.fromStandardImages(playlistTrackObject.track.album?.images)
             )
-        } else null
-    } ?: emptyList()
+        } ?: emptyList()
+    )
 }
 
-fun SavedAlbums.toModel(): List<AlbumListItem?> {
-    return this.items?.map { (album) ->
-        if (album != null) {
+fun SavedAlbums.toModel(): LazilyLoadedItems.Page<AlbumListItem, Offset.Index> {
+    return LazilyLoadedItems.Page(
+        nextOffset = Offset.Index.fromUrl(this.next),
+        items = this.items?.filterNotNull()?.filter { it.album != null }?.map { savedAlbum ->
             AlbumListItem(
-                id = album.id,
-                name = album.name,
-                images = Images.fromStandardImages(album.images)
+                id = savedAlbum.album!!.id,
+                name = savedAlbum.album.name,
+                images = Images.fromStandardImages(savedAlbum.album.images)
             )
-        } else null
-    } ?: emptyList()
+        } ?: emptyList()
+    )
 }
 
 fun dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.album.Album.toModel(): Album {
@@ -93,47 +96,57 @@ fun dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.album.Album.toMo
     )
 }
 
-fun AlbumTracks.toModel(): List<Album.Track> {
-    return this.items?.map {
-        Album.Track(
-            id = it.id,
-            name = it.name
-        )
-    } ?: emptyList()
+fun AlbumTracks.toModel(): LazilyLoadedItems.Page<Album.Track, Offset.Index> {
+    return LazilyLoadedItems.Page(
+        nextOffset = Offset.Index.fromUrl(this.next),
+        items = this.items?.filterNotNull()?.map {
+            Album.Track(
+                id = it.id,
+                name = it.name
+            )
+        } ?: emptyList()
+    )
 }
 
-fun FollowedArtists.toModel(): List<Artist> {
-    return this.artists?.items?.map {
-        Artist(
-            id = it.id,
-            name = it.name,
-            images = Images.fromStandardImages(it.images),
-            followed = true
-        )
-    } ?: emptyList()
+fun FollowedArtists.toModel(): LazilyLoadedItems.Page<Artist, Offset.Uri> {
+    return LazilyLoadedItems.Page(
+        nextOffset = Offset.Uri.fromUrl(this.artists?.next),
+        items = this.artists?.items?.map {
+            Artist(
+                id = it.id,
+                name = it.name,
+                images = Images.fromStandardImages(it.images),
+                followed = true
+            )
+        } ?: emptyList()
+    )
 }
 
-fun ArtistAlbums.toModel(): List<Artist.Album> {
-    return this.items?.map { simplifiedAlbum ->
-        Artist.Album(
-            id = simplifiedAlbum.id,
-            name = simplifiedAlbum.name,
-            images = Images.fromStandardImages(simplifiedAlbum.images)
-        )
-    } ?: emptyList()
+fun ArtistAlbums.toModel(): LazilyLoadedItems.Page<Artist.Album, Offset.Index> {
+    return LazilyLoadedItems.Page(
+        nextOffset = Offset.Index.fromUrl(this.next),
+        items = this.items?.filterNotNull()?.map { simplifiedAlbum ->
+            Artist.Album(
+                id = simplifiedAlbum.id,
+                name = simplifiedAlbum.name,
+                images = Images.fromStandardImages(simplifiedAlbum.images)
+            )
+        } ?: emptyList()
+    )
 }
 
-fun UserPlaylists.toModel(): List<User.Playlist?> {
-    return this.items?.map {
-        if (it != null) {
+fun UserPlaylists.toModel(): LazilyLoadedItems.Page<User.Playlist, Offset.Index> {
+    return LazilyLoadedItems.Page(
+        nextOffset = Offset.Index.fromUrl(this.next),
+        items = this.items?.filterNotNull()?.map {
             User.Playlist(
                 id = it.id,
                 name = it.name,
                 description = it.description,
                 images = Images.fromStandardImages(it.images)
             )
-        } else null
-    } ?: emptyList()
+        } ?: emptyList()
+    )
 }
 
 fun dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.artist.Artist.toModel(followed: Boolean): Artist {
@@ -182,20 +195,19 @@ fun dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.PlaybackState.to
     )
 }
 
-fun CategoryPlaylists.toModel(): List<PlaylistListItem?> {
-    return this.playlists?.let {
-        it.items?.let {
-            it.map {
-                it?.let {
-                    PlaylistListItem(
-                        id = it.id,
-                        name = it.name,
-                        images = Images.fromStandardImages(it.images)
-                    )
-                }
+fun CategoryPlaylists.toModel(): LazilyLoadedItems.Page<PlaylistListItem, Offset.Index> {
+    return LazilyLoadedItems.Page(
+        nextOffset = Offset.Index.fromUrl(this.playlists?.next),
+        items = this.playlists?.let { playlists ->
+            playlists.items?.filterNotNull()?.map {
+                PlaylistListItem(
+                    id = it.id,
+                    name = it.name,
+                    images = Images.fromStandardImages(it.images)
+                )
             }
-        }
-    } ?: emptyList()
+        } ?: emptyList()
+    )
 }
 
 fun dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.SearchResult.toModel(): SearchResult {

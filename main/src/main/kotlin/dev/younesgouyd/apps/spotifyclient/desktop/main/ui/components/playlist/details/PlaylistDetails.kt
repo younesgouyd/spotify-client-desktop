@@ -14,6 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
+import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
 import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.UserId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
@@ -39,10 +41,8 @@ private fun PlaylistDetails(state: PlaylistDetailsState.State) {
         playlist = state.playlist,
         followButtonEnabledState = state.followButtonEnabledState,
         tracks = state.tracks,
-        loadingTracks = state.loadingTracks,
         onOwnerClick = state.onOwnerClick,
         onPlaylistFollowStateChange = state.onPlaylistFollowStateChange,
-        onLoadTracks = state.onLoadTracks,
         onPlayClick = state.onPlayClick,
         onTrackClick = state.onTrackClick
     )
@@ -52,23 +52,21 @@ private fun PlaylistDetails(state: PlaylistDetailsState.State) {
 private fun PlaylistDetails(
     playlist: StateFlow<Playlist>,
     followButtonEnabledState: StateFlow<Boolean>,
-    tracks: StateFlow<List<Playlist.Track>>,
-    loadingTracks: StateFlow<Boolean>,
+    tracks: LazilyLoadedItems<Playlist.Track, Offset.Index>,
     onOwnerClick: (UserId) -> Unit,
     onPlaylistFollowStateChange: (state: Boolean) -> Unit,
-    onLoadTracks: () -> Unit,
     onPlayClick: () -> Unit,
     onTrackClick: (TrackId) -> Unit
 ) {
     val playlist by playlist.collectAsState()
     val followButtonEnabledState by followButtonEnabledState.collectAsState()
-    val tracks by tracks.collectAsState()
-    val loadingTracks by loadingTracks.collectAsState()
+    val items by tracks.items.collectAsState()
+    val loadingTracks by tracks.loading.collectAsState()
     val lazyColumnState = rememberLazyListState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        content = { it ->
+        content = {
             Box(modifier = Modifier.fillMaxSize().padding(it)) {
                 VerticalScrollbar(lazyColumnState)
                 LazyColumn (
@@ -87,7 +85,7 @@ private fun PlaylistDetails(
                             onPlayClick = onPlayClick
                         )
                     }
-                    items(items = tracks) { item ->
+                    items(items = items) { item ->
                         TrackItem(
                             modifier = Modifier.fillMaxWidth(),
                             track = item,
@@ -110,9 +108,9 @@ private fun PlaylistDetails(
     LaunchedEffect(lazyColumnState) {
         snapshotFlow {
             lazyColumnState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-        }.map { it == null || it >= (tracks.size + 1) - 5 }
+        }.map { it == null || it >= (items.size + 1) - 5 }
             .filter { it }
-            .collect { onLoadTracks() }
+            .collect { tracks.loadMore() }
     }
 }
 

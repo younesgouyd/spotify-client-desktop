@@ -1,12 +1,9 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes
 
-import dev.younesgouyd.apps.spotifyclient.desktop.main.PlaylistId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.UserId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.CategoryPlaylists
-import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.CurrentUser
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.playlist.Playlists
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.playlist.UserPlaylists
-import dev.younesgouyd.apps.spotifyclient.desktop.main.toModel
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Playlist
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.PlaylistListItem
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.User
@@ -18,18 +15,18 @@ import org.json.JSONObject
 
 class PlaylistRepo(
     private val client: HttpClient,
-    private val authRepo: AuthRepo
+    private val authRepo: AuthRepo,
+    private val userRepo: UserRepo
 ) {
     /**
      * GET /me/playlists
-     * @param limit The maximum number of items to return. Default: 20. Minimum: 1. Maximum: 50
      * @param offset The index of the first playlist to return. Default: 0 (the first object). Maximum offset: 100.000. Use with limit to get the next set of playlists
      */
-    suspend fun getCurrentUserPlaylists(limit: Int, offset: Int): List<PlaylistListItem?> {
+    suspend fun getCurrentUserPlaylists(offset: Offset.Index): LazilyLoadedItems.Page<PlaylistListItem, Offset.Index> {
         return client.get("me/playlists") {
             header("Authorization", "Bearer ${authRepo.getToken()}")
-            parameter("limit", limit)
-            parameter("offset", offset)
+            parameter("limit", 20)
+            parameter("offset", offset.value)
         }.body<Playlists>().toModel()
     }
 
@@ -47,22 +44,22 @@ class PlaylistRepo(
     /**
      * GET /users/{user_id}/playlists
      */
-    suspend fun getUserPlaylists(userId: UserId, limit: Int, offset: Int): List<User.Playlist?> {
+    suspend fun getUserPlaylists(userId: UserId, offset: Offset.Index): LazilyLoadedItems.Page<User.Playlist, Offset.Index> {
         return client.get("users/$userId/playlists") {
             header("Authorization", "Bearer ${authRepo.getToken()}")
-            parameter("limit", limit)
-            parameter("offset", offset)
+            parameter("limit", 20)
+            parameter("offset", offset.value)
         }.body<UserPlaylists>().toModel()
     }
 
     /**
      * GET /browse/categories/{category_id}/playlists
      */
-    suspend fun getDiscoverPlaylists(limit: Int, offset: Int): List<PlaylistListItem?> {
+    suspend fun getDiscoverPlaylists(offset: Offset.Index): LazilyLoadedItems.Page<PlaylistListItem, Offset.Index> {
         return client.get("browse/categories/discover/playlists") {
             header("Authorization", "Bearer ${authRepo.getToken()}")
-            parameter("limit", limit)
-            parameter("offset", offset)
+            parameter("limit", 20)
+            parameter("offset", offset.value)
         }.body<CategoryPlaylists>().toModel()
     }
 
@@ -85,10 +82,7 @@ class PlaylistRepo(
     }
 
     private suspend fun isPlaylistFollowed(id: PlaylistId): Boolean {
-        val currentUserId = client.get("me") {
-            header("Authorization", "Bearer ${authRepo.getToken()}")
-        }.body<CurrentUser>().id
-
+        val currentUserId = userRepo.getCurrentUser().id
         return client.get("playlists/$id/followers/contains") {
             header("Authorization", "Bearer ${authRepo.getToken()}")
             parameter("ids", currentUserId)

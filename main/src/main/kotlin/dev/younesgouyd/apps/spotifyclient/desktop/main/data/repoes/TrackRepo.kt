@@ -1,12 +1,9 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes
 
-import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.PlaylistId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.ArtistTopTracks
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.album.AlbumTracks
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.playlist.PlaylistTracks
-import dev.younesgouyd.apps.spotifyclient.desktop.main.toModel
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Album
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Artist
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Playlist
@@ -20,14 +17,13 @@ class TrackRepo(
 ) {
     /**
      * GET /playlists/{id}/tracks
-     * @param limit The maximum number of items to return. Default: 20. Minimum: 1. Maximum: 50. Default: limit=20. Range: 0 - 50. Example: limit=10
      * @param offset The index of the first item to return. Default: 0 (the first item). Use with limit to get the next set of items. Default: offset=0. Example: offset=5
      */
-    suspend fun getPlaylistTracks(playlistId: PlaylistId, limit: Int?, offset: Int?): List<Playlist.Track?> {
+    suspend fun getPlaylistTracks(playlistId: PlaylistId, offset: Offset.Index): LazilyLoadedItems.Page<Playlist.Track, Offset.Index> {
         return client.get("playlists/$playlistId/tracks") {
             header("Authorization", "Bearer ${authRepo.getToken()}")
-            parameter("limit", limit)
-            parameter("offset", offset)
+            parameter("limit", 20)
+            parameter("offset", offset.value)
         }.body<PlaylistTracks>().toModel()
     }
 
@@ -36,11 +32,11 @@ class TrackRepo(
      * Get Spotify catalog information about an album’s tracks. Optional parameters can be used to limit the number
      * of tracks returned.
      */
-    suspend fun getAlbumTracks(id: AlbumId, limit: Int?, offset: Int?): List<Album.Track> {
+    suspend fun getAlbumTracks(id: AlbumId, offset: Offset.Index): LazilyLoadedItems.Page<Album.Track, Offset.Index> {
         return client.get("albums/$id/tracks") {
             header("Authorization", "Bearer ${authRepo.getToken()}")
-            parameter("limit", limit)
-            parameter("offset", offset)
+            parameter("limit", 20)
+            parameter("offset", offset.value)
         }.body<AlbumTracks>().toModel()
     }
 

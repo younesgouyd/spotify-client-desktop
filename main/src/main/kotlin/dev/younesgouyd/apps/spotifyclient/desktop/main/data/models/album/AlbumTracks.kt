@@ -8,7 +8,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class AlbumTracks(
-    val items: List<SimplifiedTrackObject>?
+    val next: String?,
+    val items: List<SimplifiedTrackObject?>?
 ) {
     @Serializable
     data class SimplifiedTrackObject(

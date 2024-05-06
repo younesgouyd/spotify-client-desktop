@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import dev.younesgouyd.apps.spotifyclient.desktop.main.Component
+import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
+import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
 import dev.younesgouyd.apps.spotifyclient.desktop.main.PlaylistId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.playlist.list.PlaylistList
@@ -11,7 +13,6 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.playlist.li
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.PlaylistListItem
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -22,18 +23,16 @@ class PlaylistList(
 ) : Component() {
     override val title: String = "Playlists"
     private val state: MutableStateFlow<PlaylistListState> = MutableStateFlow(PlaylistListState.Loading)
-    private val playlists: MutableStateFlow<List<PlaylistListItem>> = MutableStateFlow(emptyList())
-    private val loadingPlaylists: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    private var reachedTheEnd = false
-    private var offset = 0
 
     init {
         coroutineScope.launch {
             state.update {
                 PlaylistListState.State(
-                    playlists = playlists.asStateFlow(),
-                    loadingPlaylists = loadingPlaylists.asStateFlow(),
-                    onLoadPlaylists = ::loadPlaylists,
+                    playlists = LazilyLoadedItems<PlaylistListItem, Offset.Index>(
+                        coroutineScope = coroutineScope,
+                        load = { repoStore.playlistRepo.getCurrentUserPlaylists(it) },
+                        initialOffset = Offset.Index.initial()
+                    ),
                     onPlaylistClick = showPlaylistDetails,
                     onPlayPlaylistClick = playPlaylist
                 )
@@ -50,18 +49,5 @@ class PlaylistList(
 
     override fun clear() {
         coroutineScope.cancel()
-    }
-
-    private fun loadPlaylists() {
-        coroutineScope.launch {
-            if (!reachedTheEnd && !loadingPlaylists.value) {
-                loadingPlaylists.update { true }
-                val result = repoStore.playlistRepo.getCurrentUserPlaylists(20, offset)
-                offset += result.size
-                reachedTheEnd = result.isEmpty()
-                playlists.update { it + result.filterNotNull() }
-                loadingPlaylists.update { false }
-            }
-        }
     }
 }

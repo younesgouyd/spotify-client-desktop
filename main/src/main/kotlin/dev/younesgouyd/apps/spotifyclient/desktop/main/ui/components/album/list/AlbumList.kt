@@ -13,12 +13,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
+import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Item
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.ScrollToTopFloatingActionButton
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.VerticalScrollbar
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.AlbumListItem
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 
@@ -34,8 +35,6 @@ fun AlbumList(state: AlbumListState) {
 private fun AlbumList(state: AlbumListState.State) {
     AlbumList(
         albums = state.albums,
-        loadingAlbums = state.loadingAlbums,
-        onLoadAlbums = state.onLoadAlbums,
         onAlbumClick = state.onAlbumClick,
         onPlayAlbumClick = state.onPlayAlbumClick
     )
@@ -43,14 +42,12 @@ private fun AlbumList(state: AlbumListState.State) {
 
 @Composable
 private fun AlbumList(
-    albums: StateFlow<List<AlbumListItem>>,
-    loadingAlbums: StateFlow<Boolean>,
-    onLoadAlbums: () -> Unit,
+    albums: LazilyLoadedItems<AlbumListItem, Offset.Index>,
     onAlbumClick: (AlbumId) -> Unit,
     onPlayAlbumClick: (AlbumId) -> Unit
 ) {
-    val albums by albums.collectAsState()
-    val loadingAlbums by loadingAlbums.collectAsState()
+    val items by albums.items.collectAsState()
+    val loadingAlbums by albums.loading.collectAsState()
     val lazyGridState = rememberLazyGridState()
 
     Scaffold(
@@ -67,7 +64,7 @@ private fun AlbumList(
                     columns = GridCells.Adaptive(250.dp)
                 ) {
                     items(
-                        items = albums,
+                        items = items,
                         key = { it.id }
                     ) { item ->
                         AlbumItem(
@@ -92,9 +89,9 @@ private fun AlbumList(
     LaunchedEffect(lazyGridState) {
         snapshotFlow {
             lazyGridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-        }.map { it == null || it >= albums.size - 5 }
+        }.map { it == null || it >= items.size - 5 }
             .filter { it }
-            .collect { onLoadAlbums() }
+            .collect { albums.loadMore() }
     }
 }
 

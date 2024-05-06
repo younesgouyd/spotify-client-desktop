@@ -9,7 +9,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class SavedAlbums(
-    val items: List<SavedAlbum>?
+    val next: String?,
+    val items: List<SavedAlbum?>?
 ) {
     @Serializable
     data class SavedAlbum(

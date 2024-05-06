@@ -9,7 +9,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class PlaylistTracks(
-    val items: List<PlaylistTrackObject>?
+    val next: String?,
+    val items: List<PlaylistTrackObject?>?
 ) {
     @Serializable
     data class PlaylistTrackObject(

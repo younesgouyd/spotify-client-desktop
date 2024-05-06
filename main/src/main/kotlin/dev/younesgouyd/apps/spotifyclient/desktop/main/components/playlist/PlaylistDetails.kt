@@ -3,10 +3,7 @@ package dev.younesgouyd.apps.spotifyclient.desktop.main.components.playlist
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import dev.younesgouyd.apps.spotifyclient.desktop.main.Component
-import dev.younesgouyd.apps.spotifyclient.desktop.main.PlaylistId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.UserId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.playlist.details.PlaylistDetails
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.playlist.details.PlaylistDetailsState
@@ -26,10 +23,6 @@ class PlaylistDetails(
     private val state: MutableStateFlow<PlaylistDetailsState> = MutableStateFlow(PlaylistDetailsState.Loading)
     private val playlist: MutableStateFlow<Playlist?> = MutableStateFlow(null)
     private val followButtonEnabledState: MutableStateFlow<Boolean> = MutableStateFlow(true)
-    private val tracks: MutableStateFlow<List<Playlist.Track>> = MutableStateFlow(emptyList())
-    private val loadingTracks: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    private var reachedTheEnd = false
-    private var offset = 0
 
     init {
         coroutineScope.launch {
@@ -38,8 +31,11 @@ class PlaylistDetails(
                 PlaylistDetailsState.State(
                     playlist = playlist.asStateFlow().filterNotNull().stateIn(coroutineScope),
                     followButtonEnabledState = followButtonEnabledState.asStateFlow(),
-                    tracks = tracks.asStateFlow(),
-                    loadingTracks = loadingTracks.asStateFlow(),
+                    tracks = LazilyLoadedItems<Playlist.Track, Offset.Index>(
+                        coroutineScope = coroutineScope,
+                        load = { repoStore.trackRepo.getPlaylistTracks(id, it) },
+                        initialOffset = Offset.Index.initial()
+                    ),
                     onOwnerClick = showUserDetails,
                     onPlaylistFollowStateChange = {
                         coroutineScope.launch {
@@ -49,7 +45,6 @@ class PlaylistDetails(
                             followButtonEnabledState.update { true }
                         }
                     },
-                    onLoadTracks = ::loadTracks,
                     onPlayClick = play,
                     onTrackClick = playTrack
                 )
@@ -66,19 +61,6 @@ class PlaylistDetails(
 
     override fun clear() {
         coroutineScope.cancel()
-    }
-
-    private fun loadTracks() {
-        coroutineScope.launch {
-            if (!reachedTheEnd && !loadingTracks.value) {
-                loadingTracks.update { true }
-                val result = repoStore.trackRepo.getPlaylistTracks(id, 20, offset)
-                offset += result.size
-                reachedTheEnd = result.isEmpty()
-                tracks.update { it + result.filterNotNull() }
-                loadingTracks.update { false }
-            }
-        }
     }
 
     private suspend fun reloadPlaylist() {

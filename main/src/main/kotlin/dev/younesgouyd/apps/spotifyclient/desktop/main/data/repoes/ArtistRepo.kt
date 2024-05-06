@@ -1,12 +1,12 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes
 
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.artist.FollowedArtists
-import dev.younesgouyd.apps.spotifyclient.desktop.main.toModel
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Artist
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
+import io.ktor.http.*
 
 class ArtistRepo(
     private val client: HttpClient,
@@ -20,14 +20,13 @@ class ArtistRepo(
      * GET /me/following
      *
      * @param after The last artist ID retrieved from the previous request
-     * @param limit The maximum number of items to return. Default: 20. Minimum: 1. Maximum: 50
      */
-    suspend fun getCurrentUserFollowedArtists(after: ArtistId?, limit: Int?): List<Artist> {
+    suspend fun getCurrentUserFollowedArtists(after: Offset.Uri): LazilyLoadedItems.Page<Artist, Offset.Uri> {
         return client.get("me/following") {
             header("Authorization", "Bearer ${authRepo.getToken()}")
             parameter("type", ID_TYPE)
-            parameter("after", after)
-            parameter("limit", limit)
+            after.value?.let { parameter("after", it.id) }
+            parameter("limit", 20)
         }.body<FollowedArtists>().toModel()
     }
 

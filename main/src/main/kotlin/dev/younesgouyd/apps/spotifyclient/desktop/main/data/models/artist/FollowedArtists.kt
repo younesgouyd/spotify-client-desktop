@@ -13,6 +13,7 @@ data class FollowedArtists(
 ) {
     @Serializable
     data class Artists(
+        val next: String?,
         val items: List<Artist>?
     ) {
         @Serializable

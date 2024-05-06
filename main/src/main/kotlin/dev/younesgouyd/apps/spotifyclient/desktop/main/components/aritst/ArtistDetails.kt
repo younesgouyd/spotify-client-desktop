@@ -3,10 +3,7 @@ package dev.younesgouyd.apps.spotifyclient.desktop.main.components.aritst
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.Component
-import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.details.ArtistDetails
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.details.ArtistDetailsState
@@ -27,9 +24,6 @@ class ArtistDetails(
     private val state: MutableStateFlow<ArtistDetailsState> = MutableStateFlow(ArtistDetailsState.Loading)
     private val artist: MutableStateFlow<Artist?> = MutableStateFlow(null)
     private val followButtonEnabledState: MutableStateFlow<Boolean> = MutableStateFlow(true)
-    private val albums: MutableStateFlow<List<Artist.Album>> = MutableStateFlow(emptyList())
-    private val loadingAlbums: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    private var reachedTheEnd = false
 
     init {
         coroutineScope.launch {
@@ -39,9 +33,11 @@ class ArtistDetails(
                     artist = artist.asStateFlow().filterNotNull().stateIn(coroutineScope),
                     followButtonEnabledState = followButtonEnabledState.asStateFlow(),
                     topTracks = repoStore.trackRepo.getArtistTopTracks(id),
-                    albums = albums.asStateFlow(),
-                    loadingAlbums = loadingAlbums.asStateFlow(),
-                    onLoadAlbums = ::loadAlbums,
+                    albums = LazilyLoadedItems<Artist.Album, Offset.Index>(
+                        coroutineScope = coroutineScope,
+                        load = { repoStore.albumRepo.getArtistAlbums(id, it) },
+                        initialOffset = Offset.Index.initial()
+                    ),
                     onPlayClick = play,
                     onPlayTrackClick = playTrack,
                     onAlbumClick = showAlbumDetails,
@@ -68,18 +64,6 @@ class ArtistDetails(
 
     override fun clear() {
         coroutineScope.cancel()
-    }
-
-    private fun loadAlbums() {
-        coroutineScope.launch {
-            if (!reachedTheEnd && !loadingAlbums.value) {
-                loadingAlbums.update { true }
-                val result = repoStore.albumRepo.getArtistAlbums(id, 20, albums.value.size)
-                reachedTheEnd = result.isEmpty()
-                albums.update { it + result }
-                loadingAlbums.update { false }
-            }
-        }
     }
 
     private suspend fun reloadArtist() {

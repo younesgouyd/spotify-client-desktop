@@ -16,6 +16,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
+import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
 import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Item
@@ -41,8 +43,6 @@ private fun ArtistDetails(state: ArtistDetailsState.State) {
         followButtonEnabledState = state.followButtonEnabledState,
         topTracks = state.topTracks,
         albums = state.albums,
-        loadingAlbums = state.loadingAlbums,
-        onLoadAlbums = state.onLoadAlbums,
         onPlayClick = state.onPlayClick,
         onPlayTrackClick = state.onPlayTrackClick,
         onAlbumClick = state.onAlbumClick,
@@ -56,9 +56,7 @@ private fun ArtistDetails(
     artist: StateFlow<Artist>,
     followButtonEnabledState: StateFlow<Boolean>,
     topTracks: List<Artist.Track>,
-    albums: StateFlow<List<Artist.Album>>,
-    loadingAlbums: StateFlow<Boolean>,
-    onLoadAlbums: () -> Unit,
+    albums: LazilyLoadedItems<Artist.Album, Offset.Index>,
     onPlayClick: () -> Unit,
     onArtistFollowStateChange: (state: Boolean) -> Unit,
     onPlayTrackClick: (TrackId) -> Unit,
@@ -67,8 +65,8 @@ private fun ArtistDetails(
 ) {
     val artist by artist.collectAsState()
     val followButtonEnabledState by followButtonEnabledState.collectAsState()
-    val albums by albums.collectAsState()
-    val loadingAlbums by loadingAlbums.collectAsState()
+    val albumItems by albums.items.collectAsState()
+    val loadingAlbums by albums.loading.collectAsState()
     val lazyGridState = rememberLazyGridState()
 
     Scaffold(
@@ -114,7 +112,7 @@ private fun ArtistDetails(
                         )
                     }
                     items(
-                        items = albums,
+                        items = albumItems,
                         key = { it.id }
                     ) { item ->
                         AlbumItem(
@@ -139,9 +137,9 @@ private fun ArtistDetails(
     LaunchedEffect(lazyGridState) {
         snapshotFlow {
             lazyGridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-        }.map { it == null || it >= (albums.size + 4) - 5 }
+        }.map { it == null || it >= (albumItems.size + 4) - 5 }
             .filter { it }
-            .collect { onLoadAlbums() }
+            .collect { albums.loadMore() }
     }
 }
 

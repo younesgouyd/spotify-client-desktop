@@ -5,13 +5,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.Component
+import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
+import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.album.list.AlbumList
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.album.list.AlbumListState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.AlbumListItem
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -22,18 +23,16 @@ class AlbumList(
 ) : Component() {
     override val title: String = "Albums"
     private val state: MutableStateFlow<AlbumListState> = MutableStateFlow(AlbumListState.Loading)
-    private val albums: MutableStateFlow<List<AlbumListItem>> = MutableStateFlow(emptyList())
-    private val loadingAlbums: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    private var reachedTheEnd = false
-    private var offset = 0
 
     init {
         coroutineScope.launch {
             state.update {
                 AlbumListState.State(
-                    albums = albums.asStateFlow(),
-                    loadingAlbums = loadingAlbums.asStateFlow(),
-                    onLoadAlbums = ::loadAlbums,
+                    albums = LazilyLoadedItems<AlbumListItem, Offset.Index>(
+                        coroutineScope = coroutineScope,
+                        load = { repoStore.albumRepo.getSavedAlbums(it) },
+                        initialOffset = Offset.Index.initial()
+                    ),
                     onAlbumClick = showAlbumDetails,
                     onPlayAlbumClick = playAlbum
                 )
@@ -50,18 +49,5 @@ class AlbumList(
 
     override fun clear() {
         coroutineScope.cancel()
-    }
-
-    private fun loadAlbums() {
-        coroutineScope.launch {
-            if (!reachedTheEnd && !loadingAlbums.value) {
-                loadingAlbums.update { true }
-                val result = repoStore.albumRepo.getSavedAlbums(20, offset)
-                offset += result.size
-                reachedTheEnd = result.isEmpty()
-                albums.update { it + result.filterNotNull() }
-                loadingAlbums.update { false }
-            }
-        }
     }
 }

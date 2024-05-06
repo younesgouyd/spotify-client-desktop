@@ -14,12 +14,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
+import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Item
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.ScrollToTopFloatingActionButton
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.VerticalScrollbar
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Artist
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 
@@ -35,21 +36,17 @@ fun ArtistList(state: ArtistListState) {
 private fun ArtistList(state: ArtistListState.State) {
     ArtistList(
         artists = state.artists,
-        loadingArtists = state.loadingArtists,
-        onLoadArtists = state.onLoadArtists,
         onArtistClick = state.onArtistClick
     )
 }
 
 @Composable
 private fun ArtistList(
-    artists: StateFlow<List<Artist>>,
-    loadingArtists: StateFlow<Boolean>,
-    onLoadArtists: () -> Unit,
+    artists: LazilyLoadedItems<Artist, Offset.Uri>,
     onArtistClick: (ArtistId) -> Unit
 ) {
-    val artists by artists.collectAsState()
-    val loadingArtists by loadingArtists.collectAsState()
+    val items by artists.items.collectAsState()
+    val loadingArtists by artists.loading.collectAsState()
     val lazyGridState = rememberLazyGridState()
 
     Scaffold(
@@ -66,7 +63,7 @@ private fun ArtistList(
                     columns = GridCells.Adaptive(250.dp)
                 ) {
                     items(
-                        items = artists,
+                        items = items,
                         key = { it.id }
                     ) { item ->
                         ArtistItem(
@@ -90,9 +87,9 @@ private fun ArtistList(
     LaunchedEffect(lazyGridState) {
         snapshotFlow {
             lazyGridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-        }.map { it == null || it >= artists.size - 5 }
+        }.map { it == null || it >= items.size - 5 }
             .filter { it }
-            .collect { onLoadArtists() }
+            .collect { artists.loadMore() }
     }
 }
 

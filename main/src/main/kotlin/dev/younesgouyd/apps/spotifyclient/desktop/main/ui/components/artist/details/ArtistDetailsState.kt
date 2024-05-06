@@ -1,6 +1,8 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.details
 
 import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
+import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
 import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Artist
 import kotlinx.coroutines.flow.StateFlow
@@ -12,9 +14,7 @@ sealed class ArtistDetailsState {
         val artist: StateFlow<Artist>,
         val followButtonEnabledState: StateFlow<Boolean>,
         val topTracks: List<Artist.Track>,
-        val albums: StateFlow<List<Artist.Album>>,
-        val loadingAlbums: StateFlow<Boolean>,
-        val onLoadAlbums: () -> Unit,
+        val albums: LazilyLoadedItems<Artist.Album, Offset.Index>,
         val onPlayClick: () -> Unit,
         val onPlayTrackClick: (TrackId) -> Unit,
         val onAlbumClick: (AlbumId) -> Unit,

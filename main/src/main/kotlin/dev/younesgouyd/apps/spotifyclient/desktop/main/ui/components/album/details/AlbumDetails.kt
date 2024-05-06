@@ -16,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
+import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
 import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.ScrollToTopFloatingActionButton
@@ -40,11 +42,9 @@ private fun AlbumDetails(state: AlbumDetailsState.State) {
         saved = state.saved,
         saveRemoveButtonEnabled = state.saveRemoveButtonEnabled,
         tracks = state.tracks,
-        loadingTracks = state.loadingTracks,
         onSaveClick = state.onSaveClick,
         onRemoveClick = state.onRemoveClick,
         onArtistClick = state.onArtistClick,
-        onLoadTracks = state.onLoadTracks,
         onPlayClick = state.onPlayClick,
         onTrackClick = state.onTrackClick
     )
@@ -55,19 +55,17 @@ private fun AlbumDetails(
     album: Album,
     saved: StateFlow<Boolean>,
     saveRemoveButtonEnabled: StateFlow<Boolean>,
-    tracks: StateFlow<List<Album.Track>>,
-    loadingTracks: StateFlow<Boolean>,
+    tracks: LazilyLoadedItems<Album.Track, Offset.Index>,
     onSaveClick: () -> Unit,
     onRemoveClick: () -> Unit,
     onArtistClick: (ArtistId) -> Unit,
-    onLoadTracks: () -> Unit,
     onPlayClick: () -> Unit,
     onTrackClick: (TrackId) -> Unit
 ) {
     val saved by saved.collectAsState()
     val saveRemoveButtonEnabled by saveRemoveButtonEnabled.collectAsState()
-    val tracks by tracks.collectAsState()
-    val loadingTracks by loadingTracks.collectAsState()
+    val items by tracks.items.collectAsState()
+    val loadingTracks by tracks.loading.collectAsState()
     val lazyColumnState = rememberLazyListState()
 
     Scaffold(
@@ -94,7 +92,7 @@ private fun AlbumDetails(
                         )
                     }
                     items(
-                        items = tracks,
+                        items = items,
                         key = { it.id }
                     ) { item ->
                         TrackItem(
@@ -120,9 +118,9 @@ private fun AlbumDetails(
     LaunchedEffect(lazyColumnState) {
         snapshotFlow {
             lazyColumnState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-        }.map { it == null ||  it >= (tracks.size + 1) - 5  }
+        }.map { it == null ||  it >= (items.size + 1) - 5  }
             .filter { it }
-            .collect { onLoadTracks() }
+            .collect { tracks.loadMore() }
     }
 }
 

@@ -13,6 +13,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 @JvmInline
 value class SpotifyUri(val value: String) {
+    val id get() = value.split(":").last()
+
     override fun toString(): String {
         return value
     }

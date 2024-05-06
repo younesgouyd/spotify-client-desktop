@@ -12,13 +12,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
+import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
 import dev.younesgouyd.apps.spotifyclient.desktop.main.PlaylistId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Item
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.ScrollToTopFloatingActionButton
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.VerticalScrollbar
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.User
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 
@@ -34,9 +35,7 @@ fun User(state: UserState) {
 private fun User(state: UserState.State) {
     User(
         user = state.user,
-        loadingPlaylists = state.loadingPlaylists,
         playlists = state.playlists,
-        onLoadPlaylists = state.onLoadPlaylists,
         onPlaylistClick = state.onPlaylistClick,
         onPlayPlaylistClick = state.onPlayPlaylistClick
     )
@@ -45,14 +44,12 @@ private fun User(state: UserState.State) {
 @Composable
 private fun User(
     user: User,
-    loadingPlaylists: StateFlow<Boolean>,
-    playlists: StateFlow<List<User.Playlist>>,
-    onLoadPlaylists: () -> Unit,
+    playlists: LazilyLoadedItems<User.Playlist, Offset.Index>,
     onPlaylistClick: (PlaylistId) -> Unit,
     onPlayPlaylistClick: (PlaylistId) -> Unit
 ) {
-    val loadingPlaylists by loadingPlaylists.collectAsState()
-    val playlists by playlists.collectAsState()
+    val loadingPlaylists by playlists.loading.collectAsState()
+    val items by playlists.items.collectAsState()
     val lazyGridState = rememberLazyGridState()
 
     Scaffold(
@@ -68,7 +65,7 @@ private fun User(
                     columns = GridCells.Adaptive(250.dp)
                 ) {
                     item(content = { UserInfo(user = user) }, span = { GridItemSpan(maxLineSpan) })
-                    playlists(playlists, onPlaylistClick, onPlayPlaylistClick)
+                    playlists(items, onPlaylistClick, onPlayPlaylistClick)
                     if (loadingPlaylists) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             Box(modifier = Modifier.fillMaxWidth().padding(10.dp), contentAlignment = Alignment.Center) {
@@ -85,9 +82,9 @@ private fun User(
     LaunchedEffect(lazyGridState) {
         snapshotFlow {
             lazyGridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
-        }.map { it == null || it >= (playlists.size + 2) - 5 }
+        }.map { it == null || it >= (items.size + 2) - 5 }
             .filter { it }
-            .collect { onLoadPlaylists() }
+            .collect { playlists.loadMore() }
     }
 }
 

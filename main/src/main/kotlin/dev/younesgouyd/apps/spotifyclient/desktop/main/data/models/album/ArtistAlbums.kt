@@ -10,7 +10,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class ArtistAlbums(
-    val items: List<SimplifiedAlbum>?
+    val next: String?,
+    val items: List<SimplifiedAlbum?>?
 ) {
     @Serializable
     data class SimplifiedAlbum(
