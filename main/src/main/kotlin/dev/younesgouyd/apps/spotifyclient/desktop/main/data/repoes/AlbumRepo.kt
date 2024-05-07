@@ -35,7 +35,7 @@ class AlbumRepo(
         return client.get("artists/$id/albums") {
             header("Authorization", "Bearer ${authRepo.getToken()}")
             parameter("limit", 20)
-            parameter("offset", offset)
+            parameter("offset", offset.value)
         }.body<ArtistAlbums>().toModel()
     }
 
