@@ -1,6 +1,7 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.playlist
 
 import dev.younesgouyd.apps.spotifyclient.desktop.main.PlaylistId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.UserId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.Image
 import kotlinx.serialization.Serializable
 
@@ -16,6 +17,12 @@ data class Playlists(
     data class SimplifiedPlaylist(
         val id: PlaylistId,
         val images: List<Image>?,
-        val name: String?
-    )
+        val name: String?,
+        val owner: Owner?
+    ) {
+        @Serializable
+        data class Owner(
+            val id: UserId
+        )
+    }
 }

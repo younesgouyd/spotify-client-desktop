@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.PersonRemove
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,10 +20,8 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
 import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
 import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Item
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.ScrollToTopFloatingActionButton
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.VerticalScrollbar
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.*
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.AddTrackToPlaylistDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Artist
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
@@ -43,6 +42,7 @@ private fun ArtistDetails(state: ArtistDetailsState.State) {
         followButtonEnabledState = state.followButtonEnabledState,
         topTracks = state.topTracks,
         albums = state.albums,
+        addTrackToPlaylistDialogState = state.addTrackToPlaylistDialogState,
         onPlayClick = state.onPlayClick,
         onPlayTrackClick = state.onPlayTrackClick,
         onAlbumClick = state.onAlbumClick,
@@ -57,6 +57,7 @@ private fun ArtistDetails(
     followButtonEnabledState: StateFlow<Boolean>,
     topTracks: List<Artist.Track>,
     albums: LazilyLoadedItems<Artist.Album, Offset.Index>,
+    addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
     onPlayClick: () -> Unit,
     onArtistFollowStateChange: (state: Boolean) -> Unit,
     onPlayTrackClick: (TrackId) -> Unit,
@@ -101,6 +102,7 @@ private fun ArtistDetails(
                         TopTracks(
                             modifier = Modifier.fillMaxWidth(),
                             tracks = topTracks,
+                            addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
                             onPlayTrackClick = onPlayTrackClick
                         )
                     }
@@ -214,7 +216,8 @@ private fun ArtistInfo(
 private fun TopTracks(
     modifier: Modifier = Modifier,
     tracks: List<Artist.Track>,
-    onPlayTrackClick: (TrackId) -> Unit,
+    addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
+    onPlayTrackClick: (TrackId) -> Unit
 ) {
     Column(
         modifier = modifier,
@@ -222,23 +225,44 @@ private fun TopTracks(
         verticalArrangement = Arrangement.Top
     ) {
         for (track in tracks) {
+            var dialogVisible by remember { mutableStateOf(false) }
+
             Row(
                 modifier = Modifier.fillMaxWidth()
                     .clickable { onPlayTrackClick(track.id) },
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
-                    modifier = Modifier.size(64.dp),
-                    url = track.images.small
-                )
-                Text(
-                    text = track.name ?: "",
-                    style = MaterialTheme.typography.titleMedium
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        modifier = Modifier.size(64.dp),
+                        url = track.images.small
+                    )
+                    Text(
+                        text = track.name ?: "",
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                IconButton(
+                    content = { Icon(Icons.Default.Save, null) },
+                    onClick = { dialogVisible = true }
                 )
             }
             if (track != tracks.last()) {
                 HorizontalDivider()
+            }
+
+            if (dialogVisible) {
+                AddTrackToPlaylistDialog(
+                    state = addTrackToPlaylistDialogState,
+                    track = Track(track.id, track.name, track.images.preferablySmall()),
+                    onDismissRequest = { dialogVisible = false }
+                )
             }
         }
     }

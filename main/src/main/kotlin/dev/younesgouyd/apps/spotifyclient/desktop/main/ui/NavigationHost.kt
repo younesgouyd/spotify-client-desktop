@@ -18,6 +18,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.components.aritst.ArtistL
 import dev.younesgouyd.apps.spotifyclient.desktop.main.components.playlist.PlaylistDetails
 import dev.younesgouyd.apps.spotifyclient.desktop.main.components.playlist.PlaylistList
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.AddTrackToPlaylistDialogState
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -28,7 +29,8 @@ class NavigationHost(
     repoStore: RepoStore,
     startDestination: Destination,
     private val onLogout: () -> Unit,
-    private val playerController: PlayerController
+    private val playerController: PlayerController,
+    private val addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState
 ) : Component() {
     override val title: String
     private val destinationFactory: DestinationFactory
@@ -160,7 +162,8 @@ class NavigationHost(
                     coroutineScope.launch {
                         playerController.play(contextUri = id.toUri(), offset = Offset.Uri(it.toUri()))
                     }
-                }
+                },
+                addTrackToPlaylistDialogState = addTrackToPlaylistDialogState
             )
         }
 
@@ -191,7 +194,8 @@ class NavigationHost(
                     coroutineScope.launch {
                         playerController.play(contextUri = id.toUri(), offset = Offset.Uri(it.toUri()))
                     }
-                }
+                },
+                addTrackToPlaylistDialogState = addTrackToPlaylistDialogState
             )
         }
 
@@ -209,7 +213,8 @@ class NavigationHost(
                 showAlbumDetails = { navigationController.navigateTo(getAlbumDetails(it)) },
                 play = { coroutineScope.launch { playerController.play(id.toUri()) } },
                 playTrack = { coroutineScope.launch { playerController.play(uris = listOf(it.toUri())) } },
-                playAlbum = { coroutineScope.launch { playerController.play(it.toUri()) } }
+                playAlbum = { coroutineScope.launch { playerController.play(it.toUri()) } },
+                addTrackToPlaylistDialogState = addTrackToPlaylistDialogState
             )
         }
 
@@ -231,7 +236,8 @@ class NavigationHost(
                 playTrack = { coroutineScope.launch { playerController.play(uris = listOf(it.toUri())) } },
                 playArtist = { coroutineScope.launch { playerController.play(it.toUri()) } },
                 playAlbum = { coroutineScope.launch { playerController.play(it.toUri()) } },
-                playPlaylist = { coroutineScope.launch { playerController.play(it.toUri()) } }
+                playPlaylist = { coroutineScope.launch { playerController.play(it.toUri()) } },
+                addTrackToPlaylistDialogState = addTrackToPlaylistDialogState
             )
         }
     }

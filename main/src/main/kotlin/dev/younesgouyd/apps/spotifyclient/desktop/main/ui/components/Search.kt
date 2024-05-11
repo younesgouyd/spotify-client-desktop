@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,8 +22,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.main.*
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.AddTrackToPlaylistDialog
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Item
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Track
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.SearchResult
 import kotlinx.coroutines.flow.StateFlow
 
@@ -30,6 +33,7 @@ import kotlinx.coroutines.flow.StateFlow
 fun Search(
     searchResult: StateFlow<SearchResult?>,
     loading: StateFlow<Boolean>,
+    addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
     onSearchClick: (query: String) -> Unit,
     onTrackClick: (TrackId) -> Unit,
     onPlayTrackClick: (TrackId) -> Unit,
@@ -54,6 +58,7 @@ fun Search(
             searchResult = searchResult,
             types = types.toList(),
             loading = loading,
+            addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
             onTrackClick = onTrackClick,
             onPlayTrackClick = onPlayTrackClick,
             onArtistClick = onArtistClick,
@@ -115,6 +120,7 @@ private fun SearchResult(
     searchResult: StateFlow<SearchResult?>,
     types: List<SearchType>,
     loading: StateFlow<Boolean>,
+    addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
     onTrackClick: (TrackId) -> Unit,
     onPlayTrackClick: (TrackId) -> Unit,
     onArtistClick: (ArtistId) -> Unit,
@@ -145,11 +151,12 @@ private fun SearchResult(
                             items = result.tracks,
                             key = { it.id },
                             onItemClick = { onTrackClick(it.id) },
-                            itemContent = {
+                            itemContent = { track ->
                                 TrackItemContent(
-                                    track = it,
+                                    track = track,
+                                    addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
                                     onArtistClick = onArtistClick,
-                                    onPlayClick = { onPlayTrackClick(it.id) }
+                                    onPlayClick = { onPlayTrackClick(track.id) }
                                 )
                             }
                         )
@@ -244,9 +251,12 @@ private fun <T> ResultItems(
 private fun TrackItemContent(
     modifier: Modifier = Modifier,
     track: SearchResult.Track,
+    addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
     onArtistClick: (ArtistId) -> Unit,
     onPlayClick: () -> Unit
 ) {
+    var dialogVisible by remember { mutableStateOf(false) }
+
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -286,8 +296,20 @@ private fun TrackItemContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
+                content = { Icon(Icons.Default.Save, null) },
+                onClick = { dialogVisible = true }
+            )
+            IconButton(
                 content = { Icon(Icons.Default.PlayCircle, null) },
                 onClick = onPlayClick
+            )
+        }
+
+        if (dialogVisible) {
+            AddTrackToPlaylistDialog(
+                state = addTrackToPlaylistDialogState,
+                track = Track(track.id, track.name, track.images.preferablySmall()),
+                onDismissRequest = { dialogVisible = false }
             )
         }
     }

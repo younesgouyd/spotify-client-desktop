@@ -4,6 +4,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
 import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
 import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.AddTrackToPlaylistDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Album
 import kotlinx.coroutines.flow.StateFlow
 
@@ -19,6 +20,7 @@ sealed class AlbumDetailsState {
         val onRemoveClick: () -> Unit,
         val onArtistClick: (ArtistId) -> Unit,
         val onPlayClick: () -> Unit,
-        val onTrackClick: (TrackId) -> Unit
+        val onTrackClick: (TrackId) -> Unit,
+        val addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState
     ) : AlbumDetailsState()
 }

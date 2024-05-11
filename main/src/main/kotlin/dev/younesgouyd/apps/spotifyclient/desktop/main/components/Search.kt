@@ -3,6 +3,7 @@ package dev.younesgouyd.apps.spotifyclient.desktop.main.components
 import androidx.compose.runtime.Composable
 import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.AddTrackToPlaylistDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.Search
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.SearchResult
 import kotlinx.coroutines.cancel
@@ -20,7 +21,8 @@ class Search(
     private val playTrack: (TrackId) -> Unit,
     private val playArtist: (ArtistId) -> Unit,
     private val playAlbum: (AlbumId) -> Unit,
-    private val playPlaylist: (PlaylistId) -> Unit
+    private val playPlaylist: (PlaylistId) -> Unit,
+    private val addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState
 ) : Component() {
     override val title: String = "Search"
     private val searchResult: MutableStateFlow<SearchResult?> = MutableStateFlow(null)
@@ -31,6 +33,7 @@ class Search(
         Search(
             searchResult = searchResult.asStateFlow(),
             loading = loading.asStateFlow(),
+            addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
             onSearchClick = { query ->
                 coroutineScope.launch {
                     loading.update { true }

@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.AddTrackToPlaylistDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.details.ArtistDetails
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.details.ArtistDetailsState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Artist
@@ -18,7 +19,8 @@ class ArtistDetails(
     private val showAlbumDetails: (AlbumId) -> Unit,
     play: () -> Unit,
     playTrack: (TrackId) -> Unit,
-    playAlbum: (AlbumId) -> Unit
+    playAlbum: (AlbumId) -> Unit,
+    addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState
 ) : Component() {
     override val title: String = "Artist"
     private val state: MutableStateFlow<ArtistDetailsState> = MutableStateFlow(ArtistDetailsState.Loading)
@@ -38,6 +40,7 @@ class ArtistDetails(
                         load = { repoStore.albumRepo.getArtistAlbums(id, it) },
                         initialOffset = Offset.Index.initial()
                     ),
+                    addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
                     onPlayClick = play,
                     onPlayTrackClick = playTrack,
                     onAlbumClick = showAlbumDetails,

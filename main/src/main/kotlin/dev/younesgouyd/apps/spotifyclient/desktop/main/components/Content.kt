@@ -3,16 +3,16 @@ package dev.younesgouyd.apps.spotifyclient.desktop.main.components
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.Component
-import dev.younesgouyd.apps.spotifyclient.desktop.main.PlayerController
+import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.NavigationHost
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.AddTrackToPlaylistDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.Content
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.PlaylistOption
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 // todo: find a better name
 class Content(
@@ -23,17 +23,31 @@ class Content(
     private val mainComponentController = MainComponentController()
     private val playerController: PlayerController = PlayerController(repoStore)
 
-    private val profileNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Profile, onLogout, playerController) }
-    private val playlistsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Playlists, onLogout, playerController) }
-    private val albumsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Albums, onLogout, playerController) }
-    private val artistsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Artists, onLogout, playerController) }
-    private val discoverNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Discover, onLogout, playerController) }
-    private val searchNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Search, onLogout, playerController) }
-    private val settingsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Settings, onLogout, playerController) }
+    private val addTrackToPlaylistDialogState = AddTrackToPlaylistDialogState(
+        playlists = LazilyLoadedItems<PlaylistOption, Offset.Index>(
+            coroutineScope = coroutineScope,
+            load = repoStore.playlistRepo::getPlaylistOptions,
+            initialOffset = Offset.Index.initial()
+        ),
+        onAddTrackTopPlaylist = { trackId, playlistId ->
+            coroutineScope.launch {
+                repoStore.playlistRepo.addItems(playlistId, listOf(trackId.toUri()))
+            }
+        }
+    )
+
+    private val profileNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Profile, onLogout, playerController, addTrackToPlaylistDialogState) }
+    private val playlistsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Playlists, onLogout, playerController, addTrackToPlaylistDialogState) }
+    private val albumsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Albums, onLogout, playerController, addTrackToPlaylistDialogState) }
+    private val artistsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Artists, onLogout, playerController, addTrackToPlaylistDialogState) }
+    private val discoverNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Discover, onLogout, playerController, addTrackToPlaylistDialogState) }
+    private val searchNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Search, onLogout, playerController, addTrackToPlaylistDialogState) }
+    private val settingsNavHost by lazy { NavigationHost(repoStore, NavigationHost.Destination.Settings, onLogout, playerController, addTrackToPlaylistDialogState) }
     private val player = Player(
         playerController = playerController,
         showAlbumDetails = mainComponentController::showAlbums,
-        showArtistDetails = mainComponentController::showArtists
+        showArtistDetails = mainComponentController::showArtists,
+        addTrackToPlaylistDialogState = addTrackToPlaylistDialogState
     )
 
     private val currentMainComponent = MutableStateFlow(profileNavHost)

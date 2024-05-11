@@ -11,6 +11,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.Component
 import dev.younesgouyd.apps.spotifyclient.desktop.main.PlayerController
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.AddTrackToPlaylistDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.player.Player
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.player.PlayerState
 import kotlinx.coroutines.cancel
@@ -19,7 +20,8 @@ import kotlinx.coroutines.launch
 class Player(
     private val playerController: PlayerController,
     private val showAlbumDetails: (AlbumId) -> Unit,
-    private val showArtistDetails: (ArtistId) -> Unit
+    private val showArtistDetails: (ArtistId) -> Unit,
+    private val addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState
 ) : Component() {
     override val title: String = ""
 
@@ -39,6 +41,7 @@ class Player(
             state = PlayerState(
                 enabled = enabled,
                 playbackState = playbackState,
+                addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
                 onAlbumClick = showAlbumDetails,
                 onArtistClick = showArtistDetails,
                 onValueChange = { coroutineScope.launch { playerController.seek(it) } },

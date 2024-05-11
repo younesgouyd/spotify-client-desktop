@@ -5,15 +5,17 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.AddTrackToPlaylistDialog
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Track
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.AddTrackToPlaylistDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.PlaybackState
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -27,6 +29,7 @@ fun Player(
         modifier = modifier,
         enabled = state.enabled,
         playbackState = state.playbackState,
+        addTrackToPlaylistDialogState = state.addTrackToPlaylistDialogState,
         onAlbumClick = state.onAlbumClick,
         onArtistClick = state.onArtistClick,
         onValueChange = state.onValueChange,
@@ -45,6 +48,7 @@ private fun Player(
     modifier: Modifier = Modifier,
     enabled: Boolean,
     playbackState: PlaybackState,
+    addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
     onAlbumClick: (AlbumId) -> Unit,
     onArtistClick: (ArtistId) -> Unit,
     onValueChange: (Duration) -> Unit,
@@ -63,6 +67,7 @@ private fun Player(
         modifier = modifier,
         enabled = enabled,
         playbackState = playbackState.copy(elapsedTime = animatableElapsedTime.value),
+        addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
         onAlbumClick = onAlbumClick,
         onArtistClick = onArtistClick,
         onValueChange = onValueChange,
@@ -116,6 +121,7 @@ private fun _Player(
     modifier: Modifier = Modifier,
     enabled: Boolean,
     playbackState: PlaybackState,
+    addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
     onAlbumClick: (AlbumId) -> Unit,
     onArtistClick: (ArtistId) -> Unit,
     onValueChange: (Duration) -> Unit,
@@ -127,6 +133,7 @@ private fun _Player(
     onShuffleClick: (Boolean) -> Unit
 ) {
     val duration = playbackState.track?.duration ?: 0.milliseconds
+    var dialogVisible by remember { mutableStateOf(false) }
 
     Card(
         modifier = modifier,
@@ -144,7 +151,12 @@ private fun _Player(
                 verticalArrangement = Arrangement.Center
             ) {
                 if (playbackState.track != null) {
-                    Text(playbackState.track.title ?: "", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = playbackState.track.title ?: "",
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                     TextButton(
                         content = {
                             Row(
@@ -152,7 +164,12 @@ private fun _Player(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(Icons.Default.Album, null)
-                                Text(text = playbackState.track.album?.name ?: "", style = MaterialTheme.typography.labelMedium)
+                                Text(
+                                    text = playbackState.track.album?.name ?: "",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
                             }
                         },
                         onClick = { if (playbackState.track.album != null) { onAlbumClick(playbackState.track.album.id) } }
@@ -163,7 +180,20 @@ private fun _Player(
                     ) {
                         for (artist in playbackState.track.artists) {
                             TextButton(
-                                content = { Text(text = artist.name ?: "", style = MaterialTheme.typography.labelMedium) },
+                                content = {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(Icons.Default.Person, null)
+                                        Text(
+                                            text = artist.name ?: "",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                },
                                 onClick = { onArtistClick(artist.id) }
                             )
                         }
@@ -179,26 +209,31 @@ private fun _Player(
                         style = MaterialTheme.typography.labelMedium
                     )
                     IconButton(
+                        content = { Icon(Icons.Default.SkipPrevious, null) },
                         enabled = enabled,
-                        onClick = onPreviousClick,
-                        content = { Icon(Icons.Default.SkipPrevious, null) }
+                        onClick = onPreviousClick
                     )
                     when (playbackState.playing) {
                         true -> IconButton(
+                            content = { Icon(Icons.Default.PauseCircle, null) },
                             enabled = enabled,
-                            onClick = onPauseClick,
-                            content = { Icon(Icons.Default.PauseCircle, null) }
+                            onClick = onPauseClick
                         )
                         false, null -> IconButton(
+                            content = { Icon(Icons.Default.PlayCircle, null) },
                             enabled = enabled,
-                            onClick = onPlayClick,
-                            content = { Icon(Icons.Default.PlayCircle, null) }
+                            onClick = onPlayClick
                         )
                     }
                     IconButton(
+                        content = { Icon(Icons.Default.SkipNext, null) },
                         enabled = enabled,
-                        onClick = onNextClick,
-                        content = { Icon(Icons.Default.SkipNext, null) }
+                        onClick = onNextClick
+                    )
+                    IconButton(
+                        content = { Icon(Icons.Default.Save, null) },
+                        enabled = enabled,
+                        onClick = { dialogVisible = true }
                     )
                     when (playbackState.repeatState) {
                         PlaybackState.RepeatState.Off, null -> {
@@ -249,6 +284,14 @@ private fun _Player(
                 }
             }
         }
+    }
+
+    if (dialogVisible && playbackState.track != null) {
+        AddTrackToPlaylistDialog(
+            state = addTrackToPlaylistDialogState,
+            track = Track(playbackState.track.id, playbackState.track.title, playbackState.track.images.preferablySmall()),
+            onDismissRequest = { dialogVisible = false }
+        )
     }
 }
 
