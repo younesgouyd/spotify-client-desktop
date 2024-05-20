@@ -5,7 +5,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.AddTrackToPlaylistDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.album.details.AlbumDetails
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.album.details.AlbumDetailsState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Album
@@ -16,10 +17,11 @@ import kotlinx.coroutines.launch
 class AlbumDetails(
     private val id: AlbumId,
     private val repoStore: RepoStore,
+    addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
+    addTrackToFolderDialogState: AddTrackToFolderDialogState,
     private val showArtistDetails: (ArtistId) -> Unit,
     play: () -> Unit,
-    playTrack: (TrackId) -> Unit,
-    addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState
+    playTrack: (TrackId) -> Unit
 ) : Component() {
     override val title: String = "Album"
     private val state: MutableStateFlow<AlbumDetailsState> = MutableStateFlow(AlbumDetailsState.Loading)
@@ -39,6 +41,8 @@ class AlbumDetails(
                         load = { repoStore.trackRepo.getAlbumTracks(id, it) },
                         initialOffset = Offset.Index.initial()
                     ),
+                    addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
+                    addTrackToFolderDialogState = addTrackToFolderDialogState,
                     onSaveClick = {
                         coroutineScope.launch {
                             saveRemoveButtonEnabled.update { false }
@@ -57,8 +61,7 @@ class AlbumDetails(
                     },
                     onArtistClick = showArtistDetails,
                     onPlayClick = play,
-                    onTrackClick = playTrack,
-                    addTrackToPlaylistDialogState = addTrackToPlaylistDialogState
+                    onTrackClick = playTrack
                 )
             }
         }

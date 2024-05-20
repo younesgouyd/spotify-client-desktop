@@ -12,11 +12,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.AddTrackToPlaylistDialog
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Track
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.AddTrackToPlaylistDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialog
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialog
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.PlaybackState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Track
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -30,6 +32,7 @@ fun Player(
         enabled = state.enabled,
         playbackState = state.playbackState,
         addTrackToPlaylistDialogState = state.addTrackToPlaylistDialogState,
+        addTrackToFolderDialogState = state.addTrackToFolderDialogState,
         onAlbumClick = state.onAlbumClick,
         onArtistClick = state.onArtistClick,
         onValueChange = state.onValueChange,
@@ -49,6 +52,7 @@ private fun Player(
     enabled: Boolean,
     playbackState: PlaybackState,
     addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
+    addTrackToFolderDialogState: AddTrackToFolderDialogState,
     onAlbumClick: (AlbumId) -> Unit,
     onArtistClick: (ArtistId) -> Unit,
     onValueChange: (Duration) -> Unit,
@@ -68,6 +72,7 @@ private fun Player(
         enabled = enabled,
         playbackState = playbackState.copy(elapsedTime = animatableElapsedTime.value),
         addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
+        addTrackToFolderDialogState = addTrackToFolderDialogState,
         onAlbumClick = onAlbumClick,
         onArtistClick = onArtistClick,
         onValueChange = onValueChange,
@@ -122,6 +127,7 @@ private fun _Player(
     enabled: Boolean,
     playbackState: PlaybackState,
     addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
+    addTrackToFolderDialogState: AddTrackToFolderDialogState,
     onAlbumClick: (AlbumId) -> Unit,
     onArtistClick: (ArtistId) -> Unit,
     onValueChange: (Duration) -> Unit,
@@ -133,7 +139,8 @@ private fun _Player(
     onShuffleClick: (Boolean) -> Unit
 ) {
     val duration = playbackState.track?.duration ?: 0.milliseconds
-    var dialogVisible by remember { mutableStateOf(false) }
+    var addTrackToPlaylistDialogVisible by remember { mutableStateOf(false) }
+    var addTrackToFolderDialogVisible by remember { mutableStateOf(false) }
 
     Card(
         modifier = modifier,
@@ -233,7 +240,12 @@ private fun _Player(
                     IconButton(
                         content = { Icon(Icons.Default.Save, null) },
                         enabled = enabled,
-                        onClick = { dialogVisible = true }
+                        onClick = { addTrackToPlaylistDialogVisible = true }
+                    )
+                    IconButton(
+                        content = { Icon(Icons.Default.Folder, null) },
+                        enabled = enabled,
+                        onClick = { addTrackToFolderDialogVisible = true }
                     )
                     when (playbackState.repeatState) {
                         PlaybackState.RepeatState.Off, null -> {
@@ -286,11 +298,19 @@ private fun _Player(
         }
     }
 
-    if (dialogVisible && playbackState.track != null) {
+    if (addTrackToPlaylistDialogVisible && playbackState.track != null) {
         AddTrackToPlaylistDialog(
             state = addTrackToPlaylistDialogState,
             track = Track(playbackState.track.id, playbackState.track.title, playbackState.track.images.preferablySmall()),
-            onDismissRequest = { dialogVisible = false }
+            onDismissRequest = { addTrackToPlaylistDialogVisible = false }
+        )
+    }
+
+    if (addTrackToFolderDialogVisible && playbackState.track != null) {
+        AddTrackToFolderDialog(
+            track = Track(playbackState.track.id, playbackState.track.title, playbackState.track.images.preferablySmall()),
+            state = addTrackToFolderDialogState,
+            onDismissRequest = { addTrackToFolderDialogVisible = false  }
         )
     }
 }

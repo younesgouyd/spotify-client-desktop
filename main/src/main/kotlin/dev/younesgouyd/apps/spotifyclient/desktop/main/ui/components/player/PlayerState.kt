@@ -2,7 +2,8 @@ package dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.player
 
 import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.AddTrackToPlaylistDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.PlaybackState
 import kotlin.time.Duration
 
@@ -10,6 +11,7 @@ data class PlayerState(
     val enabled: Boolean,
     val playbackState: PlaybackState,
     val addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
+    val addTrackToFolderDialogState: AddTrackToFolderDialogState,
     val onAlbumClick: (AlbumId) -> Unit,
     val onArtistClick: (ArtistId) -> Unit,
     val onValueChange: (Duration) -> Unit,

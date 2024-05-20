@@ -41,3 +41,6 @@ value class UserId(val value: String) {
         return value
     }
 }
+
+@JvmInline
+value class FolderId(val value: Long)

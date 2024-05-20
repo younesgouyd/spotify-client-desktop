@@ -1,4 +1,4 @@
-package dev.younesgouyd.apps.spotifyclient.desktop.main.ui
+package dev.younesgouyd.apps.spotifyclient.desktop.main.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -10,7 +10,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import dev.younesgouyd.apps.spotifyclient.desktop.main.*
-import dev.younesgouyd.apps.spotifyclient.desktop.main.components.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.components.album.AlbumDetails
 import dev.younesgouyd.apps.spotifyclient.desktop.main.components.album.AlbumList
 import dev.younesgouyd.apps.spotifyclient.desktop.main.components.aritst.ArtistDetails
@@ -18,7 +17,8 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.components.aritst.ArtistL
 import dev.younesgouyd.apps.spotifyclient.desktop.main.components.playlist.PlaylistDetails
 import dev.younesgouyd.apps.spotifyclient.desktop.main.components.playlist.PlaylistList
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.AddTrackToPlaylistDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -28,9 +28,10 @@ import java.util.*
 class NavigationHost(
     repoStore: RepoStore,
     startDestination: Destination,
-    private val onLogout: () -> Unit,
     private val playerController: PlayerController,
-    private val addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState
+    private val addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
+    private val addTrackToFolderDialogState: AddTrackToFolderDialogState,
+    private val onLogout: () -> Unit
 ) : Component() {
     override val title: String
     private val destinationFactory: DestinationFactory
@@ -163,7 +164,8 @@ class NavigationHost(
                         playerController.play(contextUri = id.toUri(), offset = Offset.Uri(it.toUri()))
                     }
                 },
-                addTrackToPlaylistDialogState = addTrackToPlaylistDialogState
+                addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
+                addTrackToFolderDialogState = addTrackToFolderDialogState
             )
         }
 
@@ -188,14 +190,15 @@ class NavigationHost(
             return AlbumDetails(
                 id = id,
                 repoStore = repoStore,
+                addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
+                addTrackToFolderDialogState = addTrackToFolderDialogState,
                 showArtistDetails = { navigationController.navigateTo(getArtistDetails(it)) },
                 play = { coroutineScope.launch { playerController.play(id.toUri()) } },
                 playTrack = {
                     coroutineScope.launch {
                         playerController.play(contextUri = id.toUri(), offset = Offset.Uri(it.toUri()))
                     }
-                },
-                addTrackToPlaylistDialogState = addTrackToPlaylistDialogState
+                }
             )
         }
 
@@ -214,7 +217,8 @@ class NavigationHost(
                 play = { coroutineScope.launch { playerController.play(id.toUri()) } },
                 playTrack = { coroutineScope.launch { playerController.play(uris = listOf(it.toUri())) } },
                 playAlbum = { coroutineScope.launch { playerController.play(it.toUri()) } },
-                addTrackToPlaylistDialogState = addTrackToPlaylistDialogState
+                addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
+                addTrackToFolderDialogState = addTrackToFolderDialogState
             )
         }
 
@@ -237,7 +241,8 @@ class NavigationHost(
                 playArtist = { coroutineScope.launch { playerController.play(it.toUri()) } },
                 playAlbum = { coroutineScope.launch { playerController.play(it.toUri()) } },
                 playPlaylist = { coroutineScope.launch { playerController.play(it.toUri()) } },
-                addTrackToPlaylistDialogState = addTrackToPlaylistDialogState
+                addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
+                addTrackToFolderDialogState = addTrackToFolderDialogState
             )
         }
     }

@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.compose)
+    alias(libs.plugins.sqldelight)
 }
 
 kotlin {
@@ -15,6 +16,8 @@ dependencies {
     implementation(libs.coroutines.core)
     implementation(libs.logback)
     implementation(libs.json)
+    implementation(libs.sqliteDriver)
+    implementation(libs.sqldelightCoroutines)
 
     implementation(compose.desktop.currentOs) {
         exclude("org.jetbrains.compose.material") // todo - -_-
@@ -30,4 +33,12 @@ dependencies {
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.contentNegotiation)
     implementation(libs.ktor.serialization)
+}
+
+sqldelight {
+    databases {
+        create("SpotifyClientDesktop") {
+            packageName.set("dev.younesgouyd.apps.spotifyclient.desktop.main.data.sqldelight")
+        }
+    }
 }

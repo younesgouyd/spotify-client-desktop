@@ -3,7 +3,8 @@ package dev.younesgouyd.apps.spotifyclient.desktop.main.components
 import androidx.compose.runtime.Composable
 import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.AddTrackToPlaylistDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.Search
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.SearchResult
 import kotlinx.coroutines.cancel
@@ -22,7 +23,8 @@ class Search(
     private val playArtist: (ArtistId) -> Unit,
     private val playAlbum: (AlbumId) -> Unit,
     private val playPlaylist: (PlaylistId) -> Unit,
-    private val addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState
+    private val addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
+    private val addTrackToFolderDialogState: AddTrackToFolderDialogState
 ) : Component() {
     override val title: String = "Search"
     private val searchResult: MutableStateFlow<SearchResult?> = MutableStateFlow(null)
@@ -34,7 +36,8 @@ class Search(
             searchResult = searchResult.asStateFlow(),
             loading = loading.asStateFlow(),
             addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
-            onSearchClick = { query ->
+            addTrackToFolderDialogState = addTrackToFolderDialogState,
+            onSearch = { query ->
                 coroutineScope.launch {
                     loading.update { true }
                     searchResult.update { repoStore.searchRepo.search(query) }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material.icons.filled.PlaylistRemove
 import androidx.compose.material.icons.filled.Save
@@ -20,9 +21,16 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
 import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
 import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.UserId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.*
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.AddTrackToPlaylistDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Item
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.ScrollToTopFloatingActionButton
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.VerticalScrollbar
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialog
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialog
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Playlist
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Track
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -42,6 +50,7 @@ private fun PlaylistDetails(state: PlaylistDetailsState.State) {
         followButtonEnabledState = state.followButtonEnabledState,
         tracks = state.tracks,
         addTrackToPlaylistDialogState = state.addTrackToPlaylistDialogState,
+        addTrackToFolderDialogState = state.addTrackToFolderDialogState,
         onOwnerClick = state.onOwnerClick,
         onPlaylistFollowStateChange = state.onPlaylistFollowStateChange,
         onPlayClick = state.onPlayClick,
@@ -55,6 +64,7 @@ private fun PlaylistDetails(
     followButtonEnabledState: StateFlow<Boolean>,
     tracks: LazilyLoadedItems<Playlist.Track, Offset.Index>,
     addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
+    addTrackToFolderDialogState: AddTrackToFolderDialogState,
     onOwnerClick: (UserId) -> Unit,
     onPlaylistFollowStateChange: (state: Boolean) -> Unit,
     onPlayClick: () -> Unit,
@@ -92,6 +102,7 @@ private fun PlaylistDetails(
                             modifier = Modifier.fillMaxWidth(),
                             track = item,
                             addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
+                            addTrackToFolderDialogState = addTrackToFolderDialogState,
                             onTrackClick = onTrackClick
                         )
                     }
@@ -200,9 +211,11 @@ private fun TrackItem(
     modifier: Modifier = Modifier,
     track: Playlist.Track,
     addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
+    addTrackToFolderDialogState: AddTrackToFolderDialogState,
     onTrackClick: (TrackId) -> Unit
 ) {
-    var dialogVisible by remember { mutableStateOf(false) }
+    var addToPlaylistDialogVisible by remember { mutableStateOf(false) }
+    var addToFolderDialogVisible by remember { mutableStateOf(false) }
 
     Item(
         modifier = modifier,
@@ -229,18 +242,32 @@ private fun TrackItem(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            IconButton(
-                content = { Icon(Icons.Default.Save, null) },
-                onClick = { dialogVisible = true }
-            )
+            Row {
+                IconButton(
+                    content = { Icon(Icons.Default.Save, null) },
+                    onClick = { addToPlaylistDialogVisible = true }
+                )
+                IconButton(
+                    content = { Icon(Icons.Default.Folder, null) },
+                    onClick = { addToFolderDialogVisible = true }
+                )
+            }
         }
     }
 
-    if (dialogVisible) {
+    if (addToPlaylistDialogVisible) {
         AddTrackToPlaylistDialog(
             state = addTrackToPlaylistDialogState,
             track = Track(track.id, track.name, track.images.preferablySmall()),
-            onDismissRequest = { dialogVisible = false }
+            onDismissRequest = { addToPlaylistDialogVisible = false }
+        )
+    }
+
+    if (addToFolderDialogVisible) {
+        AddTrackToFolderDialog(
+            track = Track(track.id, track.name, track.images.preferablySmall()),
+            state = addTrackToFolderDialogState,
+            onDismissRequest = { addToFolderDialogVisible = false }
         )
     }
 }

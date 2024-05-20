@@ -5,7 +5,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.AddTrackToPlaylistDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.details.ArtistDetails
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.details.ArtistDetailsState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Artist
@@ -20,7 +21,8 @@ class ArtistDetails(
     play: () -> Unit,
     playTrack: (TrackId) -> Unit,
     playAlbum: (AlbumId) -> Unit,
-    addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState
+    addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
+    addTrackToFolderDialogState: AddTrackToFolderDialogState
 ) : Component() {
     override val title: String = "Artist"
     private val state: MutableStateFlow<ArtistDetailsState> = MutableStateFlow(ArtistDetailsState.Loading)
@@ -41,6 +43,7 @@ class ArtistDetails(
                         initialOffset = Offset.Index.initial()
                     ),
                     addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
+                    addTrackToFolderDialogState = addTrackToFolderDialogState,
                     onPlayClick = play,
                     onPlayTrackClick = playTrack,
                     onAlbumClick = showAlbumDetails,

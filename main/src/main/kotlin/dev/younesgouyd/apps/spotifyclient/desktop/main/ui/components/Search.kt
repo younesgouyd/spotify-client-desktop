@@ -7,10 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.PlayCircle
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -22,11 +19,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.main.*
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.AddTrackToPlaylistDialog
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Item
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Track
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialog
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialog
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.SearchResult
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Track
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
@@ -34,7 +34,8 @@ fun Search(
     searchResult: StateFlow<SearchResult?>,
     loading: StateFlow<Boolean>,
     addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
-    onSearchClick: (query: String) -> Unit,
+    addTrackToFolderDialogState: AddTrackToFolderDialogState,
+    onSearch: (query: String) -> Unit,
     onTrackClick: (TrackId) -> Unit,
     onPlayTrackClick: (TrackId) -> Unit,
     onArtistClick: (ArtistId) -> Unit,
@@ -52,13 +53,14 @@ fun Search(
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        SearchForm(modifier = Modifier.fillMaxWidth().padding(12.dp), types = types, onSearchClick = onSearchClick)
+        SearchForm(modifier = Modifier.fillMaxWidth().padding(12.dp), types = types, onSearch = onSearch)
         SearchResult(
             modifier = Modifier.fillMaxWidth(),
             searchResult = searchResult,
             types = types.toList(),
             loading = loading,
             addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
+            addTrackToFolderDialogState = addTrackToFolderDialogState,
             onTrackClick = onTrackClick,
             onPlayTrackClick = onPlayTrackClick,
             onArtistClick = onArtistClick,
@@ -77,7 +79,7 @@ fun Search(
 private fun SearchForm(
     modifier: Modifier = Modifier,
     types: SnapshotStateList<SearchType>,
-    onSearchClick: (query: String) -> Unit
+    onSearch: (query: String) -> Unit
 ) {
     var query by remember { mutableStateOf("") }
 
@@ -89,7 +91,7 @@ private fun SearchForm(
             shape = MaterialTheme.shapes.extraLarge,
             singleLine = true,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-            keyboardActions = KeyboardActions(onSearch = { onSearchClick(query) }, onDone = { onSearchClick(query) }),
+            keyboardActions = KeyboardActions(onSearch = { onSearch(query) }),
             onValueChange = { query = it },
             trailingIcon = {
                 IconButton(
@@ -121,6 +123,7 @@ private fun SearchResult(
     types: List<SearchType>,
     loading: StateFlow<Boolean>,
     addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
+    addTrackToFolderDialogState: AddTrackToFolderDialogState,
     onTrackClick: (TrackId) -> Unit,
     onPlayTrackClick: (TrackId) -> Unit,
     onArtistClick: (ArtistId) -> Unit,
@@ -155,6 +158,7 @@ private fun SearchResult(
                                 TrackItemContent(
                                     track = track,
                                     addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
+                                    addTrackToFolderDialogState = addTrackToFolderDialogState,
                                     onArtistClick = onArtistClick,
                                     onPlayClick = { onPlayTrackClick(track.id) }
                                 )
@@ -252,10 +256,12 @@ private fun TrackItemContent(
     modifier: Modifier = Modifier,
     track: SearchResult.Track,
     addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
+    addTrackToFolderDialogState: AddTrackToFolderDialogState,
     onArtistClick: (ArtistId) -> Unit,
     onPlayClick: () -> Unit
 ) {
-    var dialogVisible by remember { mutableStateOf(false) }
+    var addToPlaylistDialogVisible by remember { mutableStateOf(false) }
+    var addToFolderDialogVisible by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier,
@@ -297,7 +303,11 @@ private fun TrackItemContent(
         ) {
             IconButton(
                 content = { Icon(Icons.Default.Save, null) },
-                onClick = { dialogVisible = true }
+                onClick = { addToPlaylistDialogVisible = true }
+            )
+            IconButton(
+                content = { Icon(Icons.Default.Folder, null) },
+                onClick = { addToFolderDialogVisible = true }
             )
             IconButton(
                 content = { Icon(Icons.Default.PlayCircle, null) },
@@ -305,11 +315,19 @@ private fun TrackItemContent(
             )
         }
 
-        if (dialogVisible) {
+        if (addToPlaylistDialogVisible) {
             AddTrackToPlaylistDialog(
                 state = addTrackToPlaylistDialogState,
                 track = Track(track.id, track.name, track.images.preferablySmall()),
-                onDismissRequest = { dialogVisible = false }
+                onDismissRequest = { addToPlaylistDialogVisible = false }
+            )
+        }
+
+        if (addToFolderDialogVisible) {
+            AddTrackToFolderDialog(
+                track = Track(track.id, track.name, track.images.preferablySmall()),
+                state = addTrackToFolderDialogState,
+                onDismissRequest = { addToFolderDialogVisible = false }
             )
         }
     }

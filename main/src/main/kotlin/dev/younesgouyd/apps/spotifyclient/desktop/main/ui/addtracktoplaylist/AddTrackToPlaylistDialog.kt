@@ -1,4 +1,4 @@
-package dev.younesgouyd.apps.spotifyclient.desktop.main.ui
+package dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,16 +15,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.AddTrackToPlaylistDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Item
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.VerticalScrollbar
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Track
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
-
-data class Track(
-    val id: TrackId,
-    val name: String?,
-    val imageUrl: ImageUrl?
-)
 
 @Composable
 fun AddTrackToPlaylistDialog(
@@ -38,7 +34,7 @@ fun AddTrackToPlaylistDialog(
 
     Dialog(onDismissRequest = onDismissRequest) {
         Surface(
-            modifier = Modifier.size(width = 400.dp, height = 600.dp),
+            modifier = Modifier.size(width = 500.dp, height = 600.dp),
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.background
         ) {

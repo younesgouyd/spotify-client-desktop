@@ -28,16 +28,20 @@ dependencyResolutionManagement {
                 val logback = version("logback", "1.4.14")
                 val compose = version("compose", "1.6.1")
                 val json = version("json", "20240303")
+                val sqldelight = version("sqldelight", "2.0.2")
             }
 
             plugin("kotlin.jvm", "org.jetbrains.kotlin.jvm").versionRef(versions.kotlin)
             plugin("kotlin.serialization", "org.jetbrains.kotlin.plugin.serialization").versionRef(versions.kotlin)
             plugin("compose", "org.jetbrains.compose").versionRef(versions.compose)
+            plugin("sqldelight", "app.cash.sqldelight").versionRef(versions.sqldelight)
 
             library("coroutines.core", "org.jetbrains.kotlinx", "kotlinx-coroutines-core").versionRef(versions.coroutines)
 
             library("logback", "ch.qos.logback", "logback-classic").versionRef(versions.logback)
             library("json", "org.json", "json").versionRef(versions.json)
+            library("sqliteDriver", "app.cash.sqldelight", "sqlite-driver").versionRef(versions.sqldelight)
+            library("sqldelightCoroutines", "app.cash.sqldelight", "coroutines-extensions").versionRef(versions.sqldelight)
 
             library("ktor.server.core", "io.ktor", "ktor-server-core").versionRef(versions.ktor)
             library("ktor.server.netty", "io.ktor", "ktor-server-netty").versionRef(versions.ktor)

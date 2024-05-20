@@ -1,0 +1,21 @@
+CREATE TABLE folder_track_cross_ref (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    folder_id INTEGER NOT NULL REFERENCES folder(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    track_id TEXT NOT NULL,
+    creation_datetime INTEGER NOT NULL,
+    update_datetime INTEGER NOT NULL,
+    UNIQUE (folder_id, track_id)
+);
+
+selectFolderTrackIds:
+SELECT track_id FROM folder_track_cross_ref
+WHERE folder_id = :folderId;
+
+insert:
+INSERT INTO folder_track_cross_ref (folder_id, track_id, creation_datetime, update_datetime)
+VALUES (:folderId, :trackId, :creationDatetime, :updateDatetime);
+
+delete:
+DELETE FROM folder_track_cross_ref
+WHERE folder_id = :folderId
+AND track_id = :trackId;

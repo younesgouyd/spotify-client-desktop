@@ -4,10 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.PersonRemove
-import androidx.compose.material.icons.filled.PlayCircle
-import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,9 +17,16 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
 import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
 import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.*
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.AddTrackToPlaylistDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Item
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.ScrollToTopFloatingActionButton
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.VerticalScrollbar
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialog
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialog
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Artist
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Track
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -43,6 +47,7 @@ private fun ArtistDetails(state: ArtistDetailsState.State) {
         topTracks = state.topTracks,
         albums = state.albums,
         addTrackToPlaylistDialogState = state.addTrackToPlaylistDialogState,
+        addTrackToFolderDialogState = state.addTrackToFolderDialogState,
         onPlayClick = state.onPlayClick,
         onPlayTrackClick = state.onPlayTrackClick,
         onAlbumClick = state.onAlbumClick,
@@ -58,6 +63,7 @@ private fun ArtistDetails(
     topTracks: List<Artist.Track>,
     albums: LazilyLoadedItems<Artist.Album, Offset.Index>,
     addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
+    addTrackToFolderDialogState: AddTrackToFolderDialogState,
     onPlayClick: () -> Unit,
     onArtistFollowStateChange: (state: Boolean) -> Unit,
     onPlayTrackClick: (TrackId) -> Unit,
@@ -103,6 +109,7 @@ private fun ArtistDetails(
                             modifier = Modifier.fillMaxWidth(),
                             tracks = topTracks,
                             addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
+                            addTrackToFolderDialogState = addTrackToFolderDialogState,
                             onPlayTrackClick = onPlayTrackClick
                         )
                     }
@@ -217,6 +224,7 @@ private fun TopTracks(
     modifier: Modifier = Modifier,
     tracks: List<Artist.Track>,
     addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
+    addTrackToFolderDialogState: AddTrackToFolderDialogState,
     onPlayTrackClick: (TrackId) -> Unit
 ) {
     Column(
@@ -225,7 +233,8 @@ private fun TopTracks(
         verticalArrangement = Arrangement.Top
     ) {
         for (track in tracks) {
-            var dialogVisible by remember { mutableStateOf(false) }
+            var addToPlaylistDialogVisible by remember { mutableStateOf(false) }
+            var addToFolderDialogVisible by remember { mutableStateOf(false) }
 
             Row(
                 modifier = Modifier.fillMaxWidth()
@@ -248,20 +257,34 @@ private fun TopTracks(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                IconButton(
-                    content = { Icon(Icons.Default.Save, null) },
-                    onClick = { dialogVisible = true }
-                )
+                Row {
+                    IconButton(
+                        content = { Icon(Icons.Default.Save, null) },
+                        onClick = { addToPlaylistDialogVisible = true }
+                    )
+                    IconButton(
+                        content = { Icon(Icons.Default.Folder, null) },
+                        onClick = { addToFolderDialogVisible = true }
+                    )
+                }
             }
             if (track != tracks.last()) {
                 HorizontalDivider()
             }
 
-            if (dialogVisible) {
+            if (addToPlaylistDialogVisible) {
                 AddTrackToPlaylistDialog(
                     state = addTrackToPlaylistDialogState,
                     track = Track(track.id, track.name, track.images.preferablySmall()),
-                    onDismissRequest = { dialogVisible = false }
+                    onDismissRequest = { addToPlaylistDialogVisible = false }
+                )
+            }
+
+            if (addToFolderDialogVisible) {
+                AddTrackToFolderDialog(
+                    track = Track(track.id, track.name, track.images.preferablySmall()),
+                    state = addTrackToFolderDialogState,
+                    onDismissRequest = { addToFolderDialogVisible = false }
                 )
             }
         }

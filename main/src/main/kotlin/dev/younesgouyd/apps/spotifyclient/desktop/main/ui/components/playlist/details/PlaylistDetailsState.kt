@@ -4,7 +4,8 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
 import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
 import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.UserId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.AddTrackToPlaylistDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Playlist
 import kotlinx.coroutines.flow.StateFlow
 
@@ -16,6 +17,7 @@ sealed class PlaylistDetailsState {
         val followButtonEnabledState: StateFlow<Boolean>,
         val tracks: LazilyLoadedItems<Playlist.Track, Offset.Index>,
         val addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
+        val addTrackToFolderDialogState: AddTrackToFolderDialogState,
         val onOwnerClick: (UserId) -> Unit,
         val onPlaylistFollowStateChange: (state: Boolean) -> Unit,
         val onPlayClick: () -> Unit,

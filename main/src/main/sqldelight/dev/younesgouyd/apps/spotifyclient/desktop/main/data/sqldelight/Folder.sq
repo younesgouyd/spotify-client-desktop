@@ -1,0 +1,32 @@
+CREATE TABLE folder (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    parent_folder_id INTEGER REFERENCES folder(id) ON UPDATE CASCADE ON DELETE CASCADE,
+    creation_datetime INTEGER NOT NULL,
+    update_datetime INTEGER NOT NULL
+);
+
+select:
+SELECT * FROM folder WHERE id = :id;
+
+selectSubfolders:
+SELECT * FROM folder
+WHERE parent_folder_id = :parentFolderId;
+
+selectAddTrackToFolderOptions:
+SELECT f.id, f.name, ftcr.track_id
+FROM folder f
+LEFT JOIN folder_track_cross_ref ftcr ON ftcr.folder_id = f.id AND ftcr.track_id = :trackId
+WHERE f.parent_folder_id = :parentFolderId;
+
+insert:
+INSERT INTO folder (name, parent_folder_id, creation_datetime, update_datetime)
+VALUES (:name, :parentFolderId, :creationDatetime, :updateDatetime);
+
+updateName:
+UPDATE folder
+SET name = :name, update_datetime = :updateDatetime
+WHERE id = :id;
+
+delete:
+DELETE FROM folder WHERE id = :id;

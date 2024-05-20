@@ -1,6 +1,8 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.main.data
 
+import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.*
+import dev.younesgouyd.apps.spotifyclient.desktop.main.data.sqldelight.SpotifyClientDesktop
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
@@ -9,38 +11,71 @@ import io.ktor.client.plugins.logging.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
+import java.io.File
+import java.util.*
 
 class RepoStore {
-    private val client = HttpClient(CIO) {
-        install(Logging) { level = LogLevel.ALL }
-        install(ContentNegotiation) {
-            json(Json { ignoreUnknownKeys = true })
-        }
+    private lateinit var client: HttpClient
+    private lateinit var authClient: HttpClient
+    private lateinit var database: SpotifyClientDesktop
 
-        defaultRequest {
-            url {
-                protocol = URLProtocol.HTTPS
-                host = "api.spotify.com"
-                path("v1/")
+    private lateinit var appDataRepo: AppDataRepo
+    lateinit var settingsRepo: SettingsRepo private set
+    lateinit var authRepo: AuthRepo private set
+    lateinit var userRepo: UserRepo private set
+    lateinit var albumRepo: AlbumRepo private set
+    lateinit var artistRepo: ArtistRepo private set
+    lateinit var playlistRepo: PlaylistRepo private set
+    lateinit var trackRepo: TrackRepo private set
+    lateinit var playbackRepo: PlaybackRepo private set
+    lateinit var searchRepo: SearchRepo private set
+    lateinit var folderRepo: FolderRepo private set
+
+    suspend fun init() {
+        client = HttpClient(CIO) {
+            install(Logging) { level = LogLevel.ALL }
+            install(ContentNegotiation) {
+                json(Json { ignoreUnknownKeys = true })
+            }
+
+            defaultRequest {
+                url {
+                    protocol = URLProtocol.HTTPS
+                    host = "api.spotify.com"
+                    path("v1/")
+                }
             }
         }
-    }
 
-    private val authClient = HttpClient(CIO) {
-        install(Logging) { level = LogLevel.ALL }
-        install(ContentNegotiation) {
-            json(Json { ignoreUnknownKeys = true })
+        authClient = HttpClient(CIO) {
+            install(Logging) { level = LogLevel.ALL }
+            install(ContentNegotiation) {
+                json(Json { ignoreUnknownKeys = true })
+            }
         }
-    }
 
-    val appDataRepo by lazy { AppDataRepo() }
-    val settingsRepo by lazy { SettingsRepo(appDataRepo) }
-    val authRepo by lazy { AuthRepo(authClient, appDataRepo) }
-    val albumRepo by lazy { AlbumRepo(client, authRepo) }
-    val artistRepo by lazy { ArtistRepo(client, authRepo) }
-    val playlistRepo by lazy { PlaylistRepo(client, authRepo, userRepo) }
-    val trackRepo by lazy { TrackRepo(client, authRepo) }
-    val userRepo by lazy { UserRepo(client, authRepo, appDataRepo) }
-    val playbackRepo by lazy { PlaybackRepo(client, authRepo) }
-    val searchRepo by lazy { SearchRepo(client, authRepo) }
+        val driver = JdbcSqliteDriver(
+            url = "jdbc:sqlite:data.db",
+            properties = Properties().apply { put("foreign_keys", "true") }
+        )
+        if (!File("data.db").exists()) {
+            SpotifyClientDesktop.Schema.create(driver)
+        }
+        database = SpotifyClientDesktop(driver)
+
+        appDataRepo = AppDataRepo()
+        settingsRepo = SettingsRepo(appDataRepo)
+        authRepo = AuthRepo(authClient, appDataRepo)
+        userRepo = UserRepo(client, authRepo, appDataRepo)
+        albumRepo = AlbumRepo(client, authRepo)
+        artistRepo = ArtistRepo(client, authRepo)
+        playlistRepo = PlaylistRepo(client, authRepo, userRepo)
+        trackRepo = TrackRepo(client, authRepo, database.folderTrackCrossRefQueries)
+        playbackRepo = PlaybackRepo(client, authRepo)
+        searchRepo = SearchRepo(client, authRepo)
+        folderRepo = FolderRepo(database.folderQueries, database.folderTrackCrossRefQueries)
+
+        appDataRepo.init()
+        settingsRepo.init()
+    }
 }

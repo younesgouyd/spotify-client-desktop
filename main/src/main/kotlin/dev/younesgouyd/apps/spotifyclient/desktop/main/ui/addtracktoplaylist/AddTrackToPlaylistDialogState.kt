@@ -1,4 +1,4 @@
-package dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components
+package dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist
 
 import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
 import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
