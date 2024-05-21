@@ -20,7 +20,7 @@ class Content(
 ) : Component() {
     override val title: String = ""
     private val mainComponentController = MainComponentController()
-    private val playerController: PlayerController = PlayerController(repoStore)
+    private val playerController: PlayerController = PlayerController(repoStore.playbackRepo)
     private val darkTheme: StateFlow<DarkThemeOptions> = repoStore.settingsRepo.getDarkThemeFlow().filterNotNull().stateIn(
         scope = coroutineScope,
         started = SharingStarted.WhileSubscribed(),
