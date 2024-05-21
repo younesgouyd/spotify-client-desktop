@@ -12,7 +12,6 @@ data class User(
     data class Playlist(
         val id: PlaylistId,
         val name: String?,
-        val description: String?,
         val images: Images
     )
 }

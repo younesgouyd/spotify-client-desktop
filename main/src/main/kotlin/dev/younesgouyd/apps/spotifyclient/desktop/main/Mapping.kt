@@ -142,7 +142,6 @@ fun UserPlaylists.toModel(): LazilyLoadedItems.Page<User.Playlist, Offset.Index>
             User.Playlist(
                 id = it.id,
                 name = it.name,
-                description = it.description,
                 images = Images.fromStandardImages(it.images)
             )
         } ?: emptyList()
