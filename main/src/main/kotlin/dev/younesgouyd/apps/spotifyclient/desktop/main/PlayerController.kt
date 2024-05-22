@@ -15,14 +15,18 @@ class PlayerController(private val playbackRepo: PlaybackRepo) {
     companion object { private const val DELAY = 1000L }
 
     private val mutex = Mutex()
-    private val _state: MutableStateFlow<PlaybackState> = MutableStateFlow(PlaybackState.empty())
+    private val _state: MutableStateFlow<Result<PlaybackState>> = MutableStateFlow(Result.success(PlaybackState.empty()))
     private val _enabled: MutableStateFlow<Boolean> = MutableStateFlow(true)
 
-    val state: StateFlow<PlaybackState> get() = _state.asStateFlow()
+    val state: StateFlow<Result<PlaybackState>> get() = _state.asStateFlow()
     val enabled: StateFlow<Boolean> get() = _enabled.asStateFlow()
 
     suspend fun refresh() {
-        _state.update { this.playbackRepo.getPlaybackState() }
+        mutex.withLock {
+            _enabled.update { false }
+            _state.update { this.playbackRepo.getPlaybackState() }
+            _enabled.update { true }
+        }
     }
 
     suspend fun play(
@@ -40,7 +44,7 @@ class PlayerController(private val playbackRepo: PlaybackRepo) {
                 positionMs = positionMs
             )
             delay(DELAY)
-            refresh()
+            _state.update { this.playbackRepo.getPlaybackState() }
             _enabled.update { true }
         }
     }
@@ -50,7 +54,7 @@ class PlayerController(private val playbackRepo: PlaybackRepo) {
             _enabled.update { false }
             this.playbackRepo.pause()
             delay(DELAY)
-            refresh()
+            _state.update { this.playbackRepo.getPlaybackState() }
             _enabled.update { true }
         }
     }
@@ -60,7 +64,7 @@ class PlayerController(private val playbackRepo: PlaybackRepo) {
             _enabled.update { false }
             this.playbackRepo.seek(position.inWholeMilliseconds)
             delay(DELAY)
-            refresh()
+            _state.update { this.playbackRepo.getPlaybackState() }
             _enabled.update { true }
         }
     }
@@ -70,7 +74,7 @@ class PlayerController(private val playbackRepo: PlaybackRepo) {
             _enabled.update { false }
             this.playbackRepo.next()
             delay(DELAY)
-            refresh()
+            _state.update { this.playbackRepo.getPlaybackState() }
             _enabled.update { true }
         }
     }
@@ -80,7 +84,7 @@ class PlayerController(private val playbackRepo: PlaybackRepo) {
             _enabled.update { false }
             this.playbackRepo.previous()
             delay(DELAY)
-            refresh()
+            _state.update { this.playbackRepo.getPlaybackState() }
             _enabled.update { true }
         }
     }
@@ -95,7 +99,7 @@ class PlayerController(private val playbackRepo: PlaybackRepo) {
             }
             this.playbackRepo.repeat(stateData)
             delay(DELAY)
-            refresh()
+            _state.update { this.playbackRepo.getPlaybackState() }
             _enabled.update { true }
         }
     }
@@ -105,7 +109,7 @@ class PlayerController(private val playbackRepo: PlaybackRepo) {
             _enabled.update { false }
             this.playbackRepo.shuffle(state)
             delay(DELAY)
-            refresh()
+            _state.update { this.playbackRepo.getPlaybackState() }
             _enabled.update { true }
         }
     }

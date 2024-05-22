@@ -18,10 +18,16 @@ class PlaybackRepo internal constructor(
     /**
      * GET /me/player
      */
-    suspend fun getPlaybackState(): PlaybackState {
-        return client.get("me/player") {
-            header("Authorization", "Bearer ${authRepo.getToken()}")
-        }.body<dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.PlaybackState>().toModel()
+    suspend fun getPlaybackState(): Result<PlaybackState> {
+        return try {
+            Result.success(
+                client.get("me/player") {
+                    header("Authorization", "Bearer ${authRepo.getToken()}")
+                }.body<dev.younesgouyd.apps.spotifyclient.desktop.main.data.models.PlaybackState>().toModel()
+            )
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     /**

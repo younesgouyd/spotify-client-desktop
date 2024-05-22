@@ -75,9 +75,10 @@ class Content(
         val darkTheme by darkTheme.collectAsState()
 
         Content(
+            darkTheme = darkTheme,
             currentMainComponent = currentMainComponent,
-            selectedNavigationDrawerItem = selectedNavigationDrawerItem,
             player = player,
+            selectedNavigationDrawerItem = selectedNavigationDrawerItem,
             onNavigationDrawerItemClick = {
                 when (it) {
                     NavigationDrawerItems.Profile -> mainComponentController.showProfile()
@@ -90,7 +91,7 @@ class Content(
                     NavigationDrawerItems.Settings -> mainComponentController.showSettings()
                 }
             },
-            darkTheme = darkTheme
+            onRefreshPlayer = { coroutineScope.launch { playerController.refresh() } }
         )
     }
 

@@ -19,16 +19,21 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.Add
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.PlaybackState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Track
+import kotlinx.coroutines.flow.StateFlow
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun Player(
-    modifier: Modifier = Modifier,
-    state: PlayerState
-) {
+fun Player(state: PlayerState) {
+    when (state) {
+        is PlayerState.Available -> Player(state)
+        else -> { /* todo */ }
+    }
+}
+
+@Composable
+private fun Player(state: PlayerState.Available) {
     Player(
-        modifier = modifier,
         enabled = state.enabled,
         playbackState = state.playbackState,
         addTrackToPlaylistDialogState = state.addTrackToPlaylistDialogState,
@@ -48,8 +53,7 @@ fun Player(
 
 @Composable
 private fun Player(
-    modifier: Modifier = Modifier,
-    enabled: Boolean,
+    enabled: StateFlow<Boolean>,
     playbackState: PlaybackState,
     addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
     addTrackToFolderDialogState: AddTrackToFolderDialogState,
@@ -68,7 +72,6 @@ private fun Player(
     val animatableElapsedTime = remember { Animatable(0.milliseconds) }
 
     _Player(
-        modifier = modifier,
         enabled = enabled,
         playbackState = playbackState.copy(elapsedTime = animatableElapsedTime.value),
         addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
@@ -123,8 +126,7 @@ private fun Player(
 
 @Composable
 private fun _Player(
-    modifier: Modifier = Modifier,
-    enabled: Boolean,
+    enabled: StateFlow<Boolean>,
     playbackState: PlaybackState,
     addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
     addTrackToFolderDialogState: AddTrackToFolderDialogState,
@@ -138,12 +140,13 @@ private fun _Player(
     onRepeatClick: (PlaybackState.RepeatState) -> Unit,
     onShuffleClick: (Boolean) -> Unit
 ) {
+    val enabled by enabled.collectAsState()
     val duration = playbackState.track?.duration ?: 0.milliseconds
     var addTrackToPlaylistDialogVisible by remember { mutableStateOf(false) }
     var addTrackToFolderDialogVisible by remember { mutableStateOf(false) }
 
     Card(
-        modifier = modifier,
+        modifier = Modifier.fillMaxWidth().padding(8.dp),
         elevation = CardDefaults.elevatedCardElevation(),
         colors = CardDefaults.elevatedCardColors()
     ) {
