@@ -181,6 +181,7 @@ private fun ToolBar(
 
     if (newFolderFormVisible) {
         FolderForm(
+            title = "New folder",
             onDismissRequest = { newFolderFormVisible = false },
             onDone = onNewFolder
         )
@@ -245,6 +246,7 @@ private fun FolderItem(
 
     if (editFormDialogVisible) {
         FolderForm(
+            title = "Rename folder",
             name = folder.name,
             onDismissRequest = { editFormDialogVisible = false },
             onDone = onRenameFolder
@@ -327,6 +329,7 @@ private fun TrackItem(
 
 @Composable
 private fun FolderForm(
+    title: String,
     name: String = "",
     onDismissRequest: () -> Unit,
     onDone: (name: String) -> Unit
@@ -346,7 +349,7 @@ private fun FolderForm(
             ) {
                 Text(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-                    text = "New folder",
+                    text = title,
                     style = MaterialTheme.typography.headlineMedium,
                     textAlign = TextAlign.Center
                 )
