@@ -6,7 +6,6 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.UserId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Playlist
 import kotlinx.coroutines.flow.StateFlow
 
 sealed class PlaylistDetailsState {

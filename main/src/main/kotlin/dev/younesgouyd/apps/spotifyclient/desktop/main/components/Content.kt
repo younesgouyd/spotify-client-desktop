@@ -7,8 +7,9 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.PlaylistOption
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.Content
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.PlaylistOption
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Images
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -30,7 +31,19 @@ class Content(
     private val addTrackToPlaylistDialogState = AddTrackToPlaylistDialogState(
         playlists = LazilyLoadedItems<PlaylistOption, Offset.Index>(
             coroutineScope = coroutineScope,
-            load = repoStore.playlistRepo::getPlaylistOptions,
+            load = { offset ->
+                val data = repoStore.playlistRepo.getPlaylistOptions(offset)
+                LazilyLoadedItems.Page<PlaylistOption, Offset.Index>(
+                    nextOffset = data.nextOffset,
+                    items = data.items.map {
+                        PlaylistOption(
+                            id = it.id,
+                            name = it.name,
+                            image = (it.images?.toImages() ?: Images.empty()).preferablySmall()
+                        )
+                    }
+                )
+            },
             initialOffset = Offset.Index.initial()
         ),
         onAddTrackTopPlaylist = { trackId, playlistId ->

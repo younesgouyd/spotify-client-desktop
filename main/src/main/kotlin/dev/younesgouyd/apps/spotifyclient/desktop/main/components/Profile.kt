@@ -5,8 +5,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import dev.younesgouyd.apps.spotifyclient.desktop.main.Component
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
+import dev.younesgouyd.apps.spotifyclient.desktop.main.toImages
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.profile.Profile
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.profile.ProfileState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.profile.User
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Images
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -23,7 +26,15 @@ class Profile(
         coroutineScope.launch {
             state.update {
                 ProfileState.State(
-                    user = repoStore.userRepo.getCurrentUser(),
+                    user = kotlin.run {
+                        val data = repoStore.userRepo.getCurrentUser()
+                        User(
+                            id = data.id,
+                            displayName = data.displayName,
+                            followerCount = data.followers?.total,
+                            profilePictureUrl = (data.images?.toImages() ?: Images.empty()).preferablyMedium()
+                        )
+                    },
                     onLogoutClick = {
                         coroutineScope.launch {
                             onLogout()

@@ -5,10 +5,12 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.Component
 import dev.younesgouyd.apps.spotifyclient.desktop.main.FolderId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.FolderRepo
-import dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.TrackRepo
+import dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.track.TrackRepo
+import dev.younesgouyd.apps.spotifyclient.desktop.main.toImages
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.Library
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Folder
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Images
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -66,8 +68,16 @@ class Library(
                 emit(emptyList())
                 loadingTracks.value = true
                 if (it != null) {
-                    trackRepo.getFolderTracks(it.id).collect {
-                        emit(it)
+                    trackRepo.getFolderTracks(it.id).collect { tracks ->
+                        emit(
+                            tracks?.tracks?.filterNotNull()?.map {
+                                Folder.Track(
+                                    id = it.id,
+                                    name = it.name,
+                                    images = it.album?.images?.toImages() ?: Images.empty()
+                                )
+                            } ?: emptyList()
+                        )
                         loadingTracks.value = false
                     }
                 }

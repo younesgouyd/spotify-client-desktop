@@ -1,7 +1,17 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.main.data
 
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
-import dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.*
+import dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.AppDataRepo
+import dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.FolderRepo
+import dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.SettingsRepo
+import dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.album.AlbumRepo
+import dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.artist.ArtistRepo
+import dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.auth.AuthRepo
+import dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.playback.PlaybackRepo
+import dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.playlist.PlaylistRepo
+import dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.search.SearchRepo
+import dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.track.TrackRepo
+import dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.user.UserRepo
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.sqldelight.SpotifyClientDesktop
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*

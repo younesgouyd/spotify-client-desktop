@@ -25,7 +25,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTr
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialog
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Artist
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.Artist
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Track
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter

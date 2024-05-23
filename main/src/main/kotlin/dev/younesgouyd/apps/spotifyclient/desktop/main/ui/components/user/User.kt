@@ -19,7 +19,6 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Item
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.ScrollToTopFloatingActionButton
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.VerticalScrollbar
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.User
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 
@@ -43,8 +42,8 @@ private fun User(state: UserState.State) {
 
 @Composable
 private fun User(
-    user: User,
-    playlists: LazilyLoadedItems<User.Playlist, Offset.Index>,
+    user: UserState.User,
+    playlists: LazilyLoadedItems<UserState.User.Playlist, Offset.Index>,
     onPlaylistClick: (PlaylistId) -> Unit,
     onPlayPlaylistClick: (PlaylistId) -> Unit
 ) {
@@ -91,7 +90,7 @@ private fun User(
 @Composable
 private fun UserInfo(
     modifier: Modifier = Modifier,
-    user: User
+    user: UserState.User
 ) {
     Row(
         modifier = modifier,
@@ -123,7 +122,7 @@ private fun UserInfo(
 }
 
 private fun LazyGridScope.playlists(
-    playlists: List<User.Playlist>,
+    playlists: List<UserState.User.Playlist>,
     onPlaylistClick: (PlaylistId) -> Unit,
     onPlayPlaylistClick: (PlaylistId) -> Unit
 ) {

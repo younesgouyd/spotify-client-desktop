@@ -7,7 +7,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.FolderId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.sqldelight.FolderQueries
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.sqldelight.FolderTrackCrossRefQueries
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.AddTrackToFolderOption
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderOption
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Folder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

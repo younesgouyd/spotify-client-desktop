@@ -21,7 +21,6 @@ import androidx.compose.ui.window.Dialog
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Item
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.VerticalScrollbar
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.AddTrackToFolderOption
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Folder
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Track
 import kotlinx.coroutines.Job

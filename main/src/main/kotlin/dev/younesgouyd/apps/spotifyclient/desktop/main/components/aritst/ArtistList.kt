@@ -3,14 +3,12 @@ package dev.younesgouyd.apps.spotifyclient.desktop.main.components.aritst
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.Component
-import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
-import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
+import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.Artist
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.list.ArtistList
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.list.ArtistListState
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Artist
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Images
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -29,7 +27,20 @@ class ArtistList(
                 ArtistListState.State(
                     artists = LazilyLoadedItems<Artist, Offset.Uri>(
                         coroutineScope = coroutineScope,
-                        load = { repoStore.artistRepo.getCurrentUserFollowedArtists(it) },
+                        load = { offset ->
+                            val data = repoStore.artistRepo.getCurrentUserFollowedArtists(offset)
+                            LazilyLoadedItems.Page(
+                                nextOffset = Offset.Uri.fromUrl(data.artists?.next),
+                                items = data.artists?.items?.map {
+                                    Artist(
+                                        id = it.id,
+                                        name = it.name,
+                                        images = it.images?.toImages() ?: Images.empty(),
+                                        followed = true
+                                    )
+                                } ?: emptyList()
+                            )
+                        },
                         initialOffset = Offset.Uri.initial()
                     ),
                     onArtistClick = showArtistDetails

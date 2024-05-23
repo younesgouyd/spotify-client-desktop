@@ -7,9 +7,10 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.album.details.Album
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.album.details.AlbumDetails
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.album.details.AlbumDetailsState
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Album
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Images
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -33,12 +34,36 @@ class AlbumDetails(
             reloadSaved()
             state.update {
                 AlbumDetailsState.State(
-                    album = repoStore.albumRepo.getAlbum(id),
+                    album = run {
+                        val data = repoStore.albumRepo.getAlbum(id)
+                        Album(
+                            id = data.id,
+                            name = data.name,
+                            artists = data.artists?.map {
+                                Album.Artist(
+                                    id = it.id,
+                                    name = it.name
+                                )
+                            } ?: emptyList(),
+                            images = data.images?.toImages() ?: Images.empty()
+                        )
+                    },
                     saved = saved.asStateFlow().filterNotNull().stateIn(coroutineScope),
                     saveRemoveButtonEnabled = saveRemoveButtonEnabled.asStateFlow(),
                     tracks = LazilyLoadedItems<Album.Track, Offset.Index>(
                         coroutineScope = coroutineScope,
-                        load = { repoStore.trackRepo.getAlbumTracks(id, it) },
+                        load = { offset ->
+                            val data = repoStore.trackRepo.getAlbumTracks(id, offset)
+                            LazilyLoadedItems.Page(
+                                nextOffset = Offset.Index.fromUrl(data.next),
+                                items = data.items?.filterNotNull()?.map {
+                                    Album.Track(
+                                        id = it.id,
+                                        name = it.name
+                                    )
+                                } ?: emptyList()
+                            )
+                        },
                         initialOffset = Offset.Index.initial()
                     ),
                     addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,

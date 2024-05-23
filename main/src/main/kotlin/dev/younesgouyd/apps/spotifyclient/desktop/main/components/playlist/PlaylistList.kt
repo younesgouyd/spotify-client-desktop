@@ -3,14 +3,12 @@ package dev.younesgouyd.apps.spotifyclient.desktop.main.components.playlist
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import dev.younesgouyd.apps.spotifyclient.desktop.main.Component
-import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
-import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
-import dev.younesgouyd.apps.spotifyclient.desktop.main.PlaylistId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.playlist.list.PlaylistList
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.playlist.list.PlaylistListItem
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.playlist.list.PlaylistListState
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.PlaylistListItem
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Images
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -30,7 +28,19 @@ class PlaylistList(
                 PlaylistListState.State(
                     playlists = LazilyLoadedItems<PlaylistListItem, Offset.Index>(
                         coroutineScope = coroutineScope,
-                        load = { repoStore.playlistRepo.getCurrentUserPlaylists(it) },
+                        load = {
+                            val data = repoStore.playlistRepo.getCurrentUserPlaylists(it)
+                            LazilyLoadedItems.Page(
+                                nextOffset = Offset.Index.fromUrl(data.next),
+                                items = data.items?.filterNotNull()?.map { playlist ->
+                                    PlaylistListItem(
+                                        id = playlist.id,
+                                        name = playlist.name,
+                                        images = playlist.images?.toImages() ?: Images.empty()
+                                    )
+                                } ?: emptyList()
+                            )
+                        },
                         initialOffset = Offset.Index.initial()
                     ),
                     onPlaylistClick = showPlaylistDetails,

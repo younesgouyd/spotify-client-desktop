@@ -3,7 +3,7 @@ package dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.lis
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
 import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Artist
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.Artist
 
 sealed class ArtistListState {
     data object Loading : ArtistListState()
