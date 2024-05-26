@@ -24,6 +24,7 @@ class SplashScreen(
 
     init {
         coroutineScope.launch {
+            System.setProperty("sun.java2d.uiScale", "1.0")
             repoStore.init()
             if (repoStore.authRepo.isAuthorized()) {
                 repoStore.authRepo.refreshTokenIfNeeded()
