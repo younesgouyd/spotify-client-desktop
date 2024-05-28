@@ -34,6 +34,7 @@ class AlbumRepo(
             header("Authorization", "Bearer ${authRepo.getToken()}")
             parameter("limit", 20)
             parameter("offset", offset.value)
+            parameter("include_groups", "album,single")
         }.body<ArtistAlbums>()
     }
 
