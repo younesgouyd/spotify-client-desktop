@@ -22,11 +22,11 @@ dependencyResolutionManagement {
         create("libs") {
             val versions = object {
                 val java = version("java", "20")
-                val kotlin = version("kotlin", "1.9.22")
-                val ktor = version("ktor", "2.3.10")
-                val coroutines = version("coroutines", "1.8.0")
-                val logback = version("logback", "1.4.14")
-                val compose = version("compose", "1.6.1")
+                val kotlin = version("kotlin", "1.9.24")
+                val ktor = version("ktor", "2.3.12")
+                val coroutines = version("coroutines", "1.8.1")
+                val logback = version("logback", "1.5.6")
+                val compose = version("compose", "1.6.11")
                 val json = version("json", "20240303")
                 val sqldelight = version("sqldelight", "2.0.2")
             }
