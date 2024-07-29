@@ -3,6 +3,7 @@ package dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.playlist.l
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
 import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
 import dev.younesgouyd.apps.spotifyclient.desktop.main.PlaylistId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.UserId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Item
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.ScrollToTopFloatingActionButton
@@ -35,6 +37,7 @@ private fun PlaylistList(state: PlaylistListState.State) {
     PlaylistList(
         playlists = state.playlists,
         onPlaylistClick = state.onPlaylistClick,
+        onOwnerClick = state.onOwnerClick,
         onPlayPlaylistClick = state.onPlayPlaylistClick
     )
 }
@@ -43,6 +46,7 @@ private fun PlaylistList(state: PlaylistListState.State) {
 private fun PlaylistList(
     playlists: LazilyLoadedItems<PlaylistListItem, Offset.Index>,
     onPlaylistClick: (PlaylistId) -> Unit,
+    onOwnerClick: (UserId) -> Unit,
     onPlayPlaylistClick: (PlaylistId) -> Unit
 ) {
     val items by playlists.items.collectAsState()
@@ -62,13 +66,11 @@ private fun PlaylistList(
                     verticalArrangement = Arrangement.spacedBy(18.dp),
                     columns = GridCells.Adaptive(250.dp)
                 ) {
-                    items(
-                        items = items,
-                        key = { it.id }
-                    ) { item ->
+                    items(items = items, key = { it.id }) { item ->
                         PlaylistItem(
                             playlist = item,
                             onClick = onPlaylistClick,
+                            onOwnerClick = onOwnerClick,
                             onPlayClick = onPlayPlaylistClick
                         )
                     }
@@ -99,6 +101,7 @@ private fun PlaylistItem(
     modifier: Modifier = Modifier,
     playlist: PlaylistListItem,
     onClick: (PlaylistId) -> Unit,
+    onOwnerClick: (UserId) -> Unit,
     onPlayClick: (PlaylistId) -> Unit
 ) {
     Item (
@@ -124,6 +127,17 @@ private fun PlaylistItem(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
+            TextButton(
+                onClick = { playlist.owner?.let { onOwnerClick(it.id) } }
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Default.Person, null)
+                    Text(playlist.owner?.displayName ?: "")
+                }
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,

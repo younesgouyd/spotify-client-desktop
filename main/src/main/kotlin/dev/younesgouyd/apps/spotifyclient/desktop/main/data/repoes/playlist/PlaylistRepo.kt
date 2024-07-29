@@ -23,12 +23,12 @@ class PlaylistRepo(
      * GET /me/playlists
      * @param offset The index of the first playlist to return. Default: 0 (the first object). Maximum offset: 100.000. Use with limit to get the next set of playlists
      */
-    suspend fun getCurrentUserPlaylists(offset: Offset.Index): Playlists {
+    suspend fun getCurrentUserPlaylists(offset: Offset.Index): CurrentUserPlaylists {
         return client.get("me/playlists") {
             header("Authorization", "Bearer ${authRepo.getToken()}")
             parameter("limit", 20)
             parameter("offset", offset.value)
-        }.body<Playlists>()
+        }.body<CurrentUserPlaylists>()
     }
 
     /**
@@ -94,7 +94,7 @@ class PlaylistRepo(
             header("Authorization", "Bearer ${authRepo.getToken()}")
             parameter("limit", 20)
             parameter("offset", offset.value)
-        }.body<Playlists>()
+        }.body<CurrentUserPlaylists>()
         return PlaylistOptions(
             items = response.items?.let { items ->
                 items.filterNotNull().filter { it.owner != null && it.owner.id == currentUserId }.map {

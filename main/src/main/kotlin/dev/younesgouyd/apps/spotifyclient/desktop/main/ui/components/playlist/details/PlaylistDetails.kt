@@ -1,34 +1,34 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.playlist.details
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.PlayCircle
-import androidx.compose.material.icons.filled.PlaylistRemove
-import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
-import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
-import dev.younesgouyd.apps.spotifyclient.desktop.main.TrackId
-import dev.younesgouyd.apps.spotifyclient.desktop.main.UserId
+import androidx.compose.ui.window.*
+import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Item
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.ScrollToTopFloatingActionButton
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.VerticalScrollbar
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialog
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialog
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.formatted
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Track
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
@@ -53,10 +53,13 @@ private fun PlaylistDetails(state: PlaylistDetailsState.State) {
         onOwnerClick = state.onOwnerClick,
         onPlaylistFollowStateChange = state.onPlaylistFollowStateChange,
         onPlayClick = state.onPlayClick,
-        onTrackClick = state.onTrackClick
+        onTrackClick = state.onTrackClick,
+        onArtistClick = state.onArtistClick,
+        onAlbumClick = state.onAlbumClick
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PlaylistDetails(
     playlist: StateFlow<Playlist>,
@@ -67,7 +70,9 @@ private fun PlaylistDetails(
     onOwnerClick: (UserId) -> Unit,
     onPlaylistFollowStateChange: (state: Boolean) -> Unit,
     onPlayClick: () -> Unit,
-    onTrackClick: (TrackId) -> Unit
+    onTrackClick: (TrackId) -> Unit,
+    onArtistClick: (ArtistId) -> Unit,
+    onAlbumClick: (AlbumId) -> Unit
 ) {
     val playlist by playlist.collectAsState()
     val followButtonEnabledState by followButtonEnabledState.collectAsState()
@@ -83,12 +88,12 @@ private fun PlaylistDetails(
                 LazyColumn (
                     modifier = Modifier.fillMaxSize().padding(end = 16.dp),
                     state = lazyColumnState,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     item {
                         PlaylistInfo(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().height(400.dp),
                             playlist = playlist,
                             followButtonEnabledState = followButtonEnabledState,
                             onOwnerClick = onOwnerClick,
@@ -96,13 +101,22 @@ private fun PlaylistDetails(
                             onPlayClick = onPlayClick
                         )
                     }
-                    items(items = items) { item ->
+                    item {
+                        Spacer(Modifier.size(8.dp))
+                    }
+                    stickyHeader {
+                        TracksHeader(modifier = Modifier.fillMaxWidth().height(64.dp))
+                        HorizontalDivider()
+                    }
+                    items(items = items) { track ->
                         TrackItem(
-                            modifier = Modifier.fillMaxWidth(),
-                            track = item,
+                            modifier = Modifier.fillMaxWidth().height(80.dp),
+                            track = track,
                             addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
                             addTrackToFolderDialogState = addTrackToFolderDialogState,
-                            onTrackClick = onTrackClick
+                            onTrackClick = onTrackClick,
+                            onArtistClick = onArtistClick,
+                            onAlbumClick = onAlbumClick
                         )
                     }
                     if (loadingTracks) {
@@ -137,7 +151,7 @@ private fun PlaylistInfo(
     onPlayClick: () -> Unit
 ) {
     Row(
-        modifier = modifier.height(300.dp),
+        modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(space = 12.dp, alignment = Alignment.Start),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -149,20 +163,42 @@ private fun PlaylistInfo(
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(space = 12.dp, alignment = Alignment.CenterVertically)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
+                modifier = Modifier.fillMaxWidth(),
                 text = playlist.name ?: "",
-                style = MaterialTheme.typography.displayMedium
-            )
-            Text(
-                text = playlist.description ?: "",
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.displayMedium,
+                textAlign = TextAlign.Center
             )
             if (playlist.owner != null) {
                 TextButton(
-                    content = { Text(text = playlist.owner.name ?: "", style = MaterialTheme.typography.labelMedium) },
-                    onClick = { onOwnerClick(playlist.owner.id) }
+                    onClick = { onOwnerClick(playlist.owner.id) },
+                    content = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.Person, null)
+                            Text(
+                                text = playlist.owner.name ?: "",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                )
+            }
+            if (playlist.followerCount != null) {
+                Text(
+                    text = "${playlist.followerCount} followers",
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+            if (playlist.description != null) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = playlist.description,
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
             Row(
@@ -205,42 +241,210 @@ private fun PlaylistInfo(
     }
 }
 
+private const val TITLE_WEIGHT = .45f
+private const val ALBUM_WEIGHT = .18f
+private const val ADDED_AT_WEIGHT = .1f
+private const val POPULARITY_WEIGHT = .07f
+private const val DURATION_WEIGHT = .1f
+private const val ACTIONS_WEIGHT = .1f
+
+@Composable
+private fun TracksHeader(modifier: Modifier = Modifier) {
+    Surface {
+        Row(
+            modifier = modifier,
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.fillMaxSize().weight(TITLE_WEIGHT), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "Title",
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+            Box(modifier = Modifier.fillMaxSize().weight(ALBUM_WEIGHT), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "Album",
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+            Box(modifier = Modifier.fillMaxSize().weight(ADDED_AT_WEIGHT), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "Date added",
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+            Box(modifier = Modifier.fillMaxSize().weight(POPULARITY_WEIGHT), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "Popularity",
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+            Box(modifier = Modifier.fillMaxSize().weight(DURATION_WEIGHT), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "Duration",
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+            Box(modifier = Modifier.fillMaxSize().weight(ACTIONS_WEIGHT), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "",
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
 @Composable
 private fun TrackItem(
     modifier: Modifier = Modifier,
     track: Playlist.Track,
     addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
     addTrackToFolderDialogState: AddTrackToFolderDialogState,
-    onTrackClick: (TrackId) -> Unit
+    onTrackClick: (TrackId) -> Unit,
+    onArtistClick: (ArtistId) -> Unit,
+    onAlbumClick: (AlbumId) -> Unit
 ) {
     var addToPlaylistDialogVisible by remember { mutableStateOf(false) }
     var addToFolderDialogVisible by remember { mutableStateOf(false) }
 
-    Item(
-        modifier = modifier,
-        onClick = { onTrackClick(track.id) },
-        contentAlignment = Alignment.CenterStart
+    Row(
+        modifier = modifier.clickable { onTrackClick(track.id) },
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        // image + title + artists
+        Box(modifier = Modifier.fillMaxSize().weight(TITLE_WEIGHT), contentAlignment = Alignment.CenterStart) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Image(
-                    modifier = Modifier.size(64.dp),
-                    url = track.images.preferablySmall()
+                    modifier = Modifier.fillMaxHeight(),
+                    url = track.album?.images?.preferablySmall(),
+                    contentScale = ContentScale.FillHeight
                 )
-                Text(
-                    text = track.name ?: "",
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = track.name ?: "",
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        items(items = track.artists, key = { it.id }) { artist ->
+                            TextButton(
+                                onClick = { onArtistClick(artist.id) },
+                                content = {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(Icons.Default.Person, null)
+                                        Text(
+                                            text = artist.name ?: "",
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        Spacer(Modifier.width(8.dp))
+
+        // album
+        Box(modifier = Modifier.fillMaxSize().weight(ALBUM_WEIGHT), contentAlignment = Alignment.CenterStart) {
+            if (track.album != null) {
+                TextButton(
+                    onClick = { onAlbumClick(track.album.id) },
+                    content = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.Album, null)
+                            Text(
+                                text = track.album.name ?: "",
+                                style = MaterialTheme.typography.bodyMedium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
                 )
             }
+        }
+
+        Spacer(Modifier.width(8.dp))
+
+        // added at
+        Box(modifier = Modifier.fillMaxSize().weight(ADDED_AT_WEIGHT), contentAlignment = Alignment.Center) {
+            Text(
+                text = track.addedAt ?: "",
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        Spacer(Modifier.width(8.dp))
+
+        // popularity
+        Box(modifier = Modifier.fillMaxSize().weight(POPULARITY_WEIGHT), contentAlignment = Alignment.CenterEnd) {
+            Text(
+                text = track.popularity?.toString() ?: "",
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        Spacer(Modifier.width(8.dp))
+
+        // duration
+        Box(modifier = Modifier.fillMaxSize().weight(DURATION_WEIGHT), contentAlignment = Alignment.Center) {
+            Text(
+                text = track.duration.formatted(),
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        Spacer(Modifier.width(8.dp))
+
+        // actions
+        Box(modifier = Modifier.fillMaxSize().weight(ACTIONS_WEIGHT), contentAlignment = Alignment.Center) {
             Row {
                 IconButton(
                     content = { Icon(Icons.Default.Save, null) },
@@ -253,20 +457,71 @@ private fun TrackItem(
             }
         }
     }
+    HorizontalDivider()
 
     if (addToPlaylistDialogVisible) {
         AddTrackToPlaylistDialog(
             state = addTrackToPlaylistDialogState,
-            track = Track(track.id, track.name, track.images.preferablySmall()),
+            track = Track(track.id, track.name, track.album?.images?.preferablySmall()),
             onDismissRequest = { addToPlaylistDialogVisible = false }
         )
     }
 
     if (addToFolderDialogVisible) {
         AddTrackToFolderDialog(
-            track = Track(track.id, track.name, track.images.preferablySmall()),
+            track = Track(track.id, track.name, track.album?.images?.preferablySmall()),
             state = addTrackToFolderDialogState,
             onDismissRequest = { addToFolderDialogVisible = false }
         )
+    }
+}
+
+data class Column(
+    val width: Float,
+    val content: @Composable () -> Unit
+)
+
+@Composable
+fun Table(
+    modifier: Modifier = Modifier,
+    header: List<Column>,
+    rows: List<List<@Composable () -> Unit>>,
+    rowHeight: Dp
+) {
+    LazyColumn(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) {
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth().height(rowHeight),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                for (cell in header) {
+                    Box(
+                        modifier = Modifier.fillMaxSize().weight(cell.width),
+                        contentAlignment = Alignment.Center,
+                        content = { cell.content() }
+                    )
+                }
+            }
+        }
+        items(items = rows) { row ->
+            Row(
+                modifier = Modifier.fillMaxWidth().height(rowHeight),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                row.forEachIndexed { index, cell ->
+                    Box(
+                        modifier = Modifier.fillMaxSize().weight(header[index].width),
+                        contentAlignment = Alignment.Center,
+                        content = { cell() }
+                    )
+                }
+            }
+        }
     }
 }

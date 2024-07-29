@@ -11,14 +11,21 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.playlist.de
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.playlist.details.PlaylistDetails
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.playlist.details.PlaylistDetailsState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Images
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import kotlin.time.Duration.Companion.milliseconds
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class PlaylistDetails(
     private val id: PlaylistId,
     private val repoStore: RepoStore,
     showUserDetails: (UserId) -> Unit,
+    showArtistDetails: (ArtistId) -> Unit,
+    showAlbumDetails: (AlbumId) -> Unit,
     play: () -> Unit,
     playTrack: (TrackId) -> Unit,
     addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
@@ -34,7 +41,7 @@ class PlaylistDetails(
             reloadPlaylist()
             state.update {
                 PlaylistDetailsState.State(
-                    playlist = playlist.asStateFlow().filterNotNull().stateIn(coroutineScope),
+                    playlist = playlist.asStateFlow().mapLatest { requireNotNull(it) }.stateIn(coroutineScope), // todo - !
                     followButtonEnabledState = followButtonEnabledState.asStateFlow(),
                     tracks = LazilyLoadedItems<Playlist.Track, Offset.Index>(
                         coroutineScope = coroutineScope,
@@ -46,7 +53,25 @@ class PlaylistDetails(
                                     Playlist.Track(
                                         id = playlistTrackObject.track!!.id,
                                         name = playlistTrackObject.track.name,
-                                        images = playlistTrackObject.track.album?.images?.toImages() ?: Images.empty()
+                                        artists = playlistTrackObject.track.artists?.map {
+                                            Playlist.Track.Artist(id = it.id, name = it.name)
+                                        } ?: emptyList(),
+                                        album = playlistTrackObject.track.album?.let { album ->
+                                            Playlist.Track.Album(
+                                                id = album.id,
+                                                name = album.name,
+                                                images = album.images?.toImages() ?: Images.empty()
+                                            )
+                                        },
+                                        duration = playlistTrackObject.track.durationMs?.milliseconds,
+                                        popularity = playlistTrackObject.track.popularity,
+                                        addedAt = run {
+                                            if (playlistTrackObject.addedAt != null) {
+                                                val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+                                                val zonedDateTime = ZonedDateTime.parse(playlistTrackObject.addedAt)
+                                                zonedDateTime.format(formatter)
+                                            } else ""
+                                        }
                                     )
                                 } ?: emptyList()
                             )
@@ -65,7 +90,9 @@ class PlaylistDetails(
                         }
                     },
                     onPlayClick = play,
-                    onTrackClick = playTrack
+                    onTrackClick = playTrack,
+                    onArtistClick = showArtistDetails,
+                    onAlbumClick = showAlbumDetails
                 )
             }
         }
@@ -91,6 +118,7 @@ class PlaylistDetails(
                 description = data.description,
                 images = data.images?.toImages() ?: Images.empty(),
                 owner = data.owner?.let { Playlist.Owner(id = it.id, name = it.displayName) },
+                followerCount = data.followers?.total,
                 followed = repoStore.playlistRepo.isPlaylistFollowedByCurrentUser(id)
             )
         }

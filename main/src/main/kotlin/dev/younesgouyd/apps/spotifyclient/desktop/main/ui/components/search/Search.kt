@@ -290,8 +290,16 @@ private fun TrackItemContent(
         ) {
             items(items = track.artists, key = { it.id }) { artist ->
                 TextButton(
-                    content = { Text(text = artist.name ?: "", style = MaterialTheme.typography.labelMedium) },
-                    onClick = { onArtistClick(artist.id) }
+                    onClick = { onArtistClick(artist.id) },
+                    content = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.Person, null)
+                            Text(text = artist.name ?: "")
+                        }
+                    }
                 )
             }
         }
@@ -406,8 +414,16 @@ private fun AlbumItemContent(
         ) {
             items(items = album.artists, key = { it.id }) { artist ->
                 TextButton(
-                    content = { Text(text = artist.name ?: "", style = MaterialTheme.typography.labelMedium) },
-                    onClick = { onArtistClick(artist.id) }
+                    onClick = { onArtistClick(artist.id) },
+                    content = {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.Person, null)
+                            Text(text = artist.name ?: "")
+                        }
+                    }
                 )
             }
         }
@@ -453,8 +469,16 @@ private fun PlaylistItemContent(
         )
         TextButton(
             modifier = Modifier.padding(horizontal = 4.dp),
-            content = { Text(text = playlist.owner?.name ?: "", style = MaterialTheme.typography.labelMedium) },
-            onClick = { playlist.owner?.let { onOwnerClick(it.id) } }
+            onClick = { playlist.owner?.let { onOwnerClick(it.id) } },
+            content = {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Default.Person, null)
+                    Text(text = playlist.owner?.name ?: "")
+                }
+            }
         )
         Row(
             modifier = Modifier.fillMaxWidth(),

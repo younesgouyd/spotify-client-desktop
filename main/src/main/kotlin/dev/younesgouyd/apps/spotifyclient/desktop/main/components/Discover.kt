@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 class Discover(
     private val repoStore: RepoStore,
     showPlaylistDetails: (PlaylistId) -> Unit,
+    showUserDetails: (UserId) -> Unit,
     playPlaylist: (PlaylistId) -> Unit
 ) : Component() {
     override val title: String = "Discover"
@@ -33,11 +34,12 @@ class Discover(
                             LazilyLoadedItems.Page(
                                 nextOffset = Offset.Index.fromUrl(data.playlists?.next),
                                 items = data.playlists?.let { playlists ->
-                                    playlists.items?.filterNotNull()?.map {
+                                    playlists.items?.filterNotNull()?.map { simplifiedPlaylist ->
                                         PlaylistListItem(
-                                            id = it.id,
-                                            name = it.name,
-                                            images = it.images?.toImages() ?: Images.empty()
+                                            id = simplifiedPlaylist.id,
+                                            name = simplifiedPlaylist.name,
+                                            images = simplifiedPlaylist.images?.toImages() ?: Images.empty(),
+                                            owner = simplifiedPlaylist.owner?.let { PlaylistListItem.Owner(id = it.id, displayName = it.displayName) }
                                         )
                                     }
                                 } ?: emptyList()
@@ -46,6 +48,7 @@ class Discover(
                         initialOffset = Offset.Index.initial()
                     ),
                     onPlaylistClick = showPlaylistDetails,
+                    onOwnerClick = showUserDetails,
                     onPlayPlaylistClick = playPlaylist
                 )
             }

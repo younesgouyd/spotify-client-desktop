@@ -46,6 +46,7 @@ data class SearchResult(
     ) {
         @Serializable
         data class ArtistObject(
+            val genres: List<String>?, // todo
             val id: ArtistId,
             val images: List<ImageOfFloatSize>,
             val name: String?
@@ -58,9 +59,13 @@ data class SearchResult(
     ) {
         @Serializable
         data class SimplifiedAlbumObject(
+            @SerialName("total_tracks")
+            val totalTracks: Int?, // todo
             val id: AlbumId,
             val images: List<Image>,
             val name: String?,
+            @SerialName("release_date")
+            val releaseDate: String?, // todo
             val artists: List<SimplifiedArtistObject?>?
         ) {
             @Serializable

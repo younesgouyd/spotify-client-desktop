@@ -19,7 +19,7 @@ class Search(
     private val showArtist: (ArtistId) -> Unit,
     private val showAlbum: (AlbumId) -> Unit,
     private val showPlaylist: (PlaylistId) -> Unit,
-    private val showUser: (UserId) -> Unit,
+    private val showUserDetails: (UserId) -> Unit,
     private val playTrack: (TrackId) -> Unit,
     private val playArtist: (ArtistId) -> Unit,
     private val playAlbum: (AlbumId) -> Unit,
@@ -99,7 +99,7 @@ class Search(
             onAlbumClick = showAlbum,
             onPlayAlbumClick = playAlbum,
             onPlaylistClick = showPlaylist,
-            onPlaylistOwnerClick = showUser,
+            onPlaylistOwnerClick = showUserDetails,
             onPlayPlaylistClick = playPlaylist
         )
     }

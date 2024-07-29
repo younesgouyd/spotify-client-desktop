@@ -5,7 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.Artist
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.list.ArtistItem
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.list.ArtistList
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.list.ArtistListState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Images
@@ -25,18 +25,17 @@ class ArtistList(
         coroutineScope.launch {
             state.update {
                 ArtistListState.State(
-                    artists = LazilyLoadedItems<Artist, Offset.Uri>(
+                    artists = LazilyLoadedItems<ArtistItem, Offset.Uri>(
                         coroutineScope = coroutineScope,
                         load = { offset ->
                             val data = repoStore.artistRepo.getCurrentUserFollowedArtists(offset)
                             LazilyLoadedItems.Page(
                                 nextOffset = Offset.Uri.fromUrl(data.artists?.next),
                                 items = data.artists?.items?.map {
-                                    Artist(
+                                    ArtistItem(
                                         id = it.id,
                                         name = it.name,
-                                        images = it.images?.toImages() ?: Images.empty(),
-                                        followed = true
+                                        images = it.images?.toImages() ?: Images.empty()
                                     )
                                 } ?: emptyList()
                             )

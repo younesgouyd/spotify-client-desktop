@@ -43,6 +43,20 @@ class ArtistRepo(
         if (state) { followArtist(id) } else { unFollowArtist(id) }
     }
 
+    suspend fun isArtistFollowed(id: ArtistId): Boolean {
+        return client.get("me/following/contains") {
+            header("Authorization", "Bearer ${authRepo.getToken()}")
+            parameter("type", ID_TYPE)
+            parameter("ids", "$id")
+        }.body<List<Boolean>>().first()
+    }
+
+    suspend fun getRelatedArtists(id: ArtistId): RelatedArtists {
+        return client.get("artists/$id/related-artists") {
+            header("Authorization", "Bearer ${authRepo.getToken()}")
+        }.body<RelatedArtists>()
+    }
+
     private suspend fun followArtist(id: ArtistId) {
         client.put("me/following") {
             header("Authorization", "Bearer ${authRepo.getToken()}")
@@ -57,13 +71,5 @@ class ArtistRepo(
             parameter("type", ID_TYPE)
             parameter("ids", "$id")
         }
-    }
-
-    suspend fun isArtistFollowed(id: ArtistId): Boolean {
-        return client.get("me/following/contains") {
-            header("Authorization", "Bearer ${authRepo.getToken()}")
-            parameter("type", ID_TYPE)
-            parameter("ids", "$id")
-        }.body<List<Boolean>>().first()
     }
 }

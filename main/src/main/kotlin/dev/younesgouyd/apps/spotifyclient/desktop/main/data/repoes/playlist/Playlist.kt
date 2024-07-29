@@ -12,11 +12,17 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Playlist(
     val description: String?,
+    val followers: Followers?,
     val id: PlaylistId,
     val images: List<Image>?,
     val name: String?,
     val owner: Owner?
 ) {
+    @Serializable
+    data class Followers(
+        val total: Long?
+    )
+
     @Serializable
     data class Owner(
         val id: UserId,

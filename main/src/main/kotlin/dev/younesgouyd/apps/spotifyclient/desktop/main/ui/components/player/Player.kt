@@ -17,6 +17,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTr
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialog
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.formatted
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.PlaybackState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Track
 import kotlinx.coroutines.flow.StateFlow
@@ -316,14 +317,6 @@ private fun _Player(
             onDismissRequest = { addTrackToFolderDialogVisible = false  }
         )
     }
-}
-
-private fun Duration?.formatted(): String {
-    return this?.let {
-        it.toComponents { minutes, seconds, _ ->
-            minutes.toString().padStart(2, '0') + ":" + seconds.toString().padStart(2, '0')
-        }
-    } ?: ""
 }
 
 private fun Animatable(

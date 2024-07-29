@@ -15,8 +15,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AlbumList(
-    private val repoStore: RepoStore,
-    private val showAlbumDetails: (AlbumId) -> Unit,
+    repoStore: RepoStore,
+    showAlbumDetails: (AlbumId) -> Unit,
+    showArtistDetails: (ArtistId) -> Unit,
     playAlbum: (AlbumId) -> Unit
 ) : Component() {
     override val title: String = "Albums"
@@ -36,7 +37,14 @@ class AlbumList(
                                     AlbumListItem(
                                         id = savedAlbum.album!!.id,
                                         name = savedAlbum.album.name,
-                                        images = savedAlbum.album.images?.toImages() ?: Images.empty()
+                                        images = savedAlbum.album.images?.toImages() ?: Images.empty(),
+                                        releaseDate = savedAlbum.album.releaseDate,
+                                        totalTracks = savedAlbum.album.totalTracks,
+                                        artists = savedAlbum.album.artists?.map {
+                                            AlbumListItem.Artist(id = it.id, name = it.name)
+                                        } ?: emptyList(),
+                                        genres = savedAlbum.album.genres ?: emptyList(),
+                                        popularity = savedAlbum.album.popularity
                                     )
                                 } ?: emptyList()
                             )
@@ -44,6 +52,7 @@ class AlbumList(
                         initialOffset = Offset.Index.initial()
                     ),
                     onAlbumClick = showAlbumDetails,
+                    onArtistClick = showArtistDetails,
                     onPlayAlbumClick = playAlbum
                 )
             }

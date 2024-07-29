@@ -15,8 +15,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class PlaylistList(
-    private val repoStore: RepoStore,
-    private val showPlaylistDetails: (PlaylistId) -> Unit,
+    repoStore: RepoStore,
+    showPlaylistDetails: (PlaylistId) -> Unit,
+    showUserDetails: (UserId) -> Unit,
     playPlaylist: (PlaylistId) -> Unit
 ) : Component() {
     override val title: String = "Playlists"
@@ -28,15 +29,16 @@ class PlaylistList(
                 PlaylistListState.State(
                     playlists = LazilyLoadedItems<PlaylistListItem, Offset.Index>(
                         coroutineScope = coroutineScope,
-                        load = {
-                            val data = repoStore.playlistRepo.getCurrentUserPlaylists(it)
+                        load = { offset ->
+                            val data = repoStore.playlistRepo.getCurrentUserPlaylists(offset)
                             LazilyLoadedItems.Page(
                                 nextOffset = Offset.Index.fromUrl(data.next),
                                 items = data.items?.filterNotNull()?.map { playlist ->
                                     PlaylistListItem(
                                         id = playlist.id,
                                         name = playlist.name,
-                                        images = playlist.images?.toImages() ?: Images.empty()
+                                        images = playlist.images?.toImages() ?: Images.empty(),
+                                        owner = playlist.owner?.let { PlaylistListItem.Owner(id = it.id, displayName = it.displayName) }
                                     )
                                 } ?: emptyList()
                             )
@@ -44,6 +46,7 @@ class PlaylistList(
                         initialOffset = Offset.Index.initial()
                     ),
                     onPlaylistClick = showPlaylistDetails,
+                    onOwnerClick = showUserDetails,
                     onPlayPlaylistClick = playPlaylist
                 )
             }

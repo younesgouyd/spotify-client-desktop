@@ -5,6 +5,6 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.UserId
 data class User(
     val id: UserId,
     val displayName: String?,
-    val followerCount: Int?,
+    val followerCount: Long?,
     val profilePictureUrl: String?
 )

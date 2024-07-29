@@ -1,8 +1,11 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.album.list
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
 import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
@@ -35,6 +39,7 @@ private fun AlbumList(state: AlbumListState.State) {
     AlbumList(
         albums = state.albums,
         onAlbumClick = state.onAlbumClick,
+        onArtistClick = state.onArtistClick,
         onPlayAlbumClick = state.onPlayAlbumClick
     )
 }
@@ -43,6 +48,7 @@ private fun AlbumList(state: AlbumListState.State) {
 private fun AlbumList(
     albums: LazilyLoadedItems<AlbumListItem, Offset.Index>,
     onAlbumClick: (AlbumId) -> Unit,
+    onArtistClick: (ArtistId) -> Unit,
     onPlayAlbumClick: (AlbumId) -> Unit
 ) {
     val items by albums.items.collectAsState()
@@ -54,7 +60,7 @@ private fun AlbumList(
         content = { paddingValues ->
             Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
                 VerticalScrollbar(lazyGridState)
-                LazyVerticalGrid (
+                LazyVerticalGrid(
                     modifier = Modifier.fillMaxSize().padding(end = 16.dp),
                     state = lazyGridState,
                     contentPadding = PaddingValues(18.dp),
@@ -62,13 +68,11 @@ private fun AlbumList(
                     verticalArrangement = Arrangement.spacedBy(18.dp),
                     columns = GridCells.Adaptive(250.dp)
                 ) {
-                    items(
-                        items = items,
-                        key = { it.id }
-                    ) { item ->
+                    items(items = items, key = { it.id }) { item ->
                         AlbumItem(
                             album = item,
                             onClick = onAlbumClick,
+                            onArtistClick = onArtistClick,
                             onPlayClick = onPlayAlbumClick
                         )
                     }
@@ -99,6 +103,7 @@ private fun AlbumItem(
     modifier: Modifier = Modifier,
     album: AlbumListItem,
     onClick: (AlbumId) -> Unit,
+    onArtistClick: (ArtistId) -> Unit,
     onPlayClick: (AlbumId) -> Unit
 ) {
     Item (
@@ -124,6 +129,50 @@ private fun AlbumItem(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = album.releaseDate?.let { "Released: $it" } ?: "",
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = album.totalTracks?.let { "$it tracks" } ?: "",
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = album.popularity?.let { "Popularity: $it" } ?: "",
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            LazyRow(
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                items(items = album.artists, key = { it.id }) { artist ->
+                    TextButton(
+                        onClick = { onArtistClick(artist.id) },
+                        content = {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Default.Person, null)
+                                Text(artist.name ?: "")
+                            }
+                        }
+                    )
+                }
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,

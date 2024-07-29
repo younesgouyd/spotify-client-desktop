@@ -3,13 +3,14 @@ package dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.playlist
 import dev.younesgouyd.apps.spotifyclient.desktop.main.PlaylistId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.UserId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.Image
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
  * GET /me/playlists
  */
 @Serializable
-data class Playlists(
+data class CurrentUserPlaylists(
     val next: String?,
     val items: List<SimplifiedPlaylist?>?
 ) {
@@ -22,7 +23,9 @@ data class Playlists(
     ) {
         @Serializable
         data class Owner(
-            val id: UserId
+            val id: UserId,
+            @SerialName("display_name")
+            val displayName: String?
         )
     }
 }

@@ -20,7 +20,6 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Item
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.ScrollToTopFloatingActionButton
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.VerticalScrollbar
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.Artist
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 
@@ -42,7 +41,7 @@ private fun ArtistList(state: ArtistListState.State) {
 
 @Composable
 private fun ArtistList(
-    artists: LazilyLoadedItems<Artist, Offset.Uri>,
+    artists: LazilyLoadedItems<ArtistItem, Offset.Uri>,
     onArtistClick: (ArtistId) -> Unit
 ) {
     val items by artists.items.collectAsState()
@@ -96,7 +95,7 @@ private fun ArtistList(
 @Composable
 private fun ArtistItem(
     modifier: Modifier = Modifier,
-    artist: Artist,
+    artist: ArtistItem,
     onArtistClick: (ArtistId) -> Unit
 ) {
     Item(

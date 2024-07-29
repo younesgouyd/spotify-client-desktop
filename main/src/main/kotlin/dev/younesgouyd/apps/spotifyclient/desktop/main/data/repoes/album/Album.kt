@@ -3,6 +3,7 @@ package dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.album
 import dev.younesgouyd.apps.spotifyclient.desktop.main.AlbumId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.repoes.Image
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -11,9 +12,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Album(
     val id: AlbumId,
-    val name: String?,
     val images: List<Image>?,
-    val artists: List<Artist>?
+    val name: String?,
+    @SerialName("release_date")
+    val releaseDate: String?,
+    val artists: List<Artist>?,
+    val genres: List<String>?,
+    val popularity: Int?
 ) {
     @Serializable
     data class Artist(

@@ -1,8 +1,10 @@
 package dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.album.details
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -12,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
@@ -25,6 +28,7 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTr
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialog
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.formatted
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Images
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Track
 import kotlinx.coroutines.flow.StateFlow
@@ -56,6 +60,7 @@ private fun AlbumDetails(state: AlbumDetailsState.State) {
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun AlbumDetails(
     album: Album,
@@ -89,7 +94,7 @@ private fun AlbumDetails(
                 ) {
                     item {
                         AlbumInfo(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().height(400.dp),
                             album = album,
                             saved = saved,
                             saveRemoveButtonEnabled = saveRemoveButtonEnabled,
@@ -99,19 +104,23 @@ private fun AlbumDetails(
                             onRemoveClick = onRemoveClick
                         )
                     }
-                    items(
-                        items = items,
-                        key = { it.id }
-                    ) { item ->
-                        TrackItem(
-                            modifier = Modifier.fillMaxWidth().height(64.dp),
-                            track = item,
-                            images = album.images,
-                            onTrackClick = onTrackClick,
-                            addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
-                            addTrackToFolderDialogState = addTrackToFolderDialogState
-                        )
+                    item {
+                        Spacer(Modifier.size(8.dp))
+                    }
+                    stickyHeader {
+                        TracksHeader(modifier = Modifier.fillMaxWidth().height(64.dp))
                         HorizontalDivider()
+                    }
+                    items(items = items, key = { it.id }) { track ->
+                        TrackItem(
+                            modifier = Modifier.fillMaxWidth().height(80.dp),
+                            track = track,
+                            images = album.images,
+                            addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
+                            addTrackToFolderDialogState = addTrackToFolderDialogState,
+                            onTrackClick = onTrackClick,
+                            onArtistClick = onArtistClick
+                        )
                     }
                     if (loadingTracks) {
                         item {
@@ -147,7 +156,7 @@ private fun AlbumInfo(
     onRemoveClick: () -> Unit
 ) {
     Row(
-        modifier = modifier.height(300.dp),
+        modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(space = 12.dp, alignment = Alignment.Start),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -159,11 +168,13 @@ private fun AlbumInfo(
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(space = 12.dp, alignment = Alignment.CenterVertically)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
+                modifier = Modifier.fillMaxWidth(),
                 text = album.name ?: "",
-                style = MaterialTheme.typography.displayMedium
+                style = MaterialTheme.typography.displayMedium,
+                textAlign = TextAlign.Center
             )
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -171,10 +182,46 @@ private fun AlbumInfo(
             ) {
                 for (artist in album.artists) {
                     TextButton(
-                        content = { Text(text = artist.name ?: "", style = MaterialTheme.typography.labelMedium) },
-                        onClick = { onArtistClick(artist.id) }
+                        onClick = { onArtistClick(artist.id) },
+                        content = {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                content = {
+                                    Icon(Icons.Default.Person, null)
+                                    Text(
+                                        text = artist.name ?: "",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                            )
+                        }
                     )
                 }
+            }
+            if (album.releaseDate != null) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "Release date: ${album.releaseDate}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
+                )
+            }
+            if (album.genres.isNotEmpty()) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "Genres: ${album.genres.joinToString(", ")}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
+                )
+            }
+            if (album.popularity != null) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "Popularity: ${album.popularity}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
+                )
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -216,40 +263,133 @@ private fun AlbumInfo(
     }
 }
 
+private const val TITLE_WEIGHT = .8f
+private const val DURATION_WEIGHT = .1f
+private const val ACTIONS_WEIGHT = .1f
+
+@Composable
+private fun TracksHeader(modifier: Modifier = Modifier) {
+    Surface {
+        Row(
+            modifier = modifier,
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.fillMaxSize().weight(TITLE_WEIGHT), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "Title",
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+            Box(modifier = Modifier.fillMaxSize().weight(DURATION_WEIGHT), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "Duration",
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Spacer(Modifier.width(8.dp))
+            Box(modifier = Modifier.fillMaxSize().weight(ACTIONS_WEIGHT), contentAlignment = Alignment.Center) {
+                Text(
+                    text = "",
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
 @Composable
 private fun TrackItem(
     modifier: Modifier = Modifier,
     track: Album.Track,
     images: Images,
-    onTrackClick: (TrackId) -> Unit,
     addTrackToPlaylistDialogState: AddTrackToPlaylistDialogState,
-    addTrackToFolderDialogState: AddTrackToFolderDialogState
+    addTrackToFolderDialogState: AddTrackToFolderDialogState,
+    onTrackClick: (TrackId) -> Unit,
+    onArtistClick: (ArtistId) -> Unit
 ) {
     var addToPlaylistDialogVisible by remember { mutableStateOf(false) }
     var addToFolderDialogVisible by remember { mutableStateOf(false) }
 
-    Row (
+    Row(
         modifier = modifier.clickable { onTrackClick(track.id) },
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = track.name ?: "",
-            style = MaterialTheme.typography.titleMedium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Row {
-            IconButton(
-                content = { Icon(Icons.Default.Save, null) },
-                onClick = { addToPlaylistDialogVisible = true }
-            )
-            IconButton(
-                content = { Icon(Icons.Default.Folder, null) },
-                onClick = { addToFolderDialogVisible = true }
+        // image + title + artists
+        Box(modifier = Modifier.fillMaxSize().weight(TITLE_WEIGHT), contentAlignment = Alignment.CenterStart) {
+            Column(
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = track.name ?: "",
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    items(items = track.artists, key = { it.id }) { artist ->
+                        TextButton(
+                            onClick = { onArtistClick(artist.id) },
+                            content = {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(Icons.Default.Person, null)
+                                    Text(
+                                        text = artist.name ?: "",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(Modifier.width(8.dp))
+
+        // duration
+        Box(modifier = Modifier.fillMaxSize().weight(DURATION_WEIGHT), contentAlignment = Alignment.Center) {
+            Text(
+                text = track.duration.formatted(),
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
+
+        Spacer(Modifier.width(8.dp))
+
+        // actions
+        Box(modifier = Modifier.fillMaxSize().weight(ACTIONS_WEIGHT), contentAlignment = Alignment.Center) {
+            Row {
+                IconButton(
+                    content = { Icon(Icons.Default.Save, null) },
+                    onClick = { addToPlaylistDialogVisible = true }
+                )
+                IconButton(
+                    content = { Icon(Icons.Default.Folder, null) },
+                    onClick = { addToFolderDialogVisible = true }
+                )
+            }
+        }
     }
+    HorizontalDivider()
 
     if (addToPlaylistDialogVisible) {
         AddTrackToPlaylistDialog(
@@ -263,7 +403,7 @@ private fun TrackItem(
         AddTrackToFolderDialog(
             track = Track(track.id, track.name, images.preferablySmall()),
             state = addTrackToFolderDialogState,
-            onDismissRequest = { addToFolderDialogVisible = false  }
+            onDismissRequest = { addToFolderDialogVisible = false }
         )
     }
 }

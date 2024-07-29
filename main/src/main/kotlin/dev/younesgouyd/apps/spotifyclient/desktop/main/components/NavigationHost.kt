@@ -149,6 +149,7 @@ class NavigationHost(
             return PlaylistList(
                 repoStore = repoStore,
                 showPlaylistDetails = { navigationController.navigateTo(getPlaylistDetails(it)) },
+                showUserDetails = { navigationController.navigateTo(getUserDetails(it)) },
                 playPlaylist = { coroutineScope.launch { playerController.play(it.toUri()) } }
             )
         }
@@ -157,7 +158,9 @@ class NavigationHost(
             return PlaylistDetails(
                 id = id,
                 repoStore = repoStore,
-                showUserDetails = { navigationController.navigateTo(getUser(it)) },
+                showUserDetails = { navigationController.navigateTo(getUserDetails(it)) },
+                showArtistDetails = { navigationController.navigateTo(getArtistDetails(it)) },
+                showAlbumDetails = { navigationController.navigateTo(getAlbumDetails(it)) },
                 play = { coroutineScope.launch { playerController.play(id.toUri()) } },
                 playTrack = {
                     coroutineScope.launch {
@@ -169,11 +172,12 @@ class NavigationHost(
             )
         }
 
-        fun getUser(id: UserId): User {
-            return User(
+        fun getUserDetails(id: UserId): UserDetails {
+            return UserDetails(
                 id = id,
                 repoStore = repoStore,
                 showPlaylistDetails = { navigationController.navigateTo(getPlaylistDetails(it)) },
+                showUserDetails = { navigationController.navigateTo(getUserDetails(it)) },
                 playPlaylist = { coroutineScope.launch { playerController.play(it.toUri()) } }
             )
         }
@@ -182,6 +186,7 @@ class NavigationHost(
             return AlbumList(
                 repoStore = repoStore,
                 showAlbumDetails = { navigationController.navigateTo(getAlbumDetails(it)) },
+                showArtistDetails = { navigationController.navigateTo(getArtistDetails(it)) },
                 playAlbum = { coroutineScope.launch { playerController.play(it.toUri()) } }
             )
         }
@@ -214,6 +219,7 @@ class NavigationHost(
                 id = id,
                 repoStore = repoStore,
                 showAlbumDetails = { navigationController.navigateTo(getAlbumDetails(it)) },
+                showArtistDetails = { navigationController.navigateTo(getArtistDetails(it)) },
                 play = { coroutineScope.launch { playerController.play(id.toUri()) } },
                 playTrack = { coroutineScope.launch { playerController.play(uris = listOf(it.toUri())) } },
                 playAlbum = { coroutineScope.launch { playerController.play(it.toUri()) } },
@@ -226,6 +232,7 @@ class NavigationHost(
             return Discover(
                 repoStore = repoStore,
                 showPlaylistDetails = { navigationController.navigateTo(getPlaylistDetails(it)) },
+                showUserDetails = { navigationController.navigateTo(getUserDetails(it)) },
                 playPlaylist = { coroutineScope.launch { playerController.play(it.toUri()) } }
             )
         }
@@ -236,7 +243,7 @@ class NavigationHost(
                 showArtist = { navigationController.navigateTo(getArtistDetails(it)) },
                 showAlbum = { navigationController.navigateTo(getAlbumDetails(it)) },
                 showPlaylist = { navigationController.navigateTo(getPlaylistDetails(it)) },
-                showUser = { navigationController.navigateTo(getUser(it)) },
+                showUserDetails = { navigationController.navigateTo(getUserDetails(it)) },
                 playTrack = { coroutineScope.launch { playerController.play(uris = listOf(it.toUri())) } },
                 playArtist = { coroutineScope.launch { playerController.play(it.toUri()) } },
                 playAlbum = { coroutineScope.launch { playerController.play(it.toUri()) } },

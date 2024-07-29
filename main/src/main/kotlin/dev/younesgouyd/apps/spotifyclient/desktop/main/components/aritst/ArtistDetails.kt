@@ -7,18 +7,21 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.data.RepoStore
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktofolder.AddTrackToFolderDialogState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.addtracktoplaylist.AddTrackToPlaylistDialogState
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.Artist
+import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.details.Artist
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.details.ArtistDetails
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.details.ArtistDetailsState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Images
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ArtistDetails(
     private val id: ArtistId,
     private val repoStore: RepoStore,
     private val showAlbumDetails: (AlbumId) -> Unit,
+    private val showArtistDetails: (ArtistId) -> Unit,
     play: () -> Unit,
     playTrack: (TrackId) -> Unit,
     playAlbum: (AlbumId) -> Unit,
@@ -35,7 +38,7 @@ class ArtistDetails(
             reloadArtist()
             state.update {
                 ArtistDetailsState.State(
-                    artist = artist.asStateFlow().filterNotNull().stateIn(coroutineScope),
+                    artist = artist.asStateFlow().mapLatest { requireNotNull(it) }.stateIn(coroutineScope), // todo - !
                     followButtonEnabledState = followButtonEnabledState.asStateFlow(),
                     topTracks = run {
                         val data = repoStore.trackRepo.getArtistTopTracks(id)
@@ -57,7 +60,12 @@ class ArtistDetails(
                                     Artist.Album(
                                         id = simplifiedAlbum.id,
                                         name = simplifiedAlbum.name,
-                                        images = simplifiedAlbum.images?.toImages() ?: Images.empty()
+                                        images = simplifiedAlbum.images?.toImages() ?: Images.empty(),
+                                        releaseDate = simplifiedAlbum.releaseDate,
+                                        totalTracks = simplifiedAlbum.totalTracks,
+                                        artists = simplifiedAlbum.artists?.map {
+                                            Artist.Album.Artist(id = it.id, name = it.name)
+                                        } ?: emptyList()
                                     )
                                 } ?: emptyList()
                             )
@@ -66,9 +74,20 @@ class ArtistDetails(
                     ),
                     addTrackToPlaylistDialogState = addTrackToPlaylistDialogState,
                     addTrackToFolderDialogState = addTrackToFolderDialogState,
+                    relatedArtists = repoStore.artistRepo.getRelatedArtists(id).artists?.filterNotNull()?.map {
+                        Artist.RelatedArtist(
+                            id = it.id,
+                            name = it.name,
+                            images = it.images?.toImages2() ?: Images.empty(),
+                            genres = it.genres ?: emptyList(),
+                            followerCount = it.followers?.total,
+                            popularity = it.popularity
+                        )
+                    } ?: emptyList(),
                     onPlayClick = play,
                     onPlayTrackClick = playTrack,
                     onAlbumClick = showAlbumDetails,
+                    onArtistClick = showArtistDetails,
                     onPlayAlbumClick = playAlbum,
                     onArtistFollowStateChange = {
                         coroutineScope.launch {
@@ -95,12 +114,15 @@ class ArtistDetails(
     }
 
     private suspend fun reloadArtist() {
-        artist.update { artist ->
+        artist.update {
             val data = repoStore.artistRepo.get(id)
             Artist(
                 id = data.id,
                 name = data.name,
                 images = data.images?.toImages2() ?: Images.empty(),
+                genres = data.genres ?: emptyList(),
+                followerCount = data.followers?.total,
+                popularity = data.popularity,
                 followed = repoStore.artistRepo.isArtistFollowed(id)
             )
         }

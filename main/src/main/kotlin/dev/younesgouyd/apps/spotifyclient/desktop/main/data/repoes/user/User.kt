@@ -18,6 +18,6 @@ data class User(
 ) {
     @Serializable
     data class Followers(
-        val total: Int?
+        val total: Long?
     )
 }

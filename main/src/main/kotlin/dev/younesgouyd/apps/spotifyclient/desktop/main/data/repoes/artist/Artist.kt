@@ -9,7 +9,15 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class Artist(
+    val followers: Followers?,
+    val genres: List<String>?,
     val id: ArtistId,
     val images: List<ImageOfFloatSize>?,
-    val name: String?
-)
+    val name: String?,
+    val popularity: Int?
+) {
+    @Serializable
+    data class Followers(
+        val total: Long?
+    )
+}

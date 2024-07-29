@@ -11,10 +11,13 @@ import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.album.detai
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.album.details.AlbumDetails
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.album.details.AlbumDetailsState
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.models.Images
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class AlbumDetails(
     private val id: AlbumId,
     private val repoStore: RepoStore,
@@ -39,16 +42,14 @@ class AlbumDetails(
                         Album(
                             id = data.id,
                             name = data.name,
-                            artists = data.artists?.map {
-                                Album.Artist(
-                                    id = it.id,
-                                    name = it.name
-                                )
-                            } ?: emptyList(),
-                            images = data.images?.toImages() ?: Images.empty()
+                            artists = data.artists?.map { Album.Artist(id = it.id, name = it.name) } ?: emptyList(),
+                            images = data.images?.toImages() ?: Images.empty(),
+                            releaseDate = data.releaseDate,
+                            genres = data.genres ?: emptyList(),
+                            popularity = data.popularity
                         )
                     },
-                    saved = saved.asStateFlow().filterNotNull().stateIn(coroutineScope),
+                    saved = saved.asStateFlow().mapLatest { requireNotNull(it) }.stateIn(coroutineScope), // todo - !
                     saveRemoveButtonEnabled = saveRemoveButtonEnabled.asStateFlow(),
                     tracks = LazilyLoadedItems<Album.Track, Offset.Index>(
                         coroutineScope = coroutineScope,
@@ -56,10 +57,14 @@ class AlbumDetails(
                             val data = repoStore.trackRepo.getAlbumTracks(id, offset)
                             LazilyLoadedItems.Page(
                                 nextOffset = Offset.Index.fromUrl(data.next),
-                                items = data.items?.filterNotNull()?.map {
+                                items = data.items?.filterNotNull()?.map { simplifiedTrackObject ->
                                     Album.Track(
-                                        id = it.id,
-                                        name = it.name
+                                        id = simplifiedTrackObject.id,
+                                        name = simplifiedTrackObject.name,
+                                        artists = simplifiedTrackObject.artists?.map {
+                                            Album.Track.Artist(id = it.id, name = it.name)
+                                        } ?: emptyList(),
+                                        duration = simplifiedTrackObject.durationMs?.milliseconds
                                     )
                                 } ?: emptyList()
                             )

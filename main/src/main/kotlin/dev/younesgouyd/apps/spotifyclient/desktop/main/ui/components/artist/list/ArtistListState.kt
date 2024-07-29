@@ -3,13 +3,12 @@ package dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.lis
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ArtistId
 import dev.younesgouyd.apps.spotifyclient.desktop.main.LazilyLoadedItems
 import dev.younesgouyd.apps.spotifyclient.desktop.main.Offset
-import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.components.artist.Artist
 
 sealed class ArtistListState {
     data object Loading : ArtistListState()
 
     data class State(
-        val artists: LazilyLoadedItems<Artist, Offset.Uri>,
+        val artists: LazilyLoadedItems<ArtistItem, Offset.Uri>,
         val onArtistClick: (ArtistId) -> Unit
     ) : ArtistListState()
 }
