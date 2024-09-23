@@ -17,9 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.*
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.Image
 import dev.younesgouyd.apps.spotifyclient.desktop.main.ui.ScrollToTopFloatingActionButton
@@ -476,52 +474,3 @@ private fun TrackItem(
     }
 }
 
-data class Column(
-    val width: Float,
-    val content: @Composable () -> Unit
-)
-
-@Composable
-fun Table(
-    modifier: Modifier = Modifier,
-    header: List<Column>,
-    rows: List<List<@Composable () -> Unit>>,
-    rowHeight: Dp
-) {
-    LazyColumn(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-    ) {
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth().height(rowHeight),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                for (cell in header) {
-                    Box(
-                        modifier = Modifier.fillMaxSize().weight(cell.width),
-                        contentAlignment = Alignment.Center,
-                        content = { cell.content() }
-                    )
-                }
-            }
-        }
-        items(items = rows) { row ->
-            Row(
-                modifier = Modifier.fillMaxWidth().height(rowHeight),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                row.forEachIndexed { index, cell ->
-                    Box(
-                        modifier = Modifier.fillMaxSize().weight(header[index].width),
-                        contentAlignment = Alignment.Center,
-                        content = { cell() }
-                    )
-                }
-            }
-        }
-    }
-}
