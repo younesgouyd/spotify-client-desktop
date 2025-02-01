@@ -4,7 +4,8 @@ version = "0.1.0"
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.compose)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.compose.jetbrains)
     alias(libs.plugins.sqldelight)
 }
 

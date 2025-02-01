@@ -21,19 +21,20 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             val versions = object {
-                val java = version("java", "20")
-                val kotlin = version("kotlin", "1.9.24")
-                val ktor = version("ktor", "2.3.12")
-                val coroutines = version("coroutines", "1.8.1")
-                val logback = version("logback", "1.5.6")
-                val compose = version("compose", "1.6.11")
-                val json = version("json", "20240303")
+                val java = version("java", "22")
+                val kotlin = version("kotlin", "2.0.20")
+                val ktor = version("ktor", "3.0.3")
+                val coroutines = version("coroutines", "1.10.1")
+                val logback = version("logback", "1.5.16")
+                val compose = version("compose", "1.7.3")
+                val json = version("json", "20250107")
                 val sqldelight = version("sqldelight", "2.0.2")
             }
 
             plugin("kotlin.jvm", "org.jetbrains.kotlin.jvm").versionRef(versions.kotlin)
             plugin("kotlin.serialization", "org.jetbrains.kotlin.plugin.serialization").versionRef(versions.kotlin)
-            plugin("compose", "org.jetbrains.compose").versionRef(versions.compose)
+            plugin("compose.jetbrains", "org.jetbrains.compose").versionRef(versions.compose)
+            plugin("compose.compiler", "org.jetbrains.kotlin.plugin.compose").versionRef(versions.kotlin)
             plugin("sqldelight", "app.cash.sqldelight").versionRef(versions.sqldelight)
 
             library("coroutines.core", "org.jetbrains.kotlinx", "kotlinx-coroutines-core").versionRef(versions.coroutines)

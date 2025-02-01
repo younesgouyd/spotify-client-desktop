@@ -6,7 +6,6 @@ import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.response.*
@@ -147,7 +146,7 @@ class AuthRepo(
                         "&code_challenge_method=S256" +
                         "&code_challenge=$challenge"
 
-                var server: NettyApplicationEngine? = null
+                var server: EmbeddedServer<NettyApplicationEngine, NettyApplicationEngine.Configuration>? = null
 
                 val code = suspendCancellableCoroutine { continuation ->
                     server = embeddedServer(Netty, port = REDIRECT_URI_PORT) {
